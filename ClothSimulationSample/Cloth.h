@@ -81,4 +81,23 @@ public:
 		}
 		glEnd();
 	}
+
+	/* used to add gravity (or any other arbitrary vector) to all particles*/
+	void addForce(const Vec3 direction)
+	{
+		std::vector<Particle>::iterator particle;
+		for (particle = particles.begin(); particle != particles.end(); particle++)
+		{
+			(*particle).addForce(direction); // add the forces to each particle
+		}
+
+	}
+	//ÎïÀíÄ£Äâ
+	void timeStep() {
+		std::vector<Particle>::iterator particle;
+		for (particle = particles.begin(); particle != particles.end(); particle++)
+		{
+			(*particle).timeStep();
+		}
+	}
 };

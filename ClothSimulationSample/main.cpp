@@ -44,10 +44,14 @@ void init(GLvoid)
 }
 
 float ball_time = 0; // counter for used to calculate the z position of the ball below
-void display(void) {
+void RenderOneFrame(void) {
+	//物理模拟不应该放在渲染循环里面
 	ball_time++;
 	ball_pos.f[2] = cos(ball_time / 50.0) * 7;
 
+	cloth1.addForce(Vec3(0, -0.2, 0)*TIME_STEPSIZE2); // add gravity each frame, pointing down
+	cloth1.timeStep(); // calculate the particle positions of the next frame
+	//drawing
 	// Clear the window with current clearing color
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glLoadIdentity();
@@ -127,7 +131,7 @@ int main(int argc, char** argv)
 
 	glutCreateWindow("Cloth Simulation Tutorial");
 	init();
-	glutDisplayFunc(display);
+	glutDisplayFunc(RenderOneFrame);
 	glutReshapeFunc(reshape);
 	glutKeyboardFunc(keyboard);
 	glutSpecialFunc(arrow_keys);
