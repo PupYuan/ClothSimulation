@@ -3,13 +3,15 @@
 #endif
 
 #include "util.h"
-#include <GL/glut.h> 
+#include <GL/glut.h>
+#include "Cloth.h"
 
 
 Vec3 ball_pos(7, -5, 0); // the center of our one ball
 float ball_radius = 2; // the radius of our one ball
-
+Cloth cloth1(14, 10, 55, 45); // one Cloth object of the Cloth class
 //TODO1:画出一个球来
+//TODO2:画出一条布
 void init(GLvoid)
 {
 	glClearColor(0.2f, 0.2f, 0.4f, 0.5f);
@@ -29,6 +31,8 @@ void display(void) {
 
 	glTranslatef(-6.5, 6, -9.0f); // move camera out and center on the cloth
 	glRotatef(25, 0, 1, 0); // rotate a bit to see the cloth from the side
+
+	cloth1.drawShaded(); // finally draw the cloth with smooth shading
 
 	glPushMatrix(); // to draw the ball we use glutSolidSphere, and need to draw the sphere at the position of the ball
 	glTranslatef(ball_pos.f[0], ball_pos.f[1], ball_pos.f[2]); // hence the translation of the sphere onto the ball position

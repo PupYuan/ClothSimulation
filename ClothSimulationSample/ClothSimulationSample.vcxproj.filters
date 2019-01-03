@@ -29,5 +29,11 @@
     <ClInclude Include="util.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Cloth.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Particles.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
