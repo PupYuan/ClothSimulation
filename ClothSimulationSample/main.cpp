@@ -12,11 +12,34 @@ float ball_radius = 2; // the radius of our one ball
 Cloth cloth1(14, 10, 55, 45); // one Cloth object of the Cloth class
 //TODO1:画出一个球来
 //TODO2:画出一条布
+//TODO3：固定管线的光照设置
 void init(GLvoid)
 {
 	glClearColor(0.2f, 0.2f, 0.4f, 0.5f);
 	glClearDepth(1.0f);
 	glEnable(GL_DEPTH_TEST);
+	//glDepthFunc(GL_LEQUAL);
+	//glShadeModel(GL_SMOOTH);
+	glEnable(GL_COLOR_MATERIAL);
+
+	//设置光照
+	glEnable(GL_LIGHTING);
+
+	//光照0
+	glEnable(GL_LIGHT0);
+	GLfloat lightPos[4] = { -1.0,1.0,0.5,0.0 };
+	glLightfv(GL_LIGHT0, GL_POSITION, (GLfloat *)&lightPos);
+
+	//光照1
+	//glEnable(GL_LIGHT1);
+	//GLfloat lightPos1[4] = { 1.0,0.0,-0.2,0.0 };
+	//GLfloat lightAmbient1[4] = { 0.0,0.0,0.0,0.0 };
+	//GLfloat lightDiffuse1[4] = { 0.5,0.5,0.3,0.0 };
+	//glLightfv(GL_LIGHT1, GL_POSITION, (GLfloat *)&lightPos1);
+	//glLightfv(GL_LIGHT1, GL_AMBIENT, (GLfloat *)&lightAmbient1);
+	//glLightfv(GL_LIGHT1, GL_DIFFUSE, (GLfloat *)&lightDiffuse1);
+
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 
 }
 
@@ -28,6 +51,17 @@ void display(void) {
 	// Clear the window with current clearing color
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glLoadIdentity();
+
+	glDisable(GL_LIGHTING); // drawing some smooth shaded background - because I like it ;)
+	glBegin(GL_POLYGON);
+	glColor3f(0.8f, 0.8f, 1.0f);
+	glVertex3f(-200.0f, -100.0f, -100.0f);
+	glVertex3f(200.0f, -100.0f, -100.0f);
+	glColor3f(0.4f, 0.4f, 0.8f);
+	glVertex3f(200.0f, 100.0f, -100.0f);
+	glVertex3f(-200.0f, 100.0f, -100.0f);
+	glEnd();
+	glEnable(GL_LIGHTING);
 
 	glTranslatef(-6.5, 6, -9.0f); // move camera out and center on the cloth
 	glRotatef(25, 0, 1, 0); // rotate a bit to see the cloth from the side
