@@ -13,6 +13,8 @@ Cloth cloth1(14, 10, 55, 45); // one Cloth object of the Cloth class
 //TODO1:画出一个球来
 //TODO2:画出一条布
 //TODO3：固定管线的光照设置
+//TODO4：模拟重力
+//TODO5：创建constraints
 void init(GLvoid)
 {
 	glClearColor(0.2f, 0.2f, 0.4f, 0.5f);
@@ -29,15 +31,6 @@ void init(GLvoid)
 	glEnable(GL_LIGHT0);
 	GLfloat lightPos[4] = { -1.0,1.0,0.5,0.0 };
 	glLightfv(GL_LIGHT0, GL_POSITION, (GLfloat *)&lightPos);
-
-	//光照1
-	//glEnable(GL_LIGHT1);
-	//GLfloat lightPos1[4] = { 1.0,0.0,-0.2,0.0 };
-	//GLfloat lightAmbient1[4] = { 0.0,0.0,0.0,0.0 };
-	//GLfloat lightDiffuse1[4] = { 0.5,0.5,0.3,0.0 };
-	//glLightfv(GL_LIGHT1, GL_POSITION, (GLfloat *)&lightPos1);
-	//glLightfv(GL_LIGHT1, GL_AMBIENT, (GLfloat *)&lightAmbient1);
-	//glLightfv(GL_LIGHT1, GL_DIFFUSE, (GLfloat *)&lightDiffuse1);
 
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 

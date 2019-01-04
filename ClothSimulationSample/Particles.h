@@ -39,4 +39,6 @@ public:
 			acceleration = Vec3(0, 0, 0); // acceleration is reset since it HAS been translated into a change in position (and implicitely into velocity)
 		}
 	}
+	void makeUnmovable() { movable = false; }
+	void offsetPos(const Vec3 v) { if (movable) pos += v; }
 };

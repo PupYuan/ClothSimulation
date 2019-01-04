@@ -4,10 +4,11 @@
 #ifdef _WIN32
 #include <windows.h> 
 #endif
-
 #include "util.h"
 #include <GL/glut.h> 
+#include "Constraint.h"
 
+#define CONSTRAINT_ITERATIONS 15 // how many iterations of constraint satisfaction each frame (more is rigid, less is soft)
 class Cloth {
 private:
 	
@@ -16,7 +17,10 @@ private:
 	// total number of particles is num_particles_width*num_particles_height
 
 	std::vector<Particle> particles; // all particles that are part of this cloth
+	std::vector<Constraint> constraints; // alle constraints between particles as part of this cloth
+
 	Particle* getParticle(int x, int y) { return &particles[y*num_particles_width + x]; }
+	void makeConstraint(Particle *p1, Particle *p2) { constraints.push_back(Constraint(p1, p2)); }
 	/* A private method used by drawShaded(), that draws a single triangle p1,p2,p3 with a color*/
 	void drawTriangle(Particle *p1, Particle *p2, Particle *p3, const Vec3 color)
 	{
@@ -47,16 +51,23 @@ public:
 				particles[y*num_particles_width + x] = Particle(pos); // insert particle in column x at y'th row
 			}
 		}
-		// creating particles in a grid of particles from (0,0,0) to (width,-height,0)
+		// Structure constraints
 		for (int x = 0; x < num_particles_width; x++)
 		{
 			for (int y = 0; y < num_particles_height; y++)
 			{
-				Vec3 pos = Vec3(width * (x / (float)num_particles_width),
-					-height * (y / (float)num_particles_height),
-					0);
-				particles[y*num_particles_width + x] = Particle(pos); // insert particle in column x at y'th row
+				if(x+1 < num_particles_width)
+					makeConstraint(getParticle(x, y), getParticle(x + 1, y));
+				if (y + 1 < num_particles_height)
+				    makeConstraint(getParticle(x, y), getParticle(x, y+1));
 			}
+		}
+		// making the upper left most three and right most three particles unmovable
+		for (int i = 0; i < 3; i++)
+		{
+			getParticle(0 + i, 0)->makeUnmovable();
+
+			getParticle(num_particles_width - 1 - i, 0)->makeUnmovable();
 		}
 	}
 
@@ -94,6 +105,16 @@ public:
 	}
 	//ÎïÀíÄ£Äâ
 	void timeStep() {
+
+		std::vector<Constraint>::iterator constraint;
+		for (int i = 0; i < CONSTRAINT_ITERATIONS; i++) // iterate over all constraints several times
+		{
+			for (constraint = constraints.begin(); constraint != constraints.end(); constraint++)
+			{
+				(*constraint).satisfyConstraint(); // satisfy constraint.
+			}
+		}
+
 		std::vector<Particle>::iterator particle;
 		for (particle = particles.begin(); particle != particles.end(); particle++)
 		{
