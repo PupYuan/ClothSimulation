@@ -5,16 +5,20 @@
 #include "util.h"
 #include <GL/glut.h>
 #include "Cloth.h"
+#include "Collider.h"
 
 
 Vec3 ball_pos(7, -5, 0); // the center of our one ball
 float ball_radius = 2; // the radius of our one ball
+SphereCollider* ball_collider;
 Cloth cloth1(14, 10, 55, 45); // one Cloth object of the Cloth class
 //TODO1:画出一个球来
 //TODO2:画出一条布
 //TODO3：固定管线的光照设置
 //TODO4：模拟重力
 //TODO5：创建constraints
+//TODO6：模拟球对布料的碰撞
+
 void init(GLvoid)
 {
 	glClearColor(0.2f, 0.2f, 0.4f, 0.5f);
@@ -33,6 +37,7 @@ void init(GLvoid)
 	glLightfv(GL_LIGHT0, GL_POSITION, (GLfloat *)&lightPos);
 
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+	ball_collider = new SphereCollider(ball_pos, 2);
 
 }
 
@@ -41,9 +46,11 @@ void RenderOneFrame(void) {
 	//物理模拟不应该放在渲染循环里面
 	ball_time++;
 	ball_pos.f[2] = cos(ball_time / 50.0) * 7;
+	ball_collider->setPos(ball_pos);
 
 	cloth1.addForce(Vec3(0, -0.2, 0)*TIME_STEPSIZE2); // add gravity each frame, pointing down
 	cloth1.timeStep(); // calculate the particle positions of the next frame
+	cloth1.CollisionDetection(ball_collider);
 	//drawing
 	// Clear the window with current clearing color
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);

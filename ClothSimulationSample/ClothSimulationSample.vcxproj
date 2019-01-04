@@ -120,11 +120,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Cloth.cpp" />
+    <ClCompile Include="Collider.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cloth.h" />
+    <ClInclude Include="Collider.h" />
     <ClInclude Include="Constraint.h" />
     <ClInclude Include="Particles.h" />
     <ClInclude Include="util.h" />
