@@ -18,9 +18,7 @@
 
 每次满足约束迭代将p1移向p2或远离p2，移动的向量为：
 
- $\vec{correctionVectorHalf} $ = $\vec{p1p2}$* (1 - rest_length/|$\vec{p1p2}$)|)*0.5 。
-
-p2的移动向量相反，为-$\vec{correctionVectorHalf} $ 。
+![correctionVectorHalf](pictures/correctionVectorHalf.png)
 
 # 碰撞
 
