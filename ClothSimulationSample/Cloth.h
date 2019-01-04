@@ -51,22 +51,28 @@ public:
 				particles[y*num_particles_width + x] = Particle(pos); // insert particle in column x at y'th row
 			}
 		}
-		// Structure constraints
+		// Ìí¼Óconstraints
 		for (int x = 0; x < num_particles_width; x++)
 		{
 			for (int y = 0; y < num_particles_height; y++)
 			{
+				// Structure constraints
 				if(x+1 < num_particles_width)
 					makeConstraint(getParticle(x, y), getParticle(x + 1, y));
 				if (y + 1 < num_particles_height)
 				    makeConstraint(getParticle(x, y), getParticle(x, y+1));
+
+				//Shear constraints
+				if (y + 1 < num_particles_height && x + 1 < num_particles_width)
+					makeConstraint(getParticle(x, y), getParticle(x+1, y + 1));
+				if (y - 1 >0 && x -1 > 0)
+					makeConstraint(getParticle(x, y), getParticle(x - 1, y - 1));
 			}
 		}
 		// making the upper left most three and right most three particles unmovable
 		for (int i = 0; i < 3; i++)
 		{
 			getParticle(0 + i, 0)->makeUnmovable();
-
 			getParticle(num_particles_width - 1 - i, 0)->makeUnmovable();
 		}
 	}
