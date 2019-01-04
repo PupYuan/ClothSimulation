@@ -8,7 +8,7 @@
 #include "util.h"
 #include <GL/glut.h> 
 #include "Constraint.h"
-#define CONSTRAINT_ITERATIONS 5 // how many iterations of constraint satisfaction each frame (more is rigid, less is soft)
+#define CONSTRAINT_ITERATIONS 15 // how many iterations of constraint satisfaction each frame (more is rigid, less is soft)
 
 class Collider;
 class Cloth {
