@@ -12,6 +12,22 @@ Vec3 ball_pos(7, -5, 0); // the center of our one ball
 float ball_radius = 2; // the radius of our one ball
 SphereCollider* ball_collider;
 Cloth cloth1(14, 10, 55, 45); // one Cloth object of the Cloth class
+
+//用来统计帧率的变量
+#define MAX_PATH 100
+char info[MAX_PATH] = { 0 };
+LARGE_INTEGER frequency;        // ticks per second
+LARGE_INTEGER t1, t2;           // ticks
+double frameTimeQP = 0;
+float frameTime = 0;
+
+float timeStep = 1 / 60.0f;
+double accumulator = timeStep;
+
+float startTime = 0, fps = 0;
+int totalFrames = 0;
+float currentTime = 0;
+
 //TODO1:画出一个球来
 //TODO2:画出一条布
 //TODO3：固定管线的光照设置
@@ -41,8 +57,36 @@ void init(GLvoid)
 
 }
 
+void CalcFPS() {
+	float newTime = (float)glutGet(GLUT_ELAPSED_TIME);
+	frameTime = newTime - currentTime;
+	currentTime = newTime;
+	//accumulator += frameTime;
+
+	//Using high res. counter
+	QueryPerformanceCounter(&t2);
+	// compute and print the elapsed time in millisec
+	frameTimeQP = (t2.QuadPart - t1.QuadPart) * 1000.0 / frequency.QuadPart;
+	t1 = t2;
+	accumulator += frameTimeQP;
+
+	++totalFrames;
+	if ((newTime - startTime) > 1000)
+	{
+		float elapsedTime = (newTime - startTime);
+		fps = (totalFrames / elapsedTime) * 1000;
+		startTime = newTime;
+		totalFrames = 0;
+	}
+
+	sprintf_s(info, "FPS: %3.2f, Frame time (GLUT): %3.4f msecs, Frame time (QP): %3.3f", fps, frameTime, frameTimeQP);
+	glutSetWindowTitle(info);
+}
+
 float ball_time = 0; // counter for used to calculate the z position of the ball below
 void RenderOneFrame(void) {
+	//统计帧率等信息
+	CalcFPS();
 	//物理模拟不应该放在渲染循环里面
 	ball_time++;
 	ball_pos.f[2] = cos(ball_time / 50.0) * 7;
