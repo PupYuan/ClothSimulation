@@ -21,6 +21,7 @@ LARGE_INTEGER t1, t2;           // ticks
 double frameTimeQP = 0;
 float frameTime = 0;
 
+//物理模拟的帧率
 float timeStep = 1 / 60.0f;
 double accumulator = timeStep;
 
@@ -83,18 +84,11 @@ void CalcFPS() {
 	glutSetWindowTitle(info);
 }
 
-float ball_time = 0; // counter for used to calculate the z position of the ball below
+
 void RenderOneFrame(void) {
 	//统计帧率等信息
 	CalcFPS();
-	//物理模拟不应该放在渲染循环里面
-	ball_time++;
-	ball_pos.f[2] = cos(ball_time / 50.0) * 7;
-	ball_collider->setPos(ball_pos);
 
-	cloth1.addForce(Vec3(0, -0.2, 0)*TIME_STEPSIZE2); // add gravity each frame, pointing down
-	cloth1.timeStep(); // calculate the particle positions of the next frame
-	cloth1.CollisionDetection(ball_collider);
 	//drawing
 	// Clear the window with current clearing color
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -124,7 +118,32 @@ void RenderOneFrame(void) {
 
 	// Perform the buffer swap to display back buffer
 	glutSwapBuffers();
+}
+
+float ball_time = 0; // counter for used to calculate the z position of the ball below
+//物理步进
+void StepPhysics(float dt) {
+
+	//物理模拟不应该放在渲染循环里面
+	ball_time++;
+	ball_pos.f[2] = cos(ball_time / 50.0) * 7;
+	ball_collider->setPos(ball_pos);
+
+	cloth1.addForce(Vec3(0, -10, 0)); // add gravity each frame, pointing down
+	cloth1.timeStep(dt); // calculate the particle positions of the next frame
+	cloth1.CollisionDetection(ball_collider);
+
+}
+
+void OnIdle() {
+	//Fixed time stepping + rendering at different fps
+	if (accumulator >= timeStep)
+	{
+		StepPhysics(timeStep);
+		accumulator -= timeStep;
+	}
 	glutPostRedisplay();
+
 }
 
 void reshape(int w, int h)
@@ -179,6 +198,7 @@ int main(int argc, char** argv)
 	glutReshapeFunc(reshape);
 	glutKeyboardFunc(keyboard);
 	glutSpecialFunc(arrow_keys);
+	glutIdleFunc(OnIdle);
 
 	glutMainLoop();
 }

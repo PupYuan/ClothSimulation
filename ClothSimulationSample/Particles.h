@@ -29,12 +29,12 @@ public:
 	}
 
 	//每次步长的一次模拟，采用verlet积分方法，可以省去速度，并且稳定
-	void timeStep()
+	void timeStep(float dt)
 	{
 		if (movable)
 		{
 			Vec3 temp = pos;
-			pos = pos + (pos - old_pos)*(1.0 - DAMPING) + acceleration * TIME_STEPSIZE2;
+			pos = pos + (pos - old_pos)*(1.0 - DAMPING) + acceleration * dt*dt;
 			old_pos = temp;
 			acceleration = Vec3(0, 0, 0); // acceleration is reset since it HAS been translated into a change in position (and implicitely into velocity)
 		}

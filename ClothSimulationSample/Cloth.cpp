@@ -89,7 +89,7 @@ void Cloth::drawShaded()
 }
 
 //ÎïÀíÄ£Äâ
-void Cloth::timeStep() {
+void Cloth::timeStep(float dt) {
 
 	std::vector<Constraint>::iterator constraint;
 	for (int i = 0; i < CONSTRAINT_ITERATIONS; i++) // iterate over all constraints several times
@@ -103,7 +103,7 @@ void Cloth::timeStep() {
 	std::vector<Particle>::iterator particle;
 	for (particle = particles.begin(); particle != particles.end(); particle++)
 	{
-		(*particle).timeStep();
+		(*particle).timeStep(dt);
 	}
 }
 
