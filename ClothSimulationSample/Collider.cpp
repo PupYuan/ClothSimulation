@@ -7,9 +7,9 @@ void SphereCollider::ClothCollisionSimulate(Cloth* c)
 	//判断particle是否在此碰撞体内
 	for (particle = particles->begin(); particle != particles->end(); particle++)
 	{
-		Vec3 v = (*particle).getPos() - center;
+		vec3 v = (*particle).getPos() - center;
 		if (v.length() < radius) {
-			Vec3 moveOffset = v.normalized() * (radius - v.length());
+			vec3 moveOffset = normalize(v) * (radius - v.length());
 			particle->offsetPos(moveOffset);
 		}
 	}

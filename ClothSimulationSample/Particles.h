@@ -1,29 +1,32 @@
 #pragma once
-#include "util.h"
-#define DAMPING 0.01
-#define TIME_STEPSIZE2 0.5*0.5
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp> //for matrices
+#include <glm/gtc/type_ptr.hpp>
+#define DAMPING 0.01f
+#define TIME_STEPSIZE2 0.5f*0.5f
+using namespace glm;
 
 class Particle
 {
 private:
-	Vec3 pos;
-	Vec3 old_pos;//上次模拟步长时所在的位置
-	Vec3 accumulated_normal; // an accumulated normal (i.e. non normalized), used for OpenGL soft shading
-	Vec3 acceleration;
+	vec3 pos;
+	vec3 old_pos;//上次模拟步长时所在的位置
+	vec3 accumulated_normal; // an accumulated normal (i.e. non normalized), used for OpenGL soft shading
+	vec3 acceleration;
 	float mass;//质量
 	bool movable;//是否可以移动
 public:
-	Particle(Vec3 pos) : pos(pos), old_pos(pos), acceleration(Vec3(0, 0, 0)), mass(1), movable(true), accumulated_normal(Vec3(0, 0, 0)) {}
+	Particle(vec3 pos) : pos(pos), old_pos(pos), acceleration(vec3(0, 0, 0)), mass(1), movable(true), accumulated_normal(vec3(0, 0, 0)) {}
 	Particle() {}
-	Vec3& getPos() { return pos; }
-	void resetNormal() { accumulated_normal = Vec3(0, 0, 0); }
-	Vec3& getNormal() { return accumulated_normal; } // notice, the normal is not unit length
-	void addToNormal(Vec3 normal)
+	vec3& getPos() { return pos; }
+	void resetNormal() { accumulated_normal = vec3(0, 0, 0); }
+	vec3& getNormal() { return accumulated_normal; } // notice, the normal is not unit length
+	void addToNormal(vec3 normal)
 	{
-		accumulated_normal += normal.normalized();
+		accumulated_normal = accumulated_normal + normalize(normal);
 	}
 
-	void addForce(Vec3 f)
+	void addForce(vec3 f)
 	{
 		acceleration += f / mass;
 	}
@@ -33,12 +36,12 @@ public:
 	{
 		if (movable)
 		{
-			Vec3 temp = pos;
-			pos = pos + (pos - old_pos)*(1.0 - DAMPING) + acceleration * TIME_STEPSIZE2;
+			vec3 temp = pos;
+			pos = pos + (pos - old_pos)*(1.0f - DAMPING) + acceleration * TIME_STEPSIZE2;
 			old_pos = temp;
-			acceleration = Vec3(0, 0, 0); // acceleration is reset since it HAS been translated into a change in position (and implicitely into velocity)
+			acceleration = vec3(0, 0, 0); // acceleration is reset since it HAS been translated into a change in position (and implicitely into velocity)
 		}
 	}
 	void makeUnmovable() { movable = false; }
-	void offsetPos(const Vec3 v) { if (movable) pos += v; }
+	void offsetPos(const vec3 v) { if (movable) pos += v; }
 };

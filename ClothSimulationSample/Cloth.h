@@ -7,8 +7,8 @@
 #include "Particles.h"
 #include "util.h"
 #include <GL/glut.h> 
-#include "Constraint.h"
-#define CONSTRAINT_ITERATIONS 15 // how many iterations of constraint satisfaction each frame (more is rigid, less is soft)
+#include "Spring.h"
+#define Spring_ITERATIONS 1 // how many iterations of Spring satisfaction each frame (more is rigid, less is soft)
 
 class Collider;
 class Cloth {
@@ -19,12 +19,12 @@ private:
 	// total number of particles is num_particles_width*num_particles_height
 
 	std::vector<Particle> particles; // all particles that are part of this cloth
-	std::vector<Constraint> constraints; // alle constraints between particles as part of this cloth
+	std::vector<Spring> Springs; // alle Springs between particles as part of this cloth
 
 	Particle* getParticle(int x, int y) { return &particles[y*num_particles_width + x]; }
-	void makeConstraint(Particle *p1, Particle *p2) { constraints.push_back(Constraint(p1, p2)); }
+	void makeSpring(Particle *p1, Particle *p2) { Springs.push_back(Spring(p1, p2)); }
 	/* A private method used by drawShaded(), that draws a single triangle p1,p2,p3 with a color*/
-	void drawTriangle(Particle *p1, Particle *p2, Particle *p3, const Vec3 color);
+	void drawTriangle(Particle *p1, Particle *p2, Particle *p3, const vec3 color);
 public:
 	Cloth(float width, float height, int num_particles_width, int num_particles_height);
 
@@ -33,7 +33,7 @@ public:
 	}
 	void drawShaded();
 	/* used to add gravity (or any other arbitrary vector) to all particles*/
-	void addForce(const Vec3 direction);
+	void addForce(const vec3 direction);
 	//ÎïÀíÄ£Äâ
 	void timeStep();
 	//Åö×²¼ì²â

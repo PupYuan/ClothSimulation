@@ -27,6 +27,9 @@
     <ClCompile Include="Cloth.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Spring.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="util.h">
@@ -38,10 +41,10 @@
     <ClInclude Include="Particles.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Constraint.h">
+    <ClInclude Include="Collider.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Collider.h">
+    <ClInclude Include="Spring.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

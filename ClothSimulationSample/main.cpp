@@ -8,7 +8,7 @@
 #include "Collider.h"
 
 
-Vec3 ball_pos(7, -5, 0); // the center of our one ball
+vec3 ball_pos(7, -5, 0); // the center of our one ball
 float ball_radius = 2; // the radius of our one ball
 SphereCollider* ball_collider;
 Cloth cloth1(14, 10, 55, 45); // one Cloth object of the Cloth class
@@ -16,7 +16,7 @@ Cloth cloth1(14, 10, 55, 45); // one Cloth object of the Cloth class
 //TODO2:画出一条布
 //TODO3：固定管线的光照设置
 //TODO4：模拟重力
-//TODO5：创建constraints
+//TODO5：创建Springs
 //TODO6：模拟球对布料的碰撞
 
 void init(GLvoid)
@@ -45,10 +45,10 @@ float ball_time = 0; // counter for used to calculate the z position of the ball
 void RenderOneFrame(void) {
 	//物理模拟不应该放在渲染循环里面
 	ball_time++;
-	ball_pos.f[2] = cos(ball_time / 50.0) * 7;
+	ball_pos[2] = cos(ball_time / 50.0) * 7;
 	ball_collider->setPos(ball_pos);
 
-	cloth1.addForce(Vec3(0, -0.2, 0)*TIME_STEPSIZE2); // add gravity each frame, pointing down
+	cloth1.addForce(vec3(0, -0.2, 0)*TIME_STEPSIZE2); // add gravity each frame, pointing down
 	cloth1.timeStep(); // calculate the particle positions of the next frame
 	cloth1.CollisionDetection(ball_collider);
 	//drawing
@@ -73,7 +73,7 @@ void RenderOneFrame(void) {
 	cloth1.drawShaded(); // finally draw the cloth with smooth shading
 
 	glPushMatrix(); // to draw the ball we use glutSolidSphere, and need to draw the sphere at the position of the ball
-	glTranslatef(ball_pos.f[0], ball_pos.f[1], ball_pos.f[2]); // hence the translation of the sphere onto the ball position
+	glTranslatef(ball_pos[0], ball_pos[1], ball_pos[2]); // hence the translation of the sphere onto the ball position
 	glColor3f(0.4f, 0.8f, 0.5f);
 	glutSolidSphere(ball_radius - 0.1, 50, 50); // draw the ball, but with a slightly lower radius, otherwise we could get ugly visual artifacts of cloth penetrating the ball slightly
 	glPopMatrix();
