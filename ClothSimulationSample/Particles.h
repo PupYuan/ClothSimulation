@@ -10,11 +10,11 @@ class Particle
 {
 private:
 	vec3 pos;
-	vec3 old_pos;//ÉÏ´ÎÄ£Äâ²½³¤Ê±ËùÔÚµÄÎ»ÖÃ
+	vec3 old_pos;//ï¿½Ï´ï¿½Ä£ï¿½â²½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Úµï¿½Î»ï¿½ï¿½
 	vec3 accumulated_normal; // an accumulated normal (i.e. non normalized), used for OpenGL soft shading
 	vec3 acceleration;
-	float mass;//ÖÊÁ¿
-	bool movable;//ÊÇ·ñ¿ÉÒÔÒÆ¶¯
+	float mass;//ï¿½ï¿½ï¿½ï¿½
+	bool movable;//ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½
 public:
 	Particle(vec3 pos) : pos(pos), old_pos(pos), acceleration(vec3(0, 0, 0)), mass(1), movable(true), accumulated_normal(vec3(0, 0, 0)) {}
 	Particle() {}
@@ -31,13 +31,13 @@ public:
 		acceleration += f / mass;
 	}
 
-	//Ã¿´Î²½³¤µÄÒ»´ÎÄ£Äâ£¬²ÉÓÃverlet»ý·Ö·½·¨£¬¿ÉÒÔÊ¡È¥ËÙ¶È£¬²¢ÇÒÎÈ¶¨
-	void timeStep()
+	//Ã¿ï¿½Î²ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Ä£ï¿½â£¬ï¿½ï¿½ï¿½ï¿½verletï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¡È¥ï¿½Ù¶È£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¶ï¿½
+	void timeStep(float dt)
 	{
 		if (movable)
 		{
 			vec3 temp = pos;
-			pos = pos + (pos - old_pos)*(1.0f - DAMPING) + acceleration * TIME_STEPSIZE2;
+			pos = pos + (pos - old_pos)*(1.0f - DAMPING) + acceleration * dt*dt;
 			old_pos = temp;
 			acceleration = vec3(0, 0, 0); // acceleration is reset since it HAS been translated into a change in position (and implicitely into velocity)
 		}

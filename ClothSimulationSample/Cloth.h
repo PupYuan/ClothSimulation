@@ -35,7 +35,7 @@ public:
 	/* used to add gravity (or any other arbitrary vector) to all particles*/
 	void addForce(const vec3 direction);
 	//ÎïÀíÄ£Äâ
-	void timeStep();
+	void timeStep(float dt);
 	//Åö×²¼ì²â
 	void CollisionDetection(Collider * collider);
 };

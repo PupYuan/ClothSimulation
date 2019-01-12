@@ -12,12 +12,29 @@ vec3 ball_pos(7, -5, 0); // the center of our one ball
 float ball_radius = 2; // the radius of our one ball
 SphereCollider* ball_collider;
 Cloth cloth1(14, 10, 55, 45); // one Cloth object of the Cloth class
-//TODO1:»­³öÒ»¸öÇòÀ´
-//TODO2:»­³öÒ»Ìõ²¼
-//TODO3£º¹Ì¶¨¹ÜÏßµÄ¹âÕÕÉèÖÃ
-//TODO4£ºÄ£ÄâÖØÁ¦
-//TODO5£º´´½¨Springs
-//TODO6£ºÄ£ÄâÇò¶Ô²¼ÁÏµÄÅö×²
+
+//ï¿½ï¿½ï¿½ï¿½Í³ï¿½ï¿½Ö¡ï¿½ÊµÄ±ï¿½ï¿½ï¿½
+#define MAX_PATH 100
+char info[MAX_PATH] = { 0 };
+LARGE_INTEGER frequency;        // ticks per second
+LARGE_INTEGER t1, t2;           // ticks
+double frameTimeQP = 0;
+float frameTime = 0;
+
+//ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½Ö¡ï¿½ï¿½
+float timeStep = 1 / 60.0f;
+double accumulator = timeStep;
+
+float startTime = 0, fps = 0;
+int totalFrames = 0;
+float currentTime = 0;
+
+//TODO1:ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//TODO2:ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½
+//TODO3ï¿½ï¿½ï¿½Ì¶ï¿½ï¿½ï¿½ï¿½ßµÄ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//TODO4ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//TODO5ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Springs
+//TODO6ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½Ô²ï¿½ï¿½Ïµï¿½ï¿½ï¿½×²
 
 void init(GLvoid)
 {
@@ -28,10 +45,10 @@ void init(GLvoid)
 	//glShadeModel(GL_SMOOTH);
 	glEnable(GL_COLOR_MATERIAL);
 
-	//ÉèÖÃ¹âÕÕ
+	//ï¿½ï¿½ï¿½Ã¹ï¿½ï¿½ï¿½
 	glEnable(GL_LIGHTING);
 
-	//¹âÕÕ0
+	//ï¿½ï¿½ï¿½ï¿½0
 	glEnable(GL_LIGHT0);
 	GLfloat lightPos[4] = { -1.0,1.0,0.5,0.0 };
 	glLightfv(GL_LIGHT0, GL_POSITION, (GLfloat *)&lightPos);
@@ -41,16 +58,37 @@ void init(GLvoid)
 
 }
 
-float ball_time = 0; // counter for used to calculate the z position of the ball below
-void RenderOneFrame(void) {
-	//ÎïÀíÄ£Äâ²»Ó¦¸Ã·ÅÔÚäÖÈ¾Ñ­»·ÀïÃæ
-	ball_time++;
-	ball_pos[2] = cos(ball_time / 50.0) * 7;
-	ball_collider->setPos(ball_pos);
+void CalcFPS() {
+	float newTime = (float)glutGet(GLUT_ELAPSED_TIME);
+	frameTime = newTime - currentTime;
+	currentTime = newTime;
+	//accumulator += frameTime;
 
-	cloth1.addForce(vec3(0, -0.2, 0)*TIME_STEPSIZE2); // add gravity each frame, pointing down
-	cloth1.timeStep(); // calculate the particle positions of the next frame
-	cloth1.CollisionDetection(ball_collider);
+	//Using high res. counter
+	QueryPerformanceCounter(&t2);
+	// compute and print the elapsed time in millisec
+	frameTimeQP = (t2.QuadPart - t1.QuadPart) * 1000.0 / frequency.QuadPart;
+	t1 = t2;
+	accumulator += frameTimeQP;
+
+	++totalFrames;
+	if ((newTime - startTime) > 1000)
+	{
+		float elapsedTime = (newTime - startTime);
+		fps = (totalFrames / elapsedTime) * 1000;
+		startTime = newTime;
+		totalFrames = 0;
+	}
+
+	sprintf_s(info, "FPS: %3.2f, Frame time (GLUT): %3.4f msecs, Frame time (QP): %3.3f", fps, frameTime, frameTimeQP);
+	glutSetWindowTitle(info);
+}
+
+
+void RenderOneFrame(void) {
+	//Í³ï¿½ï¿½Ö¡ï¿½Êµï¿½ï¿½ï¿½Ï¢
+	CalcFPS();
+
 	//drawing
 	// Clear the window with current clearing color
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -80,7 +118,32 @@ void RenderOneFrame(void) {
 
 	// Perform the buffer swap to display back buffer
 	glutSwapBuffers();
+}
+
+float ball_time = 0; // counter for used to calculate the z position of the ball below
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+void StepPhysics(float dt) {
+
+	//ï¿½ï¿½ï¿½ï¿½Ä£ï¿½â²»Ó¦ï¿½Ã·ï¿½ï¿½ï¿½ï¿½ï¿½È¾Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	ball_time++;
+	ball_pos.f[2] = cos(ball_time / 50.0) * 7;
+	ball_collider->setPos(ball_pos);
+
+	cloth1.addForce(Vec3(0, -10, 0)); // add gravity each frame, pointing down
+	cloth1.timeStep(dt); // calculate the particle positions of the next frame
+	cloth1.CollisionDetection(ball_collider);
+
+}
+
+void OnIdle() {
+	//Fixed time stepping + rendering at different fps
+	if (accumulator >= timeStep)
+	{
+		StepPhysics(timeStep);
+		accumulator -= timeStep;
+	}
 	glutPostRedisplay();
+
 }
 
 void reshape(int w, int h)
@@ -135,6 +198,7 @@ int main(int argc, char** argv)
 	glutReshapeFunc(reshape);
 	glutKeyboardFunc(keyboard);
 	glutSpecialFunc(arrow_keys);
+	glutIdleFunc(OnIdle);
 
 	glutMainLoop();
 }
