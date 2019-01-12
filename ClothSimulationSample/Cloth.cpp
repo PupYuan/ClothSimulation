@@ -96,7 +96,7 @@ void Cloth::timeStep(float dt) {
 	{
 		for (Spring = Springs.begin(); Spring != Springs.end(); Spring++)
 		{
-			(*Spring).satisfySpring(); // satisfy Spring.
+			(*Spring).satisfySpring(dt); // satisfy Spring.
 		}
 	}
 

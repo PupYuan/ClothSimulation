@@ -121,15 +121,12 @@ void RenderOneFrame(void) {
 }
 
 float ball_time = 0; // counter for used to calculate the z position of the ball below
-//������
 void StepPhysics(float dt) {
-
-	//����ģ�ⲻӦ�÷�����Ⱦѭ������
 	ball_time++;
-	ball_pos.f[2] = cos(ball_time / 50.0) * 7;
+	ball_pos[2] = cos(ball_time / 50.0) * 7;
 	ball_collider->setPos(ball_pos);
 
-	cloth1.addForce(Vec3(0, -10, 0)); // add gravity each frame, pointing down
+	cloth1.addForce(vec3(0, -10, 0)); // add gravity each frame, pointing down
 	cloth1.timeStep(dt); // calculate the particle positions of the next frame
 	cloth1.CollisionDetection(ball_collider);
 
