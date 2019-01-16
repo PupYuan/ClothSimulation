@@ -2,8 +2,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp> //for matrices
 #include <glm/gtc/type_ptr.hpp>
-#define DAMPING 0.01f
-#define TIME_STEPSIZE2 0.5f*0.5f
+const float DEFAULT_DAMPING = -0.0125f;
 using namespace glm;
 
 class Particle
@@ -40,8 +39,12 @@ public:
 	{
 		if (movable)
 		{
+			//时间积分之前添加摩擦力，摩擦力跟速度相关
+			velocity = (pos - old_pos) / dt;
+			addForce(velocity*DEFAULT_DAMPING);
+
 			vec3 temp = pos;
-			pos = pos + (pos - old_pos)*(1.0f - DAMPING) + acceleration * dt*dt;
+			pos = pos + (pos - old_pos) + acceleration * dt*dt;
 			old_pos = temp;
 			velocity = (pos - old_pos) / dt;
 			acceleration = vec3(0, 0, 0); // acceleration is reset since it HAS been translated into a change in position (and implicitely into velocity)

@@ -70,19 +70,23 @@ void Cloth::drawShaded()
 {
 	// reset normals (which where written to last frame)
 	std::vector<Particle>::iterator particle;
-	glBegin(GL_TRIANGLES);
+	//glBegin(GL_TRIANGLES);
+	glBegin(GL_POINTS);
 	for (int x = 0; x < num_particles_width - 1; x++)
 	{
 		for (int y = 0; y < num_particles_height - 1; y++)
 		{
-			vec3 color(0, 0, 0);
-			if (x % 2) // red and white color is interleaved according to which column number
-				color = vec3(0.6f, 0.2f, 0.2f);
-			else
-				color = vec3(1.0f, 1.0f, 1.0f);
+			vec3 color(1, 0, 0);
+			vec3 pos = getParticle(x, y)->getPos();
+			glVertex3f(pos.x, pos.y, pos.z);
 
-			drawTriangle(getParticle(x + 1, y), getParticle(x, y), getParticle(x, y + 1), color);
-			drawTriangle(getParticle(x + 1, y + 1), getParticle(x + 1, y), getParticle(x, y + 1), color);
+			//if (x % 2) // red and white color is interleaved according to which column number
+			//	color = vec3(0.6f, 0.2f, 0.2f);
+			//else
+			//	color = vec3(1.0f, 1.0f, 1.0f);
+
+			/*drawTriangle(getParticle(x + 1, y), getParticle(x, y), getParticle(x, y + 1), color);
+			drawTriangle(getParticle(x + 1, y + 1), getParticle(x + 1, y), getParticle(x, y + 1), color);*/
 		}
 	}
 	glEnd();

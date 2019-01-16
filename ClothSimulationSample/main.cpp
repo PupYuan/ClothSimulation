@@ -1,4 +1,4 @@
-#ifdef _WIN32
+﻿#ifdef _WIN32
 #include <windows.h> 
 #endif
 
@@ -13,7 +13,6 @@ float ball_radius = 2; // the radius of our one ball
 SphereCollider* ball_collider;
 Cloth cloth1(14, 10, 55, 45); // one Cloth object of the Cloth class
 
-//����ͳ��֡�ʵı���
 #define MAX_PATH 100
 char info[MAX_PATH] = { 0 };
 LARGE_INTEGER frequency;        // ticks per second
@@ -21,20 +20,12 @@ LARGE_INTEGER t1, t2;           // ticks
 double frameTimeQP = 0;
 float frameTime = 0;
 
-//����ģ���֡��
 float timeStep = 1 / 60.0f;
 double accumulator = timeStep;
 
 float startTime = 0, fps = 0;
 int totalFrames = 0;
 float currentTime = 0;
-
-//TODO1:����һ������
-//TODO2:����һ����
-//TODO3���̶����ߵĹ�������
-//TODO4��ģ������
-//TODO5������Springs
-//TODO6��ģ����Բ��ϵ���ײ
 
 void init(GLvoid)
 {
@@ -45,16 +36,19 @@ void init(GLvoid)
 	//glShadeModel(GL_SMOOTH);
 	glEnable(GL_COLOR_MATERIAL);
 
-	//���ù���
 	glEnable(GL_LIGHTING);
 
-	//����0
 	glEnable(GL_LIGHT0);
 	GLfloat lightPos[4] = { -1.0,1.0,0.5,0.0 };
 	glLightfv(GL_LIGHT0, GL_POSITION, (GLfloat *)&lightPos);
 
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 	ball_collider = new SphereCollider(ball_pos, 2);
+
+	//在绘制多边形时除了默认的填充方式, 还可以使用点和线
+	//使用glPolygonMode函数来设置模式
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glPointSize(5);
 
 }
 
@@ -86,7 +80,7 @@ void CalcFPS() {
 
 
 void RenderOneFrame(void) {
-	//ͳ��֡�ʵ���Ϣ
+	//计算渲染帧率
 	CalcFPS();
 
 	//drawing
@@ -94,7 +88,8 @@ void RenderOneFrame(void) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glLoadIdentity();
 
-	glDisable(GL_LIGHTING); // drawing some smooth shaded background - because I like it ;)
+	//涂亮背景
+	glDisable(GL_LIGHTING); 
 	glBegin(GL_POLYGON);
 	glColor3f(0.8f, 0.8f, 1.0f);
 	glVertex3f(-200.0f, -100.0f, -100.0f);
@@ -121,14 +116,15 @@ void RenderOneFrame(void) {
 }
 
 float ball_time = 0; // counter for used to calculate the z position of the ball below
+vec3 gravity = vec3(0, -0.981f, 0);
 void StepPhysics(float dt) {
 	ball_time++;
 	ball_pos[2] = cos(ball_time / 50.0) * 7;
 	ball_collider->setPos(ball_pos);
 
-	cloth1.addForce(vec3(0, -10, 0)); // add gravity each frame, pointing down
+	cloth1.addForce(gravity); // add gravity each frame, pointing down
 	cloth1.timeStep(dt); // calculate the particle positions of the next frame
-	cloth1.CollisionDetection(ball_collider);
+	//cloth1.CollisionDetection(ball_collider);
 
 }
 
