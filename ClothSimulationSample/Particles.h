@@ -48,6 +48,10 @@ public:
 			old_pos = temp;
 			velocity = (pos - old_pos) / dt;
 			acceleration = vec3(0, 0, 0); // acceleration is reset since it HAS been translated into a change in position (and implicitely into velocity)
+
+			if (pos.y <0) {
+				pos.y = 0;
+			}
 		}
 	}
 	void makeUnmovable() { movable = false; }

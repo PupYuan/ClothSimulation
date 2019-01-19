@@ -11,7 +11,7 @@
 vec3 ball_pos(7, -5, 0); // the center of our one ball
 float ball_radius = 2; // the radius of our one ball
 SphereCollider* ball_collider;
-Cloth cloth1(14, 10, 55, 45); // one Cloth object of the Cloth class
+Cloth cloth1(4, 4, 20, 20); // one Cloth object of the Cloth class
 
 #define MAX_PATH 100
 char info[MAX_PATH] = { 0 };
@@ -78,6 +78,22 @@ void CalcFPS() {
 	glutSetWindowTitle(info);
 }
 
+const int GRID_SIZE = 10;
+void DrawGrid()
+{
+	glBegin(GL_LINES);
+	glColor3f(0.5f, 0.5f, 0.5f);
+	for (int i = -GRID_SIZE; i <= GRID_SIZE; i++)
+	{
+		glVertex3f((float)i, 0, (float)-GRID_SIZE);
+		glVertex3f((float)i, 0, (float)GRID_SIZE);
+
+		glVertex3f((float)-GRID_SIZE, 0, (float)i);
+		glVertex3f((float)GRID_SIZE, 0, (float)i);
+	}
+	glEnd();
+}
+
 
 void RenderOneFrame(void) {
 	//计算渲染帧率
@@ -90,26 +106,28 @@ void RenderOneFrame(void) {
 
 	//涂亮背景
 	glDisable(GL_LIGHTING); 
-	glBegin(GL_POLYGON);
-	glColor3f(0.8f, 0.8f, 1.0f);
-	glVertex3f(-200.0f, -100.0f, -100.0f);
-	glVertex3f(200.0f, -100.0f, -100.0f);
-	glColor3f(0.4f, 0.4f, 0.8f);
-	glVertex3f(200.0f, 100.0f, -100.0f);
-	glVertex3f(-200.0f, 100.0f, -100.0f);
-	glEnd();
+	//glBegin(GL_POLYGON);
+	//glColor3f(0.8f, 0.8f, 1.0f);
+	//glVertex3f(-200.0f, -100.0f, -100.0f);
+	//glVertex3f(200.0f, -100.0f, -100.0f);
+	//glColor3f(0.4f, 0.4f, 0.8f);
+	//glVertex3f(200.0f, 100.0f, -100.0f);
+	//glVertex3f(-200.0f, 100.0f, -100.0f);
+	//glEnd();
 	glEnable(GL_LIGHTING);
 
-	glTranslatef(-6.5, 6, -9.0f); // move camera out and center on the cloth
-	glRotatef(25, 0, 1, 0); // rotate a bit to see the cloth from the side
+	glTranslatef(0, 0, -23.0f); // move camera out and center on the cloth
+	glRotatef(15, 1, 0, 0); // rotate a bit to see the cloth from the side
 
 	cloth1.drawShaded(); // finally draw the cloth with smooth shading
 
-	glPushMatrix(); // to draw the ball we use glutSolidSphere, and need to draw the sphere at the position of the ball
-	glTranslatef(ball_pos[0], ball_pos[1], ball_pos[2]); // hence the translation of the sphere onto the ball position
-	glColor3f(0.4f, 0.8f, 0.5f);
-	glutSolidSphere(ball_radius - 0.1, 50, 50); // draw the ball, but with a slightly lower radius, otherwise we could get ugly visual artifacts of cloth penetrating the ball slightly
-	glPopMatrix();
+	//draw grid
+	DrawGrid();
+	//glPushMatrix(); // to draw the ball we use glutSolidSphere, and need to draw the sphere at the position of the ball
+	//glTranslatef(ball_pos[0], ball_pos[1], ball_pos[2]); // hence the translation of the sphere onto the ball position
+	//glColor3f(0.4f, 0.8f, 0.5f);
+	//glutSolidSphere(ball_radius - 0.1, 50, 50); // draw the ball, but with a slightly lower radius, otherwise we could get ugly visual artifacts of cloth penetrating the ball slightly
+	//glPopMatrix();
 
 	// Perform the buffer swap to display back buffer
 	glutSwapBuffers();
@@ -145,9 +163,9 @@ void reshape(int w, int h)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	if (h == 0)
-		gluPerspective(80, (float)w, 1.0, 5000.0);
+		gluPerspective(60, (float)w, 1.0, 100.0f);
 	else
-		gluPerspective(80, (float)w / (float)h, 1.0, 5000.0);
+		gluPerspective(60, (float)w / (float)h, 1.0, 100.0f);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
@@ -177,13 +195,15 @@ void arrow_keys(int a_keys, int x, int y)
 	}
 }
 
+
+
 int main(int argc, char** argv)
 {
 	glutInit(&argc, argv);
 
 
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-	glutInitWindowSize(1280, 720);
+	glutInitWindowSize(1024, 1024);
 
 	glutCreateWindow("Cloth Simulation Tutorial");
 	init();
