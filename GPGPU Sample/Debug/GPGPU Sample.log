@@ -1,0 +1,21 @@
+﻿  main.cpp
+e:\project\clothsimulation\gpgpu sample\main.cpp(67): warning C4305: “初始化”: 从“double”到“GLfloat”截断
+e:\project\clothsimulation\gpgpu sample\main.cpp(78): warning C4305: “初始化”: 从“double”到“GLfloat”截断
+e:\project\clothsimulation\gpgpu sample\main.cpp(231): warning C4838: 从“double”转换到“GLfloat”需要收缩转换
+e:\project\clothsimulation\gpgpu sample\main.cpp(231): warning C4305: “初始化”: 从“double”到“GLfloat”截断
+e:\project\clothsimulation\gpgpu sample\main.cpp(273): warning C4244: “参数”: 从“GLuint”转换到“GLfloat”，可能丢失数据
+e:\project\clothsimulation\gpgpu sample\main.cpp(275): warning C4244: “参数”: 从“GLuint”转换到“GLfloat”，可能丢失数据
+e:\project\clothsimulation\gpgpu sample\main.cpp(277): warning C4244: “参数”: 从“GLuint”转换到“GLfloat”，可能丢失数据
+e:\project\clothsimulation\gpgpu sample\main.cpp(326): warning C4244: “参数”: 从“GLint”转换到“GLfloat”，可能丢失数据
+e:\project\clothsimulation\gpgpu sample\main.cpp(328): warning C4018: “<”: 有符号/无符号不匹配
+e:\project\clothsimulation\gpgpu sample\main.cpp(385): warning C4305: “+=”: 从“double”到“GLfloat”截断
+e:\project\clothsimulation\gpgpu sample\main.cpp(388): warning C4305: “-=”: 从“double”到“GLfloat”截断
+e:\project\clothsimulation\gpgpu sample\main.cpp(436): warning C4305: “-=”: 从“double”到“GLfloat”截断
+e:\project\clothsimulation\gpgpu sample\main.cpp(438): warning C4305: “+=”: 从“double”到“GLfloat”截断
+e:\project\clothsimulation\gpgpu sample\main.cpp(478): warning C4244: “参数”: 从“time_t”转换到“unsigned int”，可能丢失数据
+e:\project\clothsimulation\gpgpu sample\main.cpp(480): warning C4018: “<”: 有符号/无符号不匹配
+e:\project\clothsimulation\gpgpu sample\main.cpp(496): warning C4018: “<”: 有符号/无符号不匹配
+e:\project\clothsimulation\gpgpu sample\main.cpp(497): warning C4244: “=”: 从“double”转换到“GLfloat”，可能丢失数据
+e:\project\clothsimulation\gpgpu sample\main.cpp(499): warning C4244: “=”: 从“double”转换到“GLfloat”，可能丢失数据
+e:\project\clothsimulation\gpgpu sample\main.cpp(544): warning C4018: “>=”: 有符号/无符号不匹配
+  GPGPU Sample.vcxproj -> E:\Project\ClothSimulation\Debug\GPGPU Sample.exe

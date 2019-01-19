@@ -46,7 +46,6 @@ public:
 			vec3 temp = pos;
 			pos = pos + (pos - old_pos) + acceleration * dt*dt;
 			old_pos = temp;
-			velocity = (pos - old_pos) / dt;
 			acceleration = vec3(0, 0, 0); // acceleration is reset since it HAS been translated into a change in position (and implicitely into velocity)
 
 			if (pos.y <0) {
