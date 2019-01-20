@@ -1,5 +1,7 @@
 ﻿  main.cpp
-e:\project\clothsimulation\gpgpu sample\main.cpp(86): warning C4005: “MAX_PATH”: 宏重定义
+e:\project\clothsimulation\gpgpu sample\main.cpp(82): warning C4005: “MAX_PATH”: 宏重定义
   c:\program files (x86)\windows kits\10\include\10.0.17134.0\shared\minwindef.h(60): note: 参见“MAX_PATH”的前一个定义
-e:\project\clothsimulation\gpgpu sample\main.cpp(168): warning C4326: “main”的返回类型应为“int”而非“void”
+e:\project\clothsimulation\gpgpu sample\main.cpp(278): warning C4018: “<”: 有符号/无符号不匹配
+e:\project\clothsimulation\gpgpu sample\main.cpp(290): warning C4018: “<”: 有符号/无符号不匹配
+e:\project\clothsimulation\gpgpu sample\main.cpp(420): warning C4326: “main”的返回类型应为“int”而非“void”
   GPGPU Sample.vcxproj -> E:\Project\ClothSimulation\Debug\GPGPU Sample.exe

@@ -33,8 +33,3 @@
 *.exe
 *.out
 *.app
-GPGPU Sample/Debug/GPGPU Sample.log
-GPGPU Sample/Debug/GPGPU Sample.tlog/CL.read.1.tlog
-GPGPU Sample/Debug/GPGPU Sample.tlog/link.read.1.tlog
-GPGPU Sample/Debug/vc141.idb
-GPGPU Sample/Debug/vc141.pdb
