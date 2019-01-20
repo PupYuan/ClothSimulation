@@ -39,10 +39,6 @@ public:
 	{
 		if (movable)
 		{
-			//时间积分之前添加摩擦力，摩擦力跟速度相关
-			velocity = (pos - old_pos) / dt;
-			addForce(velocity*DEFAULT_DAMPING);
-
 			vec3 temp = pos;
 			pos = pos + (pos - old_pos) + acceleration * dt*dt;
 			old_pos = temp;
