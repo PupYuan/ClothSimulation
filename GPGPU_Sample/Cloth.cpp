@@ -7,6 +7,8 @@ float	KsBend = 50.95f, KdBend = -0.25f;
 
 Cloth::Cloth(float width, float height, int num_particles_width, int num_particles_height) : num_particles_width(num_particles_width), num_particles_height(num_particles_height)
 {
+	sizeX = width;
+	sizeY = height;
 	int i = 0, j = 0, count = 0;
 	int l1 = 0, l2 = 0;
 	int v = num_particles_height + 1;

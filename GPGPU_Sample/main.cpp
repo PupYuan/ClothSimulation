@@ -12,6 +12,7 @@ using namespace glm;
 #include "Spring.h"
 #include "Particles.h"
 #include "Cloth.h"
+#include "Collider.h"
 
 //窗口参数
 const int width = 1024, height = 1024;
@@ -25,13 +26,18 @@ GLdouble P[16];
 glm::vec3 Up = glm::vec3(0, 1, 0), Right, viewDir;
 
 //画椭圆的一些参数
-glm::mat4 ellipsoid, inverse_ellipsoid;
-float fRadius = 1;
-int iStacks = 30;
-int iSlices = 30;
+//glm::mat4 ellipsoid, inverse_ellipsoid;
+//float fRadius = 1;
+//int iStacks = 30;
+//int iSlices = 30;
+
+SphereCollider* ball_collider;
+vec3 ball_pos(0,2,0); // the center of our one ball
+float ball_time = 0;
+float ball_radius = 2; // the radius of our one ball
 
 glm::vec3 gravity = glm::vec3(0.0f, -0.981f, 0.0f);
-Cloth cloth(20, 20, 20, 20);
+Cloth cloth(4, 4, 20, 20);
 
 //统计帧率用的信息
 LARGE_INTEGER frequency;        // ticks per second
@@ -78,8 +84,6 @@ void Init(GLvoid)
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_COLOR_MATERIAL);
 
-	//ball_collider = new SphereCollider(ball_pos, 2);
-
 	//在绘制多边形时除了默认的填充方式, 还可以使用点和线
 	//使用glPolygonMode函数来设置模式
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -95,11 +99,13 @@ void Init(GLvoid)
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glPointSize(5);
 
+	//圆形碰撞体
+	ball_collider = new SphereCollider(ball_pos, 2);
 	//create a basic ellipsoid object
-	ellipsoid = glm::translate(glm::mat4(1), glm::vec3(0, 2, 0));
-	ellipsoid = glm::rotate(ellipsoid, 45.0f, glm::vec3(1, 0, 0));
-	ellipsoid = glm::scale(ellipsoid, glm::vec3(fRadius, fRadius, fRadius / 2));
-	inverse_ellipsoid = glm::inverse(ellipsoid);
+	//ellipsoid = glm::translate(glm::mat4(1), glm::vec3(0, 2, 0));
+	//ellipsoid = glm::rotate(ellipsoid, 45.0f, glm::vec3(1, 0, 0));
+	//ellipsoid = glm::scale(ellipsoid, glm::vec3(fRadius, fRadius, fRadius / 2));
+	//inverse_ellipsoid = glm::inverse(ellipsoid);
 }
 
 void OnKey(unsigned char key, int, int) {
@@ -167,17 +173,30 @@ void OnRender() {
 
 	//draw ellipsoid
 	glColor3f(0, 1, 0);
-	glPushMatrix();
-	glMultMatrixf(glm::value_ptr(ellipsoid));
-	glutWireSphere(fRadius, iSlices, iStacks);
+
+	//glPushMatrix();
+	//glMultMatrixf(glm::value_ptr(ellipsoid));
+	//glutWireSphere(fRadius, iSlices, iStacks);
+	//glPopMatrix();
+
+	glPushMatrix(); // to draw the ball we use glutSolidSphere, and need to draw the sphere at the position of the ball
+	glTranslatef(ball_pos[0], ball_pos[1], ball_pos[2]); // hence the translation of the sphere onto the ball position
+	glColor3f(0.4f, 0.8f, 0.5f);
+	glutSolidSphere(ball_radius - 0.1, 50, 50); // draw the ball, but with a slightly lower radius, otherwise we could get ugly visual artifacts of cloth penetrating the ball slightly
 	glPopMatrix();
 
 	cloth.draw();
 	glutSwapBuffers();
 }
+
 void StepPhysics(float dt) {
+	//ball_time++;
+	//ball_pos[2] = cos(ball_time / 50.0) * 7;
+	//ball_collider->setPos(ball_pos);
+
 	cloth.addForce(gravity);
 	cloth.timeStep(dt);
+	cloth.CollisionDetection(ball_collider);
 }
 void OnIdle() {
 	//Fixed time stepping + rendering at different fps
