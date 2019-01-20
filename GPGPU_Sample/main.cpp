@@ -112,7 +112,7 @@ void AddSpring(Particle* a, Particle* b, float ks, float kd) {
 }
 
 Particle* getParticle(int x, int y) { 
-	return &particles[y*num_particles_width + x]; 
+	return &particles[y*(num_particles_width+1) + x]; 
 }
 void Init(GLvoid)
 {
@@ -182,9 +182,9 @@ void Init(GLvoid)
 		for (int y = 0; y <= num_particles_height; y++)
 		{
 			// Structure Springs
-			if (x + 1 <= num_particles_width+1)
+			if (x + 1 <= num_particles_width)
 				AddSpring(getParticle(x, y), getParticle(x + 1, y),KsStruct,KdStruct);
-			if (y + 1 <= num_particles_height+1)
+			if (y + 1 <= num_particles_height)
 				AddSpring(getParticle(x, y), getParticle(x, y + 1), KsStruct,KdStruct);
 
 			//Shear Springs
@@ -208,7 +208,7 @@ void Init(GLvoid)
 	for (int i = 0; i < 3; i++)
 	{
 		getParticle(0 + i, 0)->makeUnmovable();
-		getParticle(num_particles_width - 1 - i, 0)->makeUnmovable();
+		getParticle(num_particles_width- i, 0)->makeUnmovable();
 	}
 
 	//create a basic ellipsoid object
