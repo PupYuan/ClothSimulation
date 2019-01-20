@@ -1,629 +1,188 @@
-/**
-*
-*    Introduction to GPU Programming with GLSL
-*
-*  GLSL Simple Particle Simulation Using Textures
-*
-*  Marroquim, Ricardo -- September, 2009
-*
-**/
+//ToDo1:先实现CPU进行物理模拟
 
-/// -----------------------------------   Definitions   -------------------------------------
+//初始化扩展
+#include <GL/glew.h>
 
-#ifdef __WIN32__
-#define GLUT_DISABLE_ATEXIT_HACK // for compiling with Mingw
-#endif
-
-#include <gl/glew.h>
-#include <time.h>
-#include <stdlib.h>
-#include <stdio.h>
-
-extern "C" {
-#ifdef __MAC__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h> // gl-utility library
-#endif
-}
-
-
-#include <math.h> 
-#include <stdio.h> // standard i/o
-#include <stdlib.h>
-
-#include <iostream> // i/o stream
-
+//glm数学库
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp> //for matrices
 #include <glm/gtc/type_ptr.hpp>
 
+//窗口相关的库
+#include <GL/freeglut.h>
 
-#define TEXTURE_TYPE GL_RGBA32F_ARB
+#include <iostream>
+using namespace std;
 
-using std::cout;
-using std::cerr;
-using std::flush;
-using std::endl;
-using namespace glm;
+//窗口参数
+const int width = 1024, height = 1024;
 
-/// ------------------------------------   Variables   --------------------------------------
+//观察矩阵、投影矩阵的参数
+float dist = -23;
+float rX = 15, rY = 0;
+GLdouble MV[16];
+GLint viewport[4];
+GLdouble P[16];
+glm::vec3 Up = glm::vec3(0, 1, 0), Right, viewDir;
 
-static int buttonPressed = -1; ///< Button state
-
-static const char titleWin[] = "Simple GLSL Particle Simulation"; ///< Window title
-
-static int winWidth = 1024, winHeight = 768; ///< Window size
-
-static GLuint tex_velocity, tex_originalVelocity, tex_position, fbo; ///< Textures
-static GLuint tex_size = 64;
-static GLuint numParticles;
-
-// Vertex and Fragment Shader file names
-static const char vsFile[2][255] = { "display.vert", "compute.vert" };
-
-static const char fsFile[2][255] = { "display.frag", "compute.frag" };
-
-static GLfloat time_step = 0.001;
-static GLint _step = 0;
-
-static GLint point_size = 2;
-/// ------------------------------------   ARCBALL   --------------------------------------
-
-// scene parameters
-const vec3 eye(0.0f, 0.0f, 3.0f);
-const vec3 center(0.0f, 0.0f, -1.0f);
-const vec3 up(0.0f, 1.0f, 0.0f);
-const float SPHERE_RADIUS = 1.0f;
-static GLfloat zoom = 0.6;
-
-const float PI = 3.141592654f;
-
-/// ------------------------------------   Functions   --------------------------------------
-
-bool setupShaders(void);
-
-/// OpenGL Write
-/// @arg x, y raster position
-/// @arg str string to write
-
-void glWrite(const GLdouble& x, const GLdouble& y, const char *str) {
-
-	// You should call glColor* before glWrite;
-	// And the font color is also affected by texture and lighting
-	glRasterPos2d(x, y);
-	for (char *s = (char*)str; *s; s++)
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *s);
-
-}
-
-/// Show Information/Help
-
-void showIH(void) {
-
-	glColor3f(0.0, 0.0, 0.0);
-
-	char str[256];
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-
-	gluOrtho2D(-1.0, 1.0, -1.0, 1.0);
-
-	sprintf(str, "Keys");
-	glWrite(-0.95, 0.9, str);
-
-	sprintf(str, "[ / ] : point size");
-	glWrite(-0.95, 0.8, str);
-
-	sprintf(str, "+ / - : animation speed %f", time_step);
-	glWrite(-0.95, 0.7, str);
-
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
-
-
-}
-
-
-inline vec3 rotate_x(vec3 v, float sin_ang, float cos_ang)
+void Init(GLvoid)
 {
-	return vec3(
-		v.x,
-		(v.y * cos_ang) + (v.z * sin_ang),
-		(v.z * cos_ang) - (v.y * sin_ang)
-	);
-}
-
-inline vec3 rotate_y(vec3 v, float sin_ang, float cos_ang)
-{
-	return vec3(
-		(v.x * cos_ang) + (v.z * sin_ang),
-		v.y,
-		(v.z * cos_ang) - (v.x * sin_ang)
-	);
-}
-
-/// Renders the currently selected model
-/// to insert a new model remember to increment the NUM_MODEL const
-void drawModel(int m) {
-
-
-}
-
-void drawBoundingBox(void) {
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	/// Draw bounding box
-	glBegin(GL_QUADS);
-	///front
-	glVertex3f(-1.0, -1.0, -1.0);
-	glVertex3f(1.0, -1.0, -1.0);
-	glVertex3f(1.0, 1.0, -1.0);
-	glVertex3f(-1.0, 1.0, -1.0);
-
-	///back
-	glVertex3f(-1.0, -1.0, 1.0);
-	glVertex3f(1.0, -1.0, 1.0);
-	glVertex3f(1.0, 1.0, 1.0);
-	glVertex3f(-1.0, 1.0, 1.0);
-
-	///bottom
-	glVertex3f(-1.0, -1.0, -1.0);
-	glVertex3f(1.0, -1.0, -1.0);
-	glVertex3f(1.0, -1.0, 1.0);
-	glVertex3f(-1.0, -1.0, 1.0);
-
-	///top
-	glVertex3f(-1.0, 1.0, -1.0);
-	glVertex3f(1.0, 1.0, -1.0);
-	glVertex3f(1.0, 1.0, 1.0);
-	glVertex3f(-1.0, 1.0, 1.0);
-
-	///left
-	glVertex3f(-1.0, -1.0, -1.0);
-	glVertex3f(-1.0, 1.0, -1.0);
-	glVertex3f(-1.0, 1.0, 1.0);
-	glVertex3f(-1.0, -1.0, 1.0);
-
-	///right
-	glVertex3f(1.0, -1.0, -1.0);
-	glVertex3f(1.0, 1.0, -1.0);
-	glVertex3f(1.0, 1.0, 1.0);
-	glVertex3f(1.0, -1.0, 1.0);
-
-
-	glEnd();
-
-	glBegin(GL_LINES);
-
-	glColor3f(1.0, 0.0, 0.0);
-	glVertex3f(-1.0, -1.0, 1.0);
-	glVertex3f(1.0, -1.0, 1.0);
-	glColor3f(0.0, 1.0, 0.0);
-	glVertex3f(-1.0, -1.0, 1.0);
-	glVertex3f(-1.0, 1.0, 1.0);
-	glColor3f(0.0, 0.0, 1.0);
-	glVertex3f(-1.0, -1.0, 1.0);
-	glVertex3f(-1.0, -1.0, -1.0);
-
-	glEnd();
-
-}
-
-
-void computeCinematics(void) {
-
-
-	/*********** COMPUTE THE ROTATED GRAVITY VECTOR ************/
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-	glScalef(zoom, zoom, zoom);
-	//arcball_rotate();
-
-	GLfloat g[3] = { 0.0, -0.98, 0.0 };
-
-	GLfloat mv[4][4];
-	glGetFloatv(GL_MODELVIEW_MATRIX, &mv[0][0]);
-
-	/// multiply by the inverse of the modelview
-	GLfloat gravity[3] = { g[0] * mv[0][0] + g[1] * mv[0][1] + g[2] * mv[0][2],
-		g[0] * mv[1][0] + g[1] * mv[1][1] + g[2] * mv[1][2],
-		g[0] * mv[2][0] + g[1] * mv[2][1] + g[2] * mv[2][2] };
-
-	glLoadIdentity();
-
-
-	glViewport(0, 0, tex_size, tex_size);
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-
-	gluOrtho2D(0.0, tex_size, 0.0, tex_size);
-
-	glEnable(GL_TEXTURE_2D);
-
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-	GLenum drawBufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-	glDrawBuffers(2, drawBufs);
-
-	/*computeShader.use();
-
-	computeShader.set_uniform("positionTex", 0);
-	computeShader.set_uniform("velocityTex", 1);
-	computeShader.set_uniform("originalVelocityTex", 2);
-	computeShader.set_uniform("time_step", (GLfloat)time_step);
-	computeShader.set_uniform("step", (GLint)step);
-	computeShader.set_uniform("numParticles", (GLint)numParticles);
-	computeShader.set_uniform("gravity", gravity[0], gravity[1], gravity[2]);*/
-
-	glShadeModel(GL_FLAT);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glBegin(GL_QUADS);
-	glTexCoord2f(0.0, 0.0);
-	glVertex2f(0.0, 0.0);
-	glTexCoord2f(1.0, 0.0);
-	glVertex2f(tex_size, 0.0);
-	glTexCoord2f(1.0, 1.0);
-	glVertex2f(tex_size, tex_size);
-	glTexCoord2f(0.0, 1.0);
-	glVertex2f(0.0, tex_size);
-	glEnd();
-
-	//computeShader.use(0);
-
-
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
-	glViewport(0, 0, winWidth, winHeight);
-	glFlush();
-
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-	glDisable(GL_TEXTURE_2D);
-
-
-}
-
-
-/// Display
-
-void display(void) {
-
-	glDrawBuffer(GL_BACK);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glScalef(zoom, zoom, zoom);
-	//arcball_rotate();
-
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, tex_position);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, tex_velocity);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, tex_originalVelocity);
-
-	GLfloat *tex_data = new GLfloat[4 * numParticles];
-
-	glReadBuffer(GL_COLOR_ATTACHMENT0);
-	glReadPixels(0, 0, tex_size, tex_size, GL_RGBA, GL_FLOAT, &tex_data[0]);
-
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-
+	glClearColor(0.2f, 0.2f, 0.4f, 0.5f);
+	glClearDepth(1.0f);
+	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_COLOR_MATERIAL);
 
-	glPointSize(point_size);
-	glBegin(GL_POINTS);
-	for (int i = 0; i < numParticles; ++i) {
+	//ball_collider = new SphereCollider(ball_pos, 2);
 
-		if (i % 3 == 0)
-			glColor3f(1.0, 0.0, 0.0);
-		else if (i % 3 == 1)
-			glColor3f(0.0, 1.0, 0.0);
-		else
-			glColor3f(0.0, 0.0, 1.0);
+	//在绘制多边形时除了默认的填充方式, 还可以使用点和线
+	//使用glPolygonMode函数来设置模式
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glPointSize(5);
 
-		glVertex3f(tex_data[4 * i + 0], tex_data[4 * i + 1], tex_data[4 * i + 2]);
+}
+
+void OnIdle() {
+	glutPostRedisplay();
+}
+
+void OnKey(unsigned char key, int, int) {
+
+}
+
+void OnShutdown() {
+	//清理掉数据
+}
+
+void OnMouseDown(int button, int s, int x, int y) {
+
+}
+
+void OnMouseMove(int x, int y) {
+
+}
+
+void OnReshape(int nw, int nh) {
+	glViewport(0, 0, nw, nh);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(60, (GLfloat)nw / (GLfloat)nh, 1.f, 100.0f);
+
+	glGetIntegerv(GL_VIEWPORT, viewport);
+	glGetDoublev(GL_PROJECTION_MATRIX, P);
+
+	glMatrixMode(GL_MODELVIEW);
+}
+
+//统计帧率用的信息
+LARGE_INTEGER frequency;        // ticks per second
+LARGE_INTEGER t1, t2;           // ticks
+double frameTimeQP = 0;
+float frameTime = 0;
+float startTime = 0, fps = 0;
+int totalFrames = 0;
+float timeStep = 1.0f / 60.0f;
+float currentTime = 0;
+double accumulator = timeStep;
+#define MAX_PATH 100
+char info[MAX_PATH] = { 0 };
+void CalcFPS() {
+	float newTime = (float)glutGet(GLUT_ELAPSED_TIME);
+	frameTime = newTime - currentTime;
+	currentTime = newTime;
+	//accumulator += frameTime;
+
+	//Using high res. counter
+	QueryPerformanceCounter(&t2);
+	// compute and print the elapsed time in millisec
+	frameTimeQP = (t2.QuadPart - t1.QuadPart) * 1000.0 / frequency.QuadPart;
+	t1 = t2;
+	accumulator += frameTimeQP;
+
+	++totalFrames;
+	if ((newTime - startTime) > 1000)
+	{
+		float elapsedTime = (newTime - startTime);
+		fps = (totalFrames / elapsedTime) * 1000;
+		startTime = newTime;
+		totalFrames = 0;
+	}
+
+	sprintf_s(info, "FPS: %3.2f, Frame time (GLUT): %3.4f msecs, Frame time (QP): %3.3f", fps, frameTime, frameTimeQP);
+	glutSetWindowTitle(info);
+}
+
+//网格的大小
+const int GRID_SIZE = 10;
+void DrawGrid()
+{
+	glBegin(GL_LINES);
+	glColor3f(0.5f, 0.5f, 0.5f);
+	for (int i = -GRID_SIZE; i <= GRID_SIZE; i++)
+	{
+		glVertex3f((float)i, 0, (float)-GRID_SIZE);
+		glVertex3f((float)i, 0, (float)GRID_SIZE);
+
+		glVertex3f((float)-GRID_SIZE, 0, (float)i);
+		glVertex3f((float)GRID_SIZE, 0, (float)i);
 	}
 	glEnd();
+}
+//画椭圆的一些参数
+glm::mat4 ellipsoid, inverse_ellipsoid;
+float fRadius = 1;
+int iStacks = 30;
+int iSlices = 30;
 
-	glColor3f(0.0, 0.0, 0.0);
-	drawBoundingBox();
+void OnRender() {
+	CalcFPS();
+	//清理Buffer
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//传入观察矩阵、投影矩阵的一些参数
+	glLoadIdentity();
+	glTranslatef(0, 0, dist);
+	glRotatef(rX, 1, 0, 0);
+	glRotatef(rY, 0, 1, 0);
 
-	showIH();
+	glGetDoublev(GL_MODELVIEW_MATRIX, MV);
+	viewDir.x = (float)-MV[2];
+	viewDir.y = (float)-MV[6];
+	viewDir.z = (float)-MV[10];
+	Right = glm::cross(viewDir, Up);
 
-	delete[] tex_data;
+	//draw grid
+	DrawGrid();
+
+	//draw ellipsoid
+	glColor3f(0, 1, 0);
+	glPushMatrix();
+	glMultMatrixf(glm::value_ptr(ellipsoid));
+	glutWireSphere(fRadius, iSlices, iStacks);
+	glPopMatrix();
+
+	//画布料
+
 
 	glutSwapBuffers();
 }
 
-/// Reshape
-/// @arg w, h new window width and height
-
-void reshape(int w, int h) {
-
-	winWidth = w;
-	winHeight = h;
-	float aspect_ratio = (float)winWidth / (float)winHeight;
-
-	glViewport(0, 0, winWidth, winHeight);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(50.0f, aspect_ratio, 1.0f, 50.0f);
-	gluLookAt(
-		eye.x, eye.y, eye.z,
-		center.x, center.y, center.z,
-		up.x, up.y, up.z);
-	// set up the arcball using the current projection matrix
-	//arcball_setzoom(SPHERE_RADIUS, eye, up);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-}
-
-
-/// Keyboard
-/// @arg key key pressed
-/// @arg x, y window position when key was pressed
-
-void keyboard(unsigned char key, int x, int y) {
-
-	switch (key) {
-	case '+':
-		time_step += 0.0005;
-		return;
-	case '-':
-		time_step -= 0.0005;
-		if (time_step < 0)
-			time_step = 0;
-		return;
-	case '[':
-		point_size--;
-		if (point_size < 1)
-			point_size = 1;
-		return;
-	case ']':
-		point_size++;
-		return;
-	case 'r': case 'R': // quit application
-
-		setupShaders();
-		return;
-	case 'q': case 'Q': case 27: // quit application
-								 //glutDestroyWindow( glutGetWindow() );
-		exit(0);
-		return;
-	default: // any other key (just to avoid warnings)
-		cerr << "[Error] No key bind for " << key
-			<< " in (" << x << ", " << y << ")" << endl;
-		return;
-	}
-
-	glutPostRedisplay();
-
-}
-
-
-/// Mouse
-/// @arg button which button activate the callback
-/// @arg state which state of the mouse
-/// @arg x, y window position of the mouse
-
-void mouse(int button, int state, int x, int y) {
-
-	buttonPressed = button;
-
-	if (state == GLUT_DOWN) {
-
-		if (button == GLUT_LEFT_BUTTON) {
-			int invert_y = (winHeight - y) - 1; // OpenGL viewport coordinates are Cartesian
-			//arcball_start(x, invert_y);
-		}
-
-		if (button == 3) // wheel up
-			zoom -= 0.1;
-		else if (button == 4) // wheel down
-			zoom += 0.1;
-
-	}
-	else if (state == GLUT_UP) {
-
-		if (button == GLUT_LEFT_BUTTON || button == GLUT_RIGHT_BUTTON) {
-
-		}
-
-	}
-
-	glutPostRedisplay();
-
-}
-
-/// Motion
-/// @arg x, y window position of the mouse
-
-void motion(int x, int y) {
-
-	if (buttonPressed == GLUT_LEFT_BUTTON || buttonPressed == GLUT_RIGHT_BUTTON) {
-
-
-		if (buttonPressed == GLUT_LEFT_BUTTON) {
-			int invert_y = (winHeight - y) - 1;
-			//arcball_move(x, invert_y);
-		}
-
-		glutPostRedisplay();
-
-	}
-}
-
-
-/// Setup position and velocity textures with random initial
-void setupTextures(void) {
-
-	numParticles = tex_size * tex_size;
-	GLfloat *tex_data = new GLfloat[4 * numParticles];
-
-	srand(time(NULL));
-
-	//将位置数据写入到frameBuffer
-	for (int i = 0; i < numParticles; ++i) {
-		tex_data[4 * i + 0] = 0.0;
-		tex_data[4 * i + 1] = 0.0;
-		tex_data[4 * i + 2] = 0.0;
-		tex_data[4 * i + 3] = i / (GLfloat)numParticles;
-	}
-
-	glGenTextures(1, &tex_position);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, tex_position);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glTexImage2D(GL_TEXTURE_2D, 0, TEXTURE_TYPE, tex_size, tex_size, 0, GL_RGBA, GL_FLOAT, &tex_data[0]);
-
-	//将速度数据写入到frameBuffer
-	for (int i = 0; i < numParticles; ++i) {
-		tex_data[i * 4 + 0] = (2.0*((GLfloat)rand() / ((GLfloat)RAND_MAX)) - 1.0)*0.25;
-		tex_data[i * 4 + 1] = ((GLfloat)rand() / ((GLfloat)RAND_MAX));
-		tex_data[i * 4 + 2] = (2.0*((GLfloat)rand() / ((GLfloat)RAND_MAX)) - 1.0)*0.25;
-		tex_data[i * 4 + 3] = 1.0;
-	}
-
-	glGenTextures(1, &tex_velocity);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, tex_velocity);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glTexImage2D(GL_TEXTURE_2D, 0, TEXTURE_TYPE, tex_size, tex_size, 0, GL_RGBA, GL_FLOAT, &tex_data[0]);
-
-	glGenTextures(1, &tex_originalVelocity);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, tex_originalVelocity);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glTexImage2D(GL_TEXTURE_2D, 0, TEXTURE_TYPE, tex_size, tex_size, 0, GL_RGBA, GL_FLOAT, &tex_data[0]);
-
-	delete[] tex_data;
-
-	//bind texture to frameBuffer
-	glGenFramebuffersEXT(1, &fbo);
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-
-	glBindTexture(GL_TEXTURE_2D, tex_position);
-	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, tex_position, 0);
-
-	glBindTexture(GL_TEXTURE_2D, tex_velocity);
-	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT1_EXT, GL_TEXTURE_2D, tex_velocity, 0);
-
-	if (glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) != GL_FRAMEBUFFER_COMPLETE_EXT)
-		printf("ERROR - Incomplete FrameBuffer\n");
-
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-
-}
-
-void timer(int extra) {
-	//GPGPU计算不用在render循环中，而是自己单独的循环
-	computeCinematics();
-
-	_step += 1;
-	if (_step >= numParticles)
-		_step = 0;
-	glutTimerFunc(10, timer, 0);
-}
-
-
-/// OpenGL Utility (GLUT) Setup
-
-void setupGL(void) {
-
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGBA);
-	glutInitWindowSize(winWidth, winHeight);
-	glutInitWindowPosition(100, 100);
-	glutCreateWindow(titleWin);
-
-#ifdef __GLEW__
-	if (GLEW_OK != glewInit()) {
-		cerr << "glew failed" << endl;
-		exit(1);
-	}
-#endif
-
-	glClearColor(1., 1., 1., 0.);
-
-	glDisable(GL_DEPTH_TEST);
-
-	glutReshapeFunc(reshape);
-	glutDisplayFunc(display);
-	glutIdleFunc(display);
-	glutTimerFunc(0, timer, 0);
-	glutKeyboardFunc(keyboard);
-	glutMouseFunc(mouse);
-	glutMotionFunc(motion);
-
-}
-
-/// Setup GLSL Shaders
-
-bool setupShaders(void) {
-
-	//if (!glsl_support()) {
-
-	//	cerr << "[Error] No GLSL support!" << endl;
-	//	return false;
-
-	//}
-
-	//~ displayShader.vertex_source(vsFile[0]);
-	//~ displayShader.fragment_source(fsFile[0]);
-	//~ displayShader.install(true);
-
-	/*computeShader.vertex_source(vsFile[1]);
-	computeShader.fragment_source(fsFile[1]);
-	computeShader.install(true);*/
-
-	return true;
-
-}
-
-/// -------------------------------------   Main   ---------------------------------------
-
-int main(int argc, char** argv) {
-
-	cout << "[Init] Starting GLUT... " << flush;
+void main(int argc, char** argv) {
 
 	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
+	glutInitWindowSize(width, height);
+	glutCreateWindow("GLUT Cloth Demo [GLSL based Verlet Integration using GPGPU approach]");
 
-	cout << "done!\n[Init] Setting OpenGL up... " << flush;
+	glutDisplayFunc(OnRender);
+	glutReshapeFunc(OnReshape);
+	glutIdleFunc(OnIdle);
 
-	setupGL();
-	setupTextures();
+	glutMouseFunc(OnMouseDown);
+	glutMotionFunc(OnMouseMove);
+	glutKeyboardFunc(OnKey);
+	glutCloseFunc(OnShutdown);
 
-	cout << "done!\n[Init] Setup Shaders:" << endl;
-
-	if (!setupShaders()) return 1;
-
-	cout << "Finish!" << endl;
+	glewInit();
+	Init();
 
 	glutMainLoop();
-
-	return 0;
-
 }
