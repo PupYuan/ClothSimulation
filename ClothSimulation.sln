@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ClothSimulationSample", "ClothSimulationSample\ClothSimulationSample.vcxproj", "{479CEF81-7A14-42D0-B3BE-7BCDA5C8454A}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GPGPU Sample", "GPGPU Sample\GPGPU Sample.vcxproj", "{8F17E9FC-45F5-43CF-B9A2-F1DCB0753FB7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GPGPU Sample", "GPGPU_Sample\GPGPU Sample.vcxproj", "{8F17E9FC-45F5-43CF-B9A2-F1DCB0753FB7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
