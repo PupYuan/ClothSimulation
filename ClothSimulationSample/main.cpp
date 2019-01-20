@@ -49,7 +49,6 @@ void init(GLvoid)
 	//使用glPolygonMode函数来设置模式
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glPointSize(5);
-
 }
 
 void CalcFPS() {

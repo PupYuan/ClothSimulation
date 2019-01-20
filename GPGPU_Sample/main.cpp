@@ -1,20 +1,16 @@
 //ToDo1:先实现CPU进行物理模拟
-
-//初始化扩展
-#include <GL/glew.h>
-
-//glm数学库
-#include <glm/glm.hpp>
+#include <GL/glew.h>//初始化扩展
+#include <glm/glm.hpp>//glm数学库
 #include <glm/gtc/matrix_transform.hpp> //for matrices
 #include <glm/gtc/type_ptr.hpp>
-
-//窗口相关的库
-#include <GL/freeglut.h>
-
+#include <GL/freeglut.h>//窗口相关的库
 #include <iostream>
 #include <vector>
 using namespace std;
 using namespace glm;
+
+#include "Spring.h"
+#include "Particles.h"
 
 //窗口参数
 const int width = 1024, height = 1024;
@@ -39,34 +35,31 @@ const int SHEAR_SPRING = 1;
 const int BEND_SPRING = 2;
 int spring_count = 0;
 
-const float DEFAULT_DAMPING = -0.0125f;
+
 float	KsStruct = 50.75f, KdStruct = -0.25f;
 float	KsShear = 50.75f, KdShear = -0.25f;
 float	KsBend = 50.95f, KdBend = -0.25f;
 
-struct Spring {
-	int p1, p2;
-	float rest_length;
-	float Ks, Kd;
-	int type;
-};
-
-int numX = 63, numY = 63;
-const size_t total_points = (numX + 1)*(numY + 1);
+//struct Spring {
+//	int p1, p2;
+//	float rest_length;
+//	float Ks, Kd;
+//	int type;
+//};
+int num_particles_width = 20; // number of particles in "width" direction
+int num_particles_height = 20; // number of particles in "height" direction
+const size_t total_points = (num_particles_width + 1)*(num_particles_height + 1);
 int sizeX = 4,
 sizeY = 4;
 float hsize = sizeX / 2.0f;
+std::vector<Particle> particles; // all particles that are part of this cloth
 
 const int NUM_ITER = 1;
 int selected_index = -1;
 vector<GLushort> indices;
 vector<Spring> springs;
 
-vector<glm::vec4> X;
-vector<glm::vec4> X_last;
-vector<glm::vec3> F;
-
-glm::vec3 gravity = glm::vec3(0.0f, -0.00981f, 0.0f);
+glm::vec3 gravity = glm::vec3(0.0f, -0.981f, 0.0f);
 float mass = 1.0f;
 
 //统计帧率用的信息
@@ -107,18 +100,20 @@ void CalcFPS() {
 	glutSetWindowTitle(info);
 }
 
-void AddSpring(int a, int b, float ks, float kd, int type) {
+void AddSpring(Particle* a, Particle* b, float ks, float kd) {
 	Spring spring;
 	spring.p1 = a;
 	spring.p2 = b;
 	spring.Ks = ks;
 	spring.Kd = kd;
-	spring.type = type;
-	glm::vec3 deltaP = vec3(X[a] - X[b]);
-	spring.rest_length = sqrt(glm::dot(deltaP, deltaP));
+	glm::vec3 deltaP = vec3(a->getPos() - b->getPos());
+	spring.restDistance = sqrt(glm::dot(deltaP, deltaP));
 	springs.push_back(spring);
 }
 
+Particle* getParticle(int x, int y) { 
+	return &particles[y*num_particles_width + x]; 
+}
 void Init(GLvoid)
 {
 	glClearColor(0.2f, 0.2f, 0.4f, 0.5f);
@@ -142,31 +137,29 @@ void Init(GLvoid)
 	glEnable(GL_DEPTH_TEST);
 	int i = 0, j = 0, count = 0;
 	int l1 = 0, l2 = 0;
-	int v = numY + 1;
-	int u = numX + 1;
+	int v = num_particles_height + 1;
+	int u = num_particles_width + 1;
 
-	indices.resize(numX*numY * 2 * 3);
-
-	X.resize(total_points);
-	X_last.resize(total_points);
-	F.resize(total_points);
+	particles.resize(total_points);
+	indices.resize(num_particles_width*num_particles_height * 2 * 3);
 
 	//fill in positions
-	for (j = 0; j <= numY; j++) {
-		for (i = 0; i <= numX; i++) {
-			X[count] = glm::vec4(((float(i) / (u - 1)) * 2 - 1)* hsize, sizeX + 1, ((float(j) / (v - 1))* sizeY), 1);
-			X_last[count] = X[count];
+	for (j = 0; j <= num_particles_height; j++) {
+		for (i = 0; i <= num_particles_width; i++) {
+			//getParticle(i, j)->setPos(vec3((float(i) / (u - 1)) * 2 - 1)* hsize, sizeX + 1, ((float(j) / (v - 1))* sizeY)));
+			vec3 pos = glm::vec3(((float(i) / (u - 1)) * 2 - 1)* hsize, sizeX + 1, ((float(j) / (v - 1))* sizeY));
+			particles[count] = Particle(pos); // insert particle in column x at y'th row
 			count++;
 		}
 	}
 
 	//fill in indices
 	GLushort* id = &indices[0];
-	for (i = 0; i < numY; i++) {
-		for (j = 0; j < numX; j++) {
-			int i0 = i * (numX + 1) + j;
+	for (i = 0; i < num_particles_height; i++) {
+		for (j = 0; j < num_particles_width; j++) {
+			int i0 = i * (num_particles_width + 1) + j;
 			int i1 = i0 + 1;
-			int i2 = i0 + (numX + 1);
+			int i2 = i0 + (num_particles_width + 1);
 			int i3 = i2 + 1;
 			if ((j + i) % 2) {
 				*id++ = i0; *id++ = i2; *id++ = i1;
@@ -182,41 +175,41 @@ void Init(GLvoid)
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	//glPolygonMode(GL_BACK, GL_LINE);
 	glPointSize(5);
-
+	
 	// Setup springs
-	// Horizontal
-	for (l1 = 0; l1 < v; l1++)	// v
-		for (l2 = 0; l2 < (u - 1); l2++) {
-			AddSpring((l1 * u) + l2, (l1 * u) + l2 + 1, KsStruct, KdStruct, STRUCTURAL_SPRING);
+	// 添加Springs
+	for (int x = 0; x < num_particles_width; x++)
+	{
+		for (int y = 0; y < num_particles_height; y++)
+		{
+			// Structure Springs
+			if (x + 1 < num_particles_width)
+				AddSpring(getParticle(x, y), getParticle(x + 1, y),KsStruct,KdStruct);
+			if (y + 1 < num_particles_height)
+				AddSpring(getParticle(x, y), getParticle(x, y + 1), KsStruct,KdStruct);
+
+			//Shear Springs
+			if (y + 1 < num_particles_height && x + 1 < num_particles_width)
+				AddSpring(getParticle(x, y), getParticle(x + 1, y + 1),KsShear,KdShear);
+			if (y - 1 > 0 && x - 1 > 0)
+				AddSpring(getParticle(x, y), getParticle(x - 1, y - 1), KsShear,KdShear);
+
+			//Bending Springs
+			if (x + 2 < num_particles_width)
+				AddSpring(getParticle(x, y), getParticle(x + 2, y), KsBend,KdBend);
+			if (y + 2 < num_particles_height)
+				AddSpring(getParticle(x, y), getParticle(x, y + 2), KsBend,KdBend);
+			if (y + 2 < num_particles_height && x + 2 < num_particles_width)
+				AddSpring(getParticle(x, y), getParticle(x + 2, y + 2), KsBend,KdBend);
+			if (y - 2 > 0 && x - 2 > 0)
+				AddSpring(getParticle(x, y), getParticle(x - 2, y - 2), KsBend,KdBend);
 		}
-
-	// Vertical
-	for (l1 = 0; l1 < (u); l1++)
-		for (l2 = 0; l2 < (v - 1); l2++) {
-			AddSpring((l2 * u) + l1, ((l2 + 1) * u) + l1, KsStruct, KdStruct, STRUCTURAL_SPRING);
-		}
-
-
-	// Shearing Springs
-	for (l1 = 0; l1 < (v - 1); l1++)
-		for (l2 = 0; l2 < (u - 1); l2++) {
-			AddSpring((l1 * u) + l2, ((l1 + 1) * u) + l2 + 1, KsShear, KdShear, SHEAR_SPRING);
-			AddSpring(((l1 + 1) * u) + l2, (l1 * u) + l2 + 1, KsShear, KdShear, SHEAR_SPRING);
-		}
-
-
-	// Bend Springs
-	for (l1 = 0; l1 < (v); l1++) {
-		for (l2 = 0; l2 < (u - 2); l2++) {
-			AddSpring((l1 * u) + l2, (l1 * u) + l2 + 2, KsBend, KdBend, BEND_SPRING);
-		}
-		AddSpring((l1 * u) + (u - 3), (l1 * u) + (u - 1), KsBend, KdBend, BEND_SPRING);
 	}
-	for (l1 = 0; l1 < (u); l1++) {
-		for (l2 = 0; l2 < (v - 2); l2++) {
-			AddSpring((l2 * u) + l1, ((l2 + 2) * u) + l1, KsBend, KdBend, BEND_SPRING);
-		}
-		AddSpring(((v - 3) * u) + l1, ((v - 1) * u) + l1, KsBend, KdBend, BEND_SPRING);
+	// making the upper left most three and right most three particles unmovable
+	for (int i = 0; i < 3; i++)
+	{
+		getParticle(0 + i, 0)->makeUnmovable();
+		getParticle(num_particles_width - 1 - i, 0)->makeUnmovable();
 	}
 
 	//create a basic ellipsoid object
@@ -276,9 +269,12 @@ void RenderCPU() {
 	glBegin(GL_TRIANGLES);
 	int i;
 	for (i = 0; i<indices.size(); i += 3) {
-		glm::vec3 p1 = vec3(X[indices[i]]);
+		glm::vec3 p1 = particles[indices[i]].getPos();
+		glm::vec3 p2 = particles[indices[i+1]].getPos();
+		glm::vec3 p3 = particles[indices[i + 2]].getPos();
+		/*glm::vec3 p1 = vec3(X[indices[i]]);
 		glm::vec3 p2 = vec3(X[indices[i + 1]]);
-		glm::vec3 p3 = vec3(X[indices[i + 2]]);
+		glm::vec3 p3 = vec3(X[indices[i + 2]]);*/
 		glVertex3f(p1.x, p1.y, p1.z);
 		glVertex3f(p2.x, p2.y, p2.z);
 		glVertex3f(p3.x, p3.y, p3.z);
@@ -288,7 +284,8 @@ void RenderCPU() {
 	//draw points	
 	glBegin(GL_POINTS);
 	for (i = 0; i<total_points; i++) {
-		glm::vec3 p = vec3(X[i]);
+		//glm::vec3 p = vec3(X[i]);
+		glm::vec3 p = particles[i].getPos();
 		int is = (i == selected_index);
 		glColor3f((float)!is, (float)is, (float)is);
 		glVertex3f(p.x, p.y, p.z);
@@ -298,9 +295,6 @@ void RenderCPU() {
 void RenderGPU() {
 
 }
-
-
-
 //绘制模式
 enum Mode { CPU, GPU };
 Mode current_mode = CPU;
@@ -343,7 +337,6 @@ void OnRender() {
 
 	glutSwapBuffers();
 }
-
 inline glm::vec3 GetVerletVelocity(glm::vec3 x_i, glm::vec3 xi_last, float dt) {
 	return  (x_i - xi_last) / dt;
 }
@@ -351,21 +344,20 @@ void ComputeForces(float dt) {
 	size_t i = 0;
 
 	for (i = 0; i<total_points; i++) {
-		F[i] = glm::vec3(0);
-		glm::vec3 V = GetVerletVelocity(vec3(X[i]), vec3(X_last[i]), dt);
+		glm::vec3 V = GetVerletVelocity(particles[i].getPos(), particles[i].getLastPos(), dt);
 		//add gravity force
-		if (i != 0 && i != (numX))
-			F[i] += gravity * mass;
+		if (i != 0 && i != (num_particles_width))
+			particles[i].addForce(gravity);
 		//add force due to damping of velocity
-		F[i] += DEFAULT_DAMPING * V;
+		particles[i].addForce(DEFAULT_DAMPING * V);
 	}
 
 
 	for (i = 0; i<springs.size(); i++) {
-		glm::vec3 p1 = vec3(X[springs[i].p1]);
-		glm::vec3 p1Last = vec3(X_last[springs[i].p1]);
-		glm::vec3 p2 = vec3(X[springs[i].p2]);
-		glm::vec3 p2Last = vec3(X_last[springs[i].p2]);
+		glm::vec3 p1 = vec3(springs[i].p1->getPos());
+		glm::vec3 p1Last = vec3(springs[i].p1->getLastPos());
+		glm::vec3 p2 = vec3(springs[i].p2->getPos());
+		glm::vec3 p2Last = vec3(springs[i].p2->getLastPos());
 
 		glm::vec3 v1 = GetVerletVelocity(p1, p1Last, dt);
 		glm::vec3 v2 = GetVerletVelocity(p2, p2Last, dt);
@@ -374,32 +366,21 @@ void ComputeForces(float dt) {
 		glm::vec3 deltaV = v1 - v2;
 		float dist = glm::length(deltaP);
 
-		float leftTerm = -springs[i].Ks * (dist - springs[i].rest_length);
+		float leftTerm = -springs[i].Ks * (dist - springs[i].restDistance);
 		float rightTerm = springs[i].Kd * (glm::dot(deltaV, deltaP) / dist);
 		glm::vec3 springForce = (leftTerm + rightTerm)*glm::normalize(deltaP);
 
-		if (springs[i].p1 != 0 && springs[i].p1 != numX)
-			F[springs[i].p1] += springForce;
-		if (springs[i].p2 != 0 && springs[i].p2 != numX)
-			F[springs[i].p2] -= springForce;
+		springs[i].p1->addForce(springForce);
+		springs[i].p2->addForce(-springForce);
 	}
 }
-
 void IntegrateVerlet(float deltaTime) {
 	float deltaTime2 = (deltaTime*deltaTime);
 	size_t i = 0;
 
 	float inv_mass = 1.0f / mass;
 	for (i = 0; i<total_points; i++) {
-		glm::vec4 buffer = X[i];
-
-		X[i] = X[i] + (X[i] - X_last[i]) + deltaTime2 * glm::vec4(F[i], 0)*inv_mass;
-
-		X_last[i] = buffer;
-
-		if (X[i].y <0) {
-			X[i].y = 0;
-		}
+		particles[i].timeStep(deltaTime);
 	}
 }
 void StepPhysics(float dt) {
