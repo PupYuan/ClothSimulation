@@ -18,6 +18,4 @@ void Spring::satisfySpring(float dt) {
 
 	p1->addForce(springForce);
 	p2->addForce(-springForce);
-
-
 }
