@@ -146,7 +146,6 @@ void Init(GLvoid)
 	//fill in positions
 	for (j = 0; j <= num_particles_height; j++) {
 		for (i = 0; i <= num_particles_width; i++) {
-			//getParticle(i, j)->setPos(vec3((float(i) / (u - 1)) * 2 - 1)* hsize, sizeX + 1, ((float(j) / (v - 1))* sizeY)));
 			vec3 pos = glm::vec3(((float(i) / (u - 1)) * 2 - 1)* hsize, sizeX + 1, ((float(j) / (v - 1))* sizeY));
 			particles[count] = Particle(pos); // insert particle in column x at y'th row
 			count++;
@@ -178,30 +177,30 @@ void Init(GLvoid)
 	
 	// Setup springs
 	// Ìí¼ÓSprings
-	for (int x = 0; x < num_particles_width; x++)
+	for (int x = 0; x <= num_particles_width; x++)
 	{
-		for (int y = 0; y < num_particles_height; y++)
+		for (int y = 0; y <= num_particles_height; y++)
 		{
 			// Structure Springs
-			if (x + 1 < num_particles_width)
+			if (x + 1 <= num_particles_width+1)
 				AddSpring(getParticle(x, y), getParticle(x + 1, y),KsStruct,KdStruct);
-			if (y + 1 < num_particles_height)
+			if (y + 1 <= num_particles_height+1)
 				AddSpring(getParticle(x, y), getParticle(x, y + 1), KsStruct,KdStruct);
 
 			//Shear Springs
-			if (y + 1 < num_particles_height && x + 1 < num_particles_width)
+			if (y + 1 <= num_particles_height && x + 1 <= num_particles_width)
 				AddSpring(getParticle(x, y), getParticle(x + 1, y + 1),KsShear,KdShear);
-			if (y - 1 > 0 && x - 1 > 0)
+			if (y - 1 >= 0 && x - 1 >= 0)
 				AddSpring(getParticle(x, y), getParticle(x - 1, y - 1), KsShear,KdShear);
 
 			//Bending Springs
-			if (x + 2 < num_particles_width)
+			if (x + 2 <= num_particles_width)
 				AddSpring(getParticle(x, y), getParticle(x + 2, y), KsBend,KdBend);
-			if (y + 2 < num_particles_height)
+			if (y + 2 <= num_particles_height)
 				AddSpring(getParticle(x, y), getParticle(x, y + 2), KsBend,KdBend);
-			if (y + 2 < num_particles_height && x + 2 < num_particles_width)
+			if (y + 2 <= num_particles_height && x + 2 <= num_particles_width)
 				AddSpring(getParticle(x, y), getParticle(x + 2, y + 2), KsBend,KdBend);
-			if (y - 2 > 0 && x - 2 > 0)
+			if (y - 2 >= 0 && x - 2 >= 0)
 				AddSpring(getParticle(x, y), getParticle(x - 2, y - 2), KsBend,KdBend);
 		}
 	}
@@ -266,8 +265,9 @@ void DrawGrid()
 void RenderCPU() {
 	//draw polygons
 	glColor3f(1, 1, 1);
-	glBegin(GL_TRIANGLES);
 	int i;
+
+	glBegin(GL_TRIANGLES);
 	for (i = 0; i<indices.size(); i += 3) {
 		glm::vec3 p1 = particles[indices[i]].getPos();
 		glm::vec3 p2 = particles[indices[i+1]].getPos();
