@@ -8,8 +8,10 @@ void SphereCollider::ClothCollisionSimulate(Cloth* c)
 	for (particle = particles->begin(); particle != particles->end(); particle++)
 	{
 		vec3 v = (*particle).getPos() - center;
-		if (v.length() < radius) {
-			vec3 moveOffset = normalize(v) * (radius - v.length());
+		//int temp = v.length();
+		//v.length()有问题。v.length返回的是向量的纬度
+		if (length(v) < radius) {
+			vec3 moveOffset = normalize(v) * (radius - length(v));
 			particle->offsetPos(moveOffset);
 		}
 	}
