@@ -56,20 +56,20 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 				AddSpring(getParticle(x, y), getParticle(x, y + 1), KsStruct, KdStruct);
 
 			//Shear Springs
-			if (y + 1 <= num_particles_height && x + 1 <= num_particles_width)
+			if (y + 1 <= num_particles_height && x + 1 <= num_particles_width) {
 				AddSpring(getParticle(x, y), getParticle(x + 1, y + 1), KsShear, KdShear);
-			if (y - 1 >= 0 && x - 1 >= 0)
-				AddSpring(getParticle(x, y), getParticle(x - 1, y - 1), KsShear, KdShear);
-
+				AddSpring(getParticle(x + 1, y), getParticle(x, y + 1), KsShear, KdShear);
+			}
+		
 			//Bending Springs
 			if (x + 2 <= num_particles_width)
 				AddSpring(getParticle(x, y), getParticle(x + 2, y), KsBend, KdBend);
 			if (y + 2 <= num_particles_height)
 				AddSpring(getParticle(x, y), getParticle(x, y + 2), KsBend, KdBend);
-			if (y + 2 <= num_particles_height && x + 2 <= num_particles_width)
+			if (y + 2 <= num_particles_height && x + 2 <= num_particles_width) {
 				AddSpring(getParticle(x, y), getParticle(x + 2, y + 2), KsBend, KdBend);
-			if (y - 2 >= 0 && x - 2 >= 0)
-				AddSpring(getParticle(x, y), getParticle(x - 2, y - 2), KsBend, KdBend);
+				AddSpring(getParticle(x+2, y), getParticle(x, y + 2), KsBend, KdBend);
+			}
 		}
 	}
 	// making the upper left most three and right most three particles unmovable
