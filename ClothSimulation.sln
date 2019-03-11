@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Fixed pipeline", "GPGPU_Sam
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core-profile", "Core-profile\Core-profile.vcxproj", "{FBD43004-C29B-4493-B3DF-0B0C01FE3ACF}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ResourceManager", "ResourceManager\ResourceManager.vcxproj", "{A7B3E5EA-3007-497C-83AD-40BFA64E84D5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{FBD43004-C29B-4493-B3DF-0B0C01FE3ACF}.Release|x64.Build.0 = Release|x64
 		{FBD43004-C29B-4493-B3DF-0B0C01FE3ACF}.Release|x86.ActiveCfg = Release|Win32
 		{FBD43004-C29B-4493-B3DF-0B0C01FE3ACF}.Release|x86.Build.0 = Release|Win32
+		{A7B3E5EA-3007-497C-83AD-40BFA64E84D5}.Debug|x64.ActiveCfg = Debug|x64
+		{A7B3E5EA-3007-497C-83AD-40BFA64E84D5}.Debug|x64.Build.0 = Debug|x64
+		{A7B3E5EA-3007-497C-83AD-40BFA64E84D5}.Debug|x86.ActiveCfg = Debug|Win32
+		{A7B3E5EA-3007-497C-83AD-40BFA64E84D5}.Debug|x86.Build.0 = Debug|Win32
+		{A7B3E5EA-3007-497C-83AD-40BFA64E84D5}.Release|x64.ActiveCfg = Release|x64
+		{A7B3E5EA-3007-497C-83AD-40BFA64E84D5}.Release|x64.Build.0 = Release|x64
+		{A7B3E5EA-3007-497C-83AD-40BFA64E84D5}.Release|x86.ActiveCfg = Release|Win32
+		{A7B3E5EA-3007-497C-83AD-40BFA64E84D5}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
