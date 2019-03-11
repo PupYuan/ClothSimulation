@@ -29,6 +29,12 @@
 *.a
 *.lib
 
+*/x64/Debug
+*/Debug
+
+*/x64/Release
+*/Release
+
 # Executables
 *.exe
 *.out

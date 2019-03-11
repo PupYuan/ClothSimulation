@@ -9,6 +9,9 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link />
+    <Link>
+      <AdditionalDependencies>assimp-vc140-mt.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup />
 </Project>
