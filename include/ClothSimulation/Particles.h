@@ -16,6 +16,9 @@ private:
 	float mass;
 	bool movable;
 public:
+	float * x;
+	float * y;
+	float * z;
 	Particle(vec3 pos) : pos(pos), old_pos(pos), acceleration(vec3(0, 0, 0)), mass(1), movable(true), accumulated_normal(vec3(0, 0, 0)) {}
 	Particle() {}
 	vec3& getPos() { return pos; }
@@ -44,9 +47,13 @@ public:
 			old_pos = temp;
 			acceleration = vec3(0, 0, 0); // acceleration is reset since it HAS been translated into a change in position (and implicitely into velocity)
 
-			if (pos.y <0) {
-				pos.y = 0;
+			if (pos.y <-10.0f) {
+				pos.y = -10.0f;
 			}
+			//然后把数据传递给之前的顶点数据
+			*x = pos.x;
+			*y = pos.y;
+			*z = pos.z;
 		}
 	}
 	void makeUnmovable() { movable = false; }
