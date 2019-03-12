@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClInclude Include="..\include\ClothSimulation\Particles.h" />
     <ClInclude Include="Cloth.h" />
+    <ClInclude Include="SceneManager.h" />
     <ClInclude Include="WindowsManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

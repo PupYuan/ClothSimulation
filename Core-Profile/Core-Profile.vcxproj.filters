@@ -49,5 +49,8 @@
     <ClInclude Include="WindowsManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
