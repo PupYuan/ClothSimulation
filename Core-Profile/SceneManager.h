@@ -1,7 +1,6 @@
 #pragma once
 #include <learnopengl/shader.h>
 #include <learnopengl/model.h>
-
 Shader * ourShader;
 Model *ourModel;
 Cloth * cloth;
@@ -61,7 +60,10 @@ void SceneInit() {
 
 	cloth = new Cloth(14, 10, 55, 45);
 }
+
 float ball_time = 0;
+vec3 ball_pos;
+
 void RenderScene() {
 	// don't forget to enable shader before setting uniforms
 	ourShader->use();
@@ -88,9 +90,8 @@ void RenderScene() {
 
 	// render the loaded model
 	glm::mat4 model;
-	ball_time++;
-	model = glm::translate(model, glm::vec3(5.0f,-1.75f , sin(ball_time / 50.0) * 7)); // translate it down so it's at the center of the scene
-	model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));	// it's a bit too big for our scene, so scale it down
+	model = glm::translate(model, ball_pos); // translate it down so it's at the center of the scene
+	//model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
 	ourShader->setMat4("model", model);
 	ourModel->Draw(*ourShader);
 

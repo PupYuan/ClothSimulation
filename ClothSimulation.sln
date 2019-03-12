@@ -5,8 +5,6 @@ VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core-Profile", "Core-Profile\Core-Profile.vcxproj", "{D1002D44-B6A6-4D31-AB35-7E791AC71C59}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GPGPU Sample", "GPGPU_Sample\GPGPU Sample.vcxproj", "{8F17E9FC-45F5-43CF-B9A2-F1DCB0753FB7}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -23,14 +21,6 @@ Global
 		{D1002D44-B6A6-4D31-AB35-7E791AC71C59}.Release|x64.Build.0 = Release|x64
 		{D1002D44-B6A6-4D31-AB35-7E791AC71C59}.Release|x86.ActiveCfg = Release|Win32
 		{D1002D44-B6A6-4D31-AB35-7E791AC71C59}.Release|x86.Build.0 = Release|Win32
-		{8F17E9FC-45F5-43CF-B9A2-F1DCB0753FB7}.Debug|x64.ActiveCfg = Debug|x64
-		{8F17E9FC-45F5-43CF-B9A2-F1DCB0753FB7}.Debug|x64.Build.0 = Debug|x64
-		{8F17E9FC-45F5-43CF-B9A2-F1DCB0753FB7}.Debug|x86.ActiveCfg = Debug|Win32
-		{8F17E9FC-45F5-43CF-B9A2-F1DCB0753FB7}.Debug|x86.Build.0 = Debug|Win32
-		{8F17E9FC-45F5-43CF-B9A2-F1DCB0753FB7}.Release|x64.ActiveCfg = Release|x64
-		{8F17E9FC-45F5-43CF-B9A2-F1DCB0753FB7}.Release|x64.Build.0 = Release|x64
-		{8F17E9FC-45F5-43CF-B9A2-F1DCB0753FB7}.Release|x86.ActiveCfg = Release|Win32
-		{8F17E9FC-45F5-43CF-B9A2-F1DCB0753FB7}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

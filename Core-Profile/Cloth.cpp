@@ -1,4 +1,8 @@
 #include "Cloth.h"
+#include "Collider.h"
+float	KsStruct = 50.75f, KdStruct = -0.25f;
+float	KsShear = 50.75f, KdShear = -0.25f;
+float	KsBend = 50.95f, KdBend = -0.25f;
 
 /* This is a important constructor for the entire system of particles and constraints*/
 Cloth::Cloth(float width, float height, int num_particles_width, int num_particles_height) : num_particles_width(num_particles_width), num_particles_height(num_particles_height)
@@ -57,6 +61,8 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 		getParticle(0 + i, 0)->offsetPos(vec3(-0.5, 0.0, 0.0)); // moving the particle a bit towards the center, to make it hang more natural - because I like it ;)
 		getParticle(num_particles_width - 1 - i, 0)->makeUnmovable();
 	}
+
+
 	//初始化gl缓存对象
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
@@ -79,6 +85,37 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 	// note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+
+	//Constraints
+		// Setup springs
+	// 添加Springs
+	for (int x = 0; x < num_particles_width; x++)
+	{
+		for (int y = 0; y < num_particles_height; y++)
+		{
+			// Structure Springs
+			if (x + 1 < num_particles_width)
+				AddSpring(getParticle(x, y), getParticle(x + 1, y), KsStruct, KdStruct);
+			if (y + 1 < num_particles_height)
+				AddSpring(getParticle(x, y), getParticle(x, y + 1), KsStruct, KdStruct);
+
+			//Shear Springs
+			if (y + 1 < num_particles_height && x + 1 < num_particles_width) {
+				AddSpring(getParticle(x, y), getParticle(x + 1, y + 1), KsShear, KdShear);
+				AddSpring(getParticle(x + 1, y), getParticle(x, y + 1), KsShear, KdShear);
+			}
+
+			//Bending Springs
+			if (x + 2 < num_particles_width)
+				AddSpring(getParticle(x, y), getParticle(x + 2, y), KsBend, KdBend);
+			if (y + 2 < num_particles_height)
+				AddSpring(getParticle(x, y), getParticle(x, y + 2), KsBend, KdBend);
+			if (y + 2 < num_particles_height && x + 2 < num_particles_width) {
+				AddSpring(getParticle(x, y), getParticle(x + 2, y + 2), KsBend, KdBend);
+				AddSpring(getParticle(x + 2, y), getParticle(x, y + 2), KsBend, KdBend);
+			}
+		}
+	}
 }
 
 void Cloth::drawShaded()
@@ -136,8 +173,30 @@ void Cloth::timeStep(float dt) {
 		(*particle).addForce(DEFAULT_DAMPING * V);
 	}
 
+	std::vector<Spring>::iterator Spring;
+	for (Spring = Springs.begin(); Spring != Springs.end(); Spring++)
+	{
+		(*Spring).satisfySpring(dt); // satisfy Spring.
+	}
+
 	for (particle = particles.begin(); particle != particles.end(); particle++)
 	{
 		(*particle).timeStep(dt);
 	}
+}
+
+void Cloth::AddSpring(Particle* a, Particle* b, float ks, float kd) {
+	Spring spring;
+	spring.p1 = a;
+	spring.p2 = b;
+	spring.Ks = ks;
+	spring.Kd = kd;
+	glm::vec3 deltaP = vec3(a->getPos() - b->getPos());
+	spring.restDistance = sqrt(glm::dot(deltaP, deltaP));
+	Springs.push_back(spring);
+}
+
+void Cloth::CollisionDetection(Collider * collider)
+{
+	collider->ClothCollisionSimulate(this);
 }

@@ -60,9 +60,15 @@ public:
 	void offsetPos(const vec3 v) 
 	{ 
 		if (movable) pos += v;
+		*x = pos.x;
+		*y = pos.y;
+		*z = pos.z;
 	}
 	void setPos(const vec3 p)
 	{
 		if (movable) pos = p;
+		*x = pos.x;
+		*y = pos.y;
+		*z = pos.z;
 	}
 };

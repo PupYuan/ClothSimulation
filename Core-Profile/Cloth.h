@@ -8,7 +8,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
+#include "Spring.h"
+class Collider;
 class Cloth
 {
 private:
@@ -17,7 +18,7 @@ private:
 	// total number of particles is num_particles_width*num_particles_height
 
 	std::vector<Particle> particles; // all particles that are part of this cloth
-
+	std::vector<Spring> Springs; // alle Springs between particles as part of this cloth
 	Particle* getParticle(int x, int y) { return &particles[x*num_particles_height + y]; }
 	//在内存中一份顶点数据
 	std::vector<float>vertices;
@@ -46,7 +47,13 @@ public:
 		return cross(v1, v2);
 		
 	}
+	std::vector<Particle>& getParticles() {
+		return particles;
+	}
 	void drawShaded();
 	void addForce(const vec3 direction);
 	void timeStep(float dt);
+	void AddSpring(Particle* a, Particle* b, float ks, float kd);
+	void CollisionDetection(Collider * collider);
+
 };
