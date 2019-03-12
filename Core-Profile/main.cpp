@@ -12,6 +12,7 @@
 #include <ClothSimulation/Particles.h>
 #include "Cloth.h"
 #include <iostream>
+#include "WindowsManagers.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -28,10 +29,6 @@ Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
-
-// timing
-float deltaTime = 0.0f;
-float lastFrame = 0.0f;
 
 
 GLFWwindow * window;
@@ -92,7 +89,7 @@ int init() {
 
 														 // glfw window creation
 														 // --------------------
-	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Core-Profile-ClothSimulation", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -137,13 +134,8 @@ int init() {
 // lighting
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
-void draw() {
-	// per-frame time logic
-	// --------------------
-	float currentFrame = glfwGetTime();
-	deltaTime = currentFrame - lastFrame;
-	lastFrame = currentFrame;
-
+void render() {
+	CalcFPS(window);
 	// render
 	// ------
 	glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
@@ -268,7 +260,7 @@ int main()
 
 		// draw
 		// -----
-		draw();
+		render();
 	}
 	// glfw: terminate, clearing all previously allocated GLFW resources.
 	// ------------------------------------------------------------------
