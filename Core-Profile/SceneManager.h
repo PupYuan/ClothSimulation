@@ -61,7 +61,7 @@ void SceneInit() {
 
 	cloth = new Cloth(14, 10, 55, 45);
 }
-
+float ball_time = 0;
 void RenderScene() {
 	// don't forget to enable shader before setting uniforms
 	ourShader->use();
@@ -88,8 +88,9 @@ void RenderScene() {
 
 	// render the loaded model
 	glm::mat4 model;
-	model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
-	model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+	ball_time++;
+	model = glm::translate(model, glm::vec3(5.0f,-1.75f , sin(ball_time / 50.0) * 7)); // translate it down so it's at the center of the scene
+	model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));	// it's a bit too big for our scene, so scale it down
 	ourShader->setMat4("model", model);
 	ourModel->Draw(*ourShader);
 
@@ -97,7 +98,7 @@ void RenderScene() {
 	ClothShader->setMat4("projection", projection);
 	ClothShader->setMat4("view", view);
 	glm::mat4 model1;
-	model1 = glm::translate(model, glm::vec3(-6.0f, 2.0f, -5.0f)); // translate it down so it's at the center of the scene
+	model1 = glm::translate(model1, glm::vec3(-6.0f, 2.0f, -5.0f)); // translate it down so it's at the center of the scene
 	ClothShader->setMat4("model", model1);
 	ClothShader->setVec3("light.position", lightPos);
 	ClothShader->setVec3("viewPos", camera.Position);

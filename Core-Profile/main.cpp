@@ -10,11 +10,6 @@
 #include "WindowsManager.h"
 #include"SceneManager.h"
 
-
-
-
-
-
 int Init() {
 	if (WindowsInit() == -1) {
 		return -1;
