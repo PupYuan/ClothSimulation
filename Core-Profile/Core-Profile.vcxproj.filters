@@ -46,7 +46,7 @@
     <ClInclude Include="Cloth.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="WindowsManagers.h">
+    <ClInclude Include="WindowsManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
