@@ -40,11 +40,17 @@ public:
 				vec3 pos = vec3(width * (x / (float)num_particles_width),
 					-height * (y / (float)num_particles_height),
 					0);
+				
 				particles[y*num_particles_width + x] = Particle(pos); // insert particle in column x at y'th row
 				//同样保存一份在内存中：
+				//顶点位置
 				vertices.push_back(pos.x);
 				vertices.push_back(pos.y);
 				vertices.push_back(pos.z);
+				//顶点法线
+				vertices.push_back(0.0f);
+				vertices.push_back(0.0f);
+				vertices.push_back(1.0f);
 			}
 		}
 		//填充索引数据到indices中
@@ -83,8 +89,10 @@ public:
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*indices.size(), &indices[0], GL_STATIC_DRAW);
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
 
 		// note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
