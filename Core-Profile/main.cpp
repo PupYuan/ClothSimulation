@@ -5,11 +5,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <ClothSimulation/Particles.h>
-#include "Cloth.h"
+#include <ClothSimulation\Cloth.h>
 #include <iostream>
-#include "WindowsManager.h"
-#include "Physics.h"
-#include "RenderSystem.h"
+#include <ClothSimulation\WindowsManager.h>
+#include <ClothSimulation\Physics.h>
+#include <ClothSimulation\RenderSystem.h>
 
 
 int Init() {

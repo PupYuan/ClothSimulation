@@ -1,4 +1,5 @@
 #pragma once
+#include <ClothSimulation\Particles.h>
 #include <math.h>
 #include <vector>
 #include <iostream>
@@ -7,8 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <ClothSimulation\Particles.h>
-#include <ClothSimulation\Spring.h>
+#include "Spring.h"
 class Collider;
 class Cloth
 {

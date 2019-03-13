@@ -1,4 +1,4 @@
-#include "Spring.h"
+#include <ClothSimulation\Spring.h>
 
 //#define Ks 80.0f
 //#define Kd -2.0f

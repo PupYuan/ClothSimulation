@@ -1,5 +1,5 @@
 #pragma once
-#include <ClothSimulation\SceneManager.h>
+#include "SceneManager.h"
 
 class RenderSystem 
 {

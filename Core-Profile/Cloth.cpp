@@ -1,5 +1,5 @@
-#include "Cloth.h"
-#include "Collider.h"
+#include <ClothSimulation\Cloth.h>
+#include <ClothSimulation\Collider.h>
 float	KsStruct = 50.0f, KdStruct = -0.25f;
 float	KsShear = 50.0f, KdShear = -0.25f;
 float	KsBend = 50.0f, KdBend = -0.25f;

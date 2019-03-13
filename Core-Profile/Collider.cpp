@@ -1,4 +1,4 @@
-#include "Collider.h"
+#include <ClothSimulation\Collider.h>
 
 void SphereCollider::ClothCollisionSimulate(Cloth* c)
 {

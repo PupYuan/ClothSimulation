@@ -1,7 +1,7 @@
 #pragma once
 #include <learnopengl/shader.h>
 #include <learnopengl/model.h>
-#include "Collider.h"
+#include <ClothSimulation\Collider.h>
 Shader * ourShader;
 Model *ourModel;
 Cloth * cloth;

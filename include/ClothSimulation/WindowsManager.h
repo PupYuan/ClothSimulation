@@ -56,7 +56,6 @@ void CalcFPS(GLFWwindow * windows) {
 	glfwSetWindowTitle(windows, info);
 }
 
-
 int WindowsInit() {
 	// glfw: initialize and configure
 	// ------------------------------
