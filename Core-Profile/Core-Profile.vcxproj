@@ -135,6 +135,7 @@
     <ClInclude Include="..\include\ClothSimulation\Particles.h" />
     <ClInclude Include="..\include\ClothSimulation\Physics.h" />
     <ClInclude Include="..\include\ClothSimulation\RenderSystem.h" />
+    <ClInclude Include="..\include\ClothSimulation\RenderTarget.h" />
     <ClInclude Include="..\include\ClothSimulation\ResourcesManager.h" />
     <ClInclude Include="..\include\ClothSimulation\SceneManager.h" />
     <ClInclude Include="..\include\ClothSimulation\Spring.h" />

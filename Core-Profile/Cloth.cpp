@@ -3,12 +3,12 @@
 float	KsStruct = 50.0f, KdStruct = -0.25f;
 float	KsShear = 50.0f, KdShear = -0.25f;
 float	KsBend = 50.0f, KdBend = -0.25f;
-
+int vertice_data_length = 8;
 /* This is a important constructor for the entire system of particles and constraints*/
 Cloth::Cloth(float width, float height, int num_particles_width, int num_particles_height) : num_particles_width(num_particles_width), num_particles_height(num_particles_height)
 {
 	particles.resize(num_particles_width*num_particles_height); //I am essentially using this vector as an array with room for num_particles_width*num_particles_height particles
-	vertices.resize(num_particles_width*num_particles_height * 6);
+	vertices.resize(num_particles_width*num_particles_height * vertice_data_length);
 	// creating particles in a grid of particles from (0,0,0) to (width,-height,0)
 	for (int y = 0; y < num_particles_height; y++)
 	{
@@ -23,24 +23,40 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 			Particle *particle = &particles[y*num_particles_width + x];
 			//同样保存一份在内存中：
 			//顶点位置,并且传递地址给particle
-			//
-			vertices[6*(y*num_particles_width + x)] = pos.x;
-			particle->x = &vertices[6 * (y*num_particles_width + x)];
+			vertices[vertice_data_length*(y*num_particles_width + x)] = pos.x;
+			particle->x = &vertices[vertice_data_length * (y*num_particles_width + x)];
 
-			vertices[6 * (y*num_particles_width + x)+1] = pos.y;
-			particle->y = &vertices[6 * (y*num_particles_width + x) + 1];
+			vertices[vertice_data_length * (y*num_particles_width + x)+1] = pos.y;
+			particle->y = &vertices[vertice_data_length * (y*num_particles_width + x) + 1];
 
-			vertices[6 * (y*num_particles_width + x) + 2] = pos.z;
-			particle->z = &vertices[6 * (y*num_particles_width + x) + 2];
-			//顶点法线
-			vertices[6 * (y*num_particles_width + x) + 3] = 0.0f;
-			particle->normal_x = &vertices[6 * (y*num_particles_width + x) + 3];
+			vertices[vertice_data_length * (y*num_particles_width + x) + 2] = pos.z;
+			particle->z = &vertices[vertice_data_length * (y*num_particles_width + x) + 2];
+			//顶点法线，并且传递地址给particle
+			vertices[vertice_data_length * (y*num_particles_width + x) + 3] = 0.0f;
+			particle->normal_x = &vertices[vertice_data_length * (y*num_particles_width + x) + 3];
 
-			vertices[6 * (y*num_particles_width + x) + 4] = 0.0f;
-			particle->normal_y = &vertices[6 * (y*num_particles_width + x) + 4];
+			vertices[vertice_data_length * (y*num_particles_width + x) + 4] = 0.0f;
+			particle->normal_y = &vertices[vertice_data_length * (y*num_particles_width + x) + 4];
 
-			vertices[6 * (y*num_particles_width + x) + 5] = 1.0f;
-			particle->normal_z = &vertices[6 * (y*num_particles_width + x) + 5];
+			vertices[vertice_data_length * (y*num_particles_width + x) + 5] = 1.0f;
+			particle->normal_z = &vertices[vertice_data_length * (y*num_particles_width + x) + 5];
+			//纹理坐标
+			//x
+			float texture_val_x;
+			if(x%2==0)
+				texture_val_x = 0.0f;//左
+			else 
+				texture_val_x = 1.0f;//右边
+			vertices[vertice_data_length * (y*num_particles_width + x) + 6] = texture_val_x;
+			//y
+			float texture_val_y;
+			if (y % 2 == 0)
+				texture_val_y = 1.0f;//上
+			else
+				texture_val_y = 0.0f;//左上
+			vertices[vertice_data_length * (y*num_particles_width + x) + 7] = texture_val_y;
+			
+
 		}
 	}
 	//填充索引数据到indices中
@@ -83,10 +99,12 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*indices.size(), &indices[0], GL_DYNAMIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vertice_data_length * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, vertice_data_length * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, vertice_data_length * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
 
 	// note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
 	glBindBuffer(GL_ARRAY_BUFFER, 0);

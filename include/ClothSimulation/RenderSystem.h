@@ -1,5 +1,6 @@
 #pragma once
 #include "SceneManager.h"
+#include "RenderTarget.h"
 
 class RenderSystem 
 {
@@ -9,6 +10,7 @@ public:
 	static void Render();
 	static bool PolygonMode;
 	static void SwitchPolygonMode();
+	static RenderTarget renderTarget;
 private:
 	static RenderSystem* instance;
 	//RenderSystem() {
