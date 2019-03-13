@@ -58,7 +58,7 @@ void SceneInit() {
 	// -----------
 	ourModel = new Model("./Model/Sphere-Bot_Basic/Armature_001-(FBX 7.4 binary mit Animation).FBX");
 
-	cloth = new Cloth(14, 10, 55, 45);
+	cloth = new Cloth(4, 4, 20, 20);
 }
 
 float ball_time = 0;

@@ -20,8 +20,8 @@ int Init() {
 	// configure global opengl state
 	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
-	ball_pos = vec3(5.0f, -5.0f, cos(ball_time / 50.0) * 7);
-	ball_collider = new SphereCollider(ball_pos,2.0f);
+	ball_pos = vec3(2.0f, -2.0f, cos(ball_time / 50.0) *2.0f);
+	ball_collider = new SphereCollider(ball_pos,1.2f);
 	SceneInit();
 	// draw in wireframe
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -29,7 +29,7 @@ int Init() {
 
 void Simulation(float dt) {
 	ball_time++;
-	ball_pos.z = cos(ball_time / 50.0) * 7;
+	ball_pos.z = cos(ball_time / 50.0) * 2.0f;
 	ball_collider->setPos(ball_pos);
 
 	cloth->addForce(gravity);
