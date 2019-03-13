@@ -99,7 +99,7 @@ void RenderScene() {
 	ClothShader->setMat4("projection", projection);
 	ClothShader->setMat4("view", view);
 	glm::mat4 model1;
-	model1 = glm::translate(model1, glm::vec3(-6.0f, 2.0f, -5.0f)); // translate it down so it's at the center of the scene
+	//model1 = glm::translate(model1, glm::vec3(-6.0f, 2.0f, -5.0f)); // translate it down so it's at the center of the scene
 	ClothShader->setMat4("model", model1);
 	ClothShader->setVec3("light.position", lightPos);
 	ClothShader->setVec3("viewPos", camera.Position);

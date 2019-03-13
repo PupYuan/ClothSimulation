@@ -10,45 +10,45 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 	particles.resize(num_particles_width*num_particles_height); //I am essentially using this vector as an array with room for num_particles_width*num_particles_height particles
 	vertices.resize(num_particles_width*num_particles_height * 6);
 	// creating particles in a grid of particles from (0,0,0) to (width,-height,0)
-	for (int x = 0; x < num_particles_width; x++)
+	for (int y = 0; y < num_particles_height; y++)
 	{
-		for (int y = 0; y < num_particles_height; y++)
+		for (int x = 0; x < num_particles_width; x++)
 		{
 			vec3 pos = vec3(width * (x / (float)num_particles_width),
 				-height * (y / (float)num_particles_height),
 				0);
 
-			particles[x*num_particles_height + y] = Particle(pos); // insert particle in column x at y'th row
-			Particle *particle = &particles[x*num_particles_height + y];
+			particles[y*num_particles_width + x] = Particle(pos); // insert particle in column x at y'th row
+			Particle *particle = &particles[y*num_particles_width + x];
 			//同样保存一份在内存中：
 			//顶点位置,并且传递地址给particle
 			//
-			vertices[6*(x*num_particles_height + y)] = pos.x;
-			particle->x = &vertices[6 * (x*num_particles_height+y)];
+			vertices[6*(y*num_particles_width + x)] = pos.x;
+			particle->x = &vertices[6 * (y*num_particles_width + x)];
 
-			vertices[6 * (x*num_particles_height+y)+1] = pos.y;
-			particle->y = &vertices[6 * (x*num_particles_height+y) + 1];
+			vertices[6 * (y*num_particles_width + x)+1] = pos.y;
+			particle->y = &vertices[6 * (y*num_particles_width + x) + 1];
 
-			vertices[6 * (x*num_particles_height+y) + 2] = pos.z;
-			particle->z = &vertices[6 * (x*num_particles_height+y) + 2];
+			vertices[6 * (y*num_particles_width + x) + 2] = pos.z;
+			particle->z = &vertices[6 * (y*num_particles_width + x) + 2];
 			//顶点法线
-			vertices[6 * (x*num_particles_height+y) + 3] = 0.0f;
-			vertices[6 * (x*num_particles_height+y) + 4] = 0.0f;
-			vertices[6 * (x*num_particles_height+y) + 5] = 1.0f;
+			vertices[6 * (y*num_particles_width + x) + 3] = 0.0f;
+			vertices[6 * (y*num_particles_width + x) + 4] = 0.0f;
+			vertices[6 * (y*num_particles_width + x) + 5] = 1.0f;
 		}
 	}
 	//填充索引数据到indices中
-	for (int x = 0; x < num_particles_width - 1; x++)
+	for (int y = 0; y < num_particles_height - 1; y++)
 	{
-		for (int y = 0; y < num_particles_height - 1; y++)
+		for (int x = 0; x < num_particles_width - 1; x++)
 		{
-			indices.push_back((x)*num_particles_height + y + 1);
-			indices.push_back((x + 1)*num_particles_height + y + 1);
-			indices.push_back((x)*num_particles_height + y);
+			indices.push_back((y)*num_particles_width + x + 1);
+			indices.push_back((y + 1)*num_particles_width + x + 1);
+			indices.push_back((y)*num_particles_width + x);
 
-			indices.push_back((x + 1)*num_particles_height + y + 1);
-			indices.push_back((x + 1)*num_particles_height + y);
-			indices.push_back((x)*num_particles_height + y);
+			indices.push_back((y + 1)*num_particles_width + x + 1);
+			indices.push_back((y + 1)*num_particles_width + x);
+			indices.push_back((y)*num_particles_width + x);
 		}
 	}
 

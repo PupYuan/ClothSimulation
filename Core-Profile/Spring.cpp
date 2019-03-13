@@ -1,6 +1,6 @@
 #include "Spring.h"
 
-#define Ks 90.0f
+#define Ks 100.0f
 #define Kd -2.0f
 //Spring Force
 void Spring::satisfySpring(float dt) {

@@ -19,7 +19,7 @@ private:
 
 	std::vector<Particle> particles; // all particles that are part of this cloth
 	std::vector<Spring> Springs; // alle Springs between particles as part of this cloth
-	Particle* getParticle(int x, int y) { return &particles[x*num_particles_height + y]; }
+	Particle* getParticle(int x, int y) { return &particles[y*num_particles_width + x]; }
 	//在内存中一份顶点数据
 	std::vector<float>vertices;
 	std::vector<unsigned int>indices;
