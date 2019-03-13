@@ -20,7 +20,7 @@ int Init() {
 	// configure global opengl state
 	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
-	ball_pos = vec3(2.0f, -2.0f, cos(ball_time / 50.0) *2.0f);
+	ball_pos = vec3(2.0f, -4.0f, cos(ball_time / 50.0) *2.0f);
 	ball_collider = new SphereCollider(ball_pos,1.2f);
 	SceneInit();
 	// draw in wireframe

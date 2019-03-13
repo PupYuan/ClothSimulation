@@ -14,9 +14,10 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 	{
 		for (int x = 0; x < num_particles_width; x++)
 		{
-			vec3 pos = vec3(width * (x / (float)num_particles_width),
-				-height * (y / (float)num_particles_height),
-				0);
+			//vec3 pos = vec3(width * (x / (float)num_particles_width),
+			//	-height * (y / (float)num_particles_height),
+			//	0);
+			vec3 pos = glm::vec3(width * (x / (float)num_particles_width), -height * (y / (float)num_particles_height),0 );
 
 			particles[y*num_particles_width + x] = Particle(pos); // insert particle in column x at y'th row
 			Particle *particle = &particles[y*num_particles_width + x];
