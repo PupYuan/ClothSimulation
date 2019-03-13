@@ -7,6 +7,8 @@ public:
 	//static RenderSystem * Instance();
 	static void Init();
 	static void Render();
+	static bool PolygonMode;
+	static void SwitchPolygonMode();
 private:
 	static RenderSystem* instance;
 	//RenderSystem() {
@@ -20,6 +22,18 @@ private:
 //	}
 //	return instance;
 //}
+
+bool RenderSystem::PolygonMode = false;
+
+void RenderSystem::SwitchPolygonMode() {
+	if (PolygonMode) {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+	else {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+	PolygonMode = !PolygonMode;
+}
 
 void RenderSystem::Init()
 {

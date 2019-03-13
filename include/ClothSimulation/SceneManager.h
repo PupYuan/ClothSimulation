@@ -2,6 +2,7 @@
 #include <learnopengl/shader.h>
 #include <learnopengl/model.h>
 #include <ClothSimulation\Collider.h>
+#include "WindowsManager.h"
 #include "ResourcesManager.h"
 
 Shader * ourShader;
