@@ -19,6 +19,9 @@ public:
 	float * x;
 	float * y;
 	float * z;
+	float * normal_x;
+	float * normal_y;
+	float * normal_z;
 	Particle(vec3 pos) : pos(pos), old_pos(pos), acceleration(vec3(0, 0, 0)), mass(1), movable(true), accumulated_normal(vec3(0, 0, 0)) {}
 	Particle() {}
 	vec3& getPos() { return pos; }
@@ -31,6 +34,9 @@ public:
 	void addToNormal(vec3 normal)
 	{
 		accumulated_normal = accumulated_normal + normalize(normal);
+		*normal_x = accumulated_normal.x;
+		*normal_y = accumulated_normal.y;
+		*normal_z = accumulated_normal.z;
 	}
 
 	void addForce(vec3 f)

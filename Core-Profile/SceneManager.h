@@ -73,7 +73,7 @@ void RenderScene() {
 	// light properties
 	glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f); // decrease the influence
-	glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); // low influence
+	glm::vec3 ambientColor = diffuseColor * glm::vec3(0.5f); // low influence
 	ourShader->setVec3("light.ambient", ambientColor);
 	ourShader->setVec3("light.diffuse", diffuseColor);
 	ourShader->setVec3("light.specular", 1.0f, 1.0f, 1.0f);

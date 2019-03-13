@@ -13,7 +13,6 @@ using namespace glm;
 #include "Particles.h"
 #include "Cloth.h"
 #include "Collider.h"
-#include <learnopengl/camera.h>
 
 //窗口参数
 const int width = 1024, height = 1024;
@@ -25,12 +24,6 @@ GLdouble MV[16];
 GLint viewport[4];
 GLdouble P[16];
 glm::vec3 Up = glm::vec3(0, 1, 0), Right, viewDir;
-
-//镜头参数
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-float lastX = width / 2.0f;
-float lastY = height / 2.0f;
-bool firstMouse = true;
 
 //画椭圆的一些参数
 //glm::mat4 ellipsoid, inverse_ellipsoid;

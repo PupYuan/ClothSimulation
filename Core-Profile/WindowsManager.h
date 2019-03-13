@@ -17,7 +17,7 @@ float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
-float timeStep = 1.0f / 50.0f;
+float timeStep = 1.0f / 60.0f;
 //Simulation
 glm::vec3 gravity = glm::vec3(0.0f, -0.981f, 0.0f);
 double accumulator = timeStep;

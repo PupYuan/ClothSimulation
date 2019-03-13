@@ -134,7 +134,6 @@
   <ItemGroup>
     <ClInclude Include="Cloth.h" />
     <ClInclude Include="Collider.h" />
-    <ClInclude Include="InputManager.h" />
     <ClInclude Include="Particles.h" />
     <ClInclude Include="Spring.h" />
   </ItemGroup>

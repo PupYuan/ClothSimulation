@@ -1,8 +1,8 @@
 #include "Cloth.h"
 #include "Collider.h"
-float	KsStruct = 50.75f, KdStruct = -0.25f;
-float	KsShear = 50.75f, KdShear = -0.25f;
-float	KsBend = 50.95f, KdBend = -0.25f;
+float	KsStruct = 50.0f, KdStruct = -0.25f;
+float	KsShear = 50.0f, KdShear = -0.25f;
+float	KsBend = 50.0f, KdBend = -0.25f;
 
 /* This is a important constructor for the entire system of particles and constraints*/
 Cloth::Cloth(float width, float height, int num_particles_width, int num_particles_height) : num_particles_width(num_particles_width), num_particles_height(num_particles_height)
@@ -33,8 +33,13 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 			particle->z = &vertices[6 * (y*num_particles_width + x) + 2];
 			//顶点法线
 			vertices[6 * (y*num_particles_width + x) + 3] = 0.0f;
+			particle->normal_x = &vertices[6 * (y*num_particles_width + x) + 3];
+
 			vertices[6 * (y*num_particles_width + x) + 4] = 0.0f;
+			particle->normal_y = &vertices[6 * (y*num_particles_width + x) + 4];
+
 			vertices[6 * (y*num_particles_width + x) + 5] = 1.0f;
+			particle->normal_z = &vertices[6 * (y*num_particles_width + x) + 5];
 		}
 	}
 	//填充索引数据到indices中
