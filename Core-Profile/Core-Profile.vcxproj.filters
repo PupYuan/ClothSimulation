@@ -49,25 +49,28 @@
     <ClInclude Include="..\include\ClothSimulation\Particles.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Cloth.h">
+    <ClInclude Include="..\include\ClothSimulation\Cloth.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="WindowsManager.h">
+    <ClInclude Include="..\include\ClothSimulation\Collider.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="SceneManager.h">
+    <ClInclude Include="..\include\ClothSimulation\Physics.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Spring.h">
+    <ClInclude Include="..\include\ClothSimulation\RenderSystem.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Collider.h">
+    <ClInclude Include="..\include\ClothSimulation\SceneManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="RenderSystem.h">
+    <ClInclude Include="..\include\ClothSimulation\Spring.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Physics.h">
+    <ClInclude Include="..\include\ClothSimulation\WindowsManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ClothSimulation\ResourcesManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

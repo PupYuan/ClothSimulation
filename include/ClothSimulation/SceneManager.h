@@ -2,11 +2,12 @@
 #include <learnopengl/shader.h>
 #include <learnopengl/model.h>
 #include <ClothSimulation\Collider.h>
+#include "ResourcesManager.h"
+
 Shader * ourShader;
 Model *ourModel;
 Cloth * cloth;
 Shader * ClothShader;
-unsigned int diffuseMap;
 
 // lighting
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
@@ -14,50 +15,12 @@ float ball_time = 0;
 vec3 ball_pos;
 SphereCollider* ball_collider;
 
-unsigned int loadTexture(char const * path)
-{
-	unsigned int textureID;
-	glGenTextures(1, &textureID);
-
-	int width, height, nrComponents;
-	unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
-	if (data)
-	{
-		GLenum format;
-		if (nrComponents == 1)
-			format = GL_RED;
-		else if (nrComponents == 3)
-			format = GL_RGB;
-		else if (nrComponents == 4)
-			format = GL_RGBA;
-
-		glBindTexture(GL_TEXTURE_2D, textureID);
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		stbi_image_free(data);
-	}
-	else
-	{
-		std::cout << "Texture failed to load at path: " << path << std::endl;
-		stbi_image_free(data);
-	}
-
-	return textureID;
-}
-
 void SceneInit() {
 	// build and compile shaders
 	// -------------------------
-	ourShader = new Shader("./Shader/lightingMaps.vs", "./Shader/lightingMaps.fs");
-	ClothShader = new Shader("./Shader/Simple.vs", "./Shader/Simple.fs");
-	//load Textures
-	diffuseMap = loadTexture("../Resource/Textures/ClothTextures.png");
+	ourShader = ResourcesManager::loadShader("lightingMaps", "./Shader/lightingMaps.vs", "./Shader/lightingMaps.fs");
+	ClothShader = ResourcesManager::loadShader("ClothShader", "./Shader/Simple.vs", "./Shader/Simple.fs");
+
 	// load models
 	// -----------
 	ourModel = new Model("./Model/Sphere-Bot_Basic/Armature_001-(FBX 7.4 binary mit Animation).FBX");

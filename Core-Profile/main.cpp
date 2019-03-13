@@ -1,6 +1,5 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -10,6 +9,7 @@
 #include <ClothSimulation\WindowsManager.h>
 #include <ClothSimulation\Physics.h>
 #include <ClothSimulation\RenderSystem.h>
+#include <ClothSimulation\SceneManager.h>
 
 
 int Init() {
