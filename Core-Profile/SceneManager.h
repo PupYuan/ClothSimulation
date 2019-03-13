@@ -1,6 +1,7 @@
 #pragma once
 #include <learnopengl/shader.h>
 #include <learnopengl/model.h>
+#include "Collider.h"
 Shader * ourShader;
 Model *ourModel;
 Cloth * cloth;
@@ -9,6 +10,9 @@ unsigned int diffuseMap;
 
 // lighting
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+float ball_time = 0;
+vec3 ball_pos;
+SphereCollider* ball_collider;
 
 unsigned int loadTexture(char const * path)
 {
@@ -59,10 +63,10 @@ void SceneInit() {
 	ourModel = new Model("./Model/Sphere-Bot_Basic/Armature_001-(FBX 7.4 binary mit Animation).FBX");
 
 	cloth = new Cloth(4, 4, 20, 20);
-}
 
-float ball_time = 0;
-vec3 ball_pos;
+	ball_pos = vec3(2.0f, -4.0f, cos(ball_time / 50.0) *2.0f);
+	ball_collider = new SphereCollider(ball_pos, 1.2f);
+}
 
 void RenderScene() {
 	// don't forget to enable shader before setting uniforms

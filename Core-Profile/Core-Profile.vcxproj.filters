@@ -64,5 +64,11 @@
     <ClInclude Include="Collider.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="RenderSystem.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -133,6 +133,8 @@
     <ClInclude Include="..\include\ClothSimulation\Particles.h" />
     <ClInclude Include="Cloth.h" />
     <ClInclude Include="Collider.h" />
+    <ClInclude Include="Physics.h" />
+    <ClInclude Include="RenderSystem.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Spring.h" />
     <ClInclude Include="WindowsManager.h" />

@@ -8,64 +8,28 @@
 #include "Cloth.h"
 #include <iostream>
 #include "WindowsManager.h"
-#include"SceneManager.h"
-#include "Collider.h"
+#include "Physics.h"
+#include "RenderSystem.h"
 
-SphereCollider* ball_collider;
 
 int Init() {
 	if (WindowsInit() == -1) {
 		return -1;
 	}
-	// configure global opengl state
-	// -----------------------------
-	glEnable(GL_DEPTH_TEST);
-	ball_pos = vec3(2.0f, -4.0f, cos(ball_time / 50.0) *2.0f);
-	ball_collider = new SphereCollider(ball_pos,1.2f);
+	RenderSystem::Init();
 	SceneInit();
-	// draw in wireframe
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
-void Simulation(float dt) {
-	ball_time++;
-	ball_pos.z = cos(ball_time / 50.0) * 2.0f;
-	ball_collider->setPos(ball_pos);
 
-	cloth->addForce(gravity);
-	cloth->timeStep(dt);
-	cloth->CollisionDetection(ball_collider);
-}
-void StepPhysics() {
-	//Using high res. counter
-	QueryPerformanceCounter(&t2);
-	// compute and print the elapsed time in millisec
-	frameTimeQP = (t2.QuadPart - t1.QuadPart) * 1000.0 / frequency.QuadPart;
-	t1 = t2;
-	accumulator += frameTimeQP;
-
-	//Fixed time stepping + rendering at different fps
-	if (accumulator >= timeStep)
-	{
-		Simulation(timeStep);
-		accumulator -= timeStep;
-	}
-	//glfwPollEvents();
-	//glutPostRedisplay();
-}
-void render() {
+void tick() {
+	//统计帧率
 	CalcFPS(window);
-	StepPhysics();
-	// render
-	// ------
-	glClearColor(0.2f, 0.2f, 0.4f, 0.5f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	RenderScene();
-	// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-	// -------------------------------------------------------------------------------
-	glfwSwapBuffers(window);
-	glfwPollEvents();
+	//物理系统
+	StepPhysics();
+
+	//渲染系统
+	RenderSystem::Render();
 }
 
 int main()
@@ -81,7 +45,7 @@ int main()
 
 		// draw
 		// -----
-		render();
+		tick();
 	}
 	// glfw: terminate, clearing all previously allocated GLFW resources.
 	// ------------------------------------------------------------------
