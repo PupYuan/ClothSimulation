@@ -26,13 +26,13 @@ unsigned int diffuseMap;
 
 void SceneInit() {
 	// build and compile shaders
-	// -------------------------
-	ourShader = ResourcesManager::loadShader("lightingMaps", "./Shader/lightingMaps.vs", "./Shader/lightingMaps.fs");
-	ClothShader = ResourcesManager::loadShader("ClothShader", "./Shader/Simple.vs", "./Shader/Simple.fs");
+		// -------------------------
+	ourShader = ResourcesManager::loadShader("lightingMaps", "../Resource/Shader/lightingMaps.vs", "../Resource/Shader/lightingMaps.fs");
+	ClothShader = ResourcesManager::loadShader("ClothShader", "../Resource/Shader/Simple.vs", "../Resource/Shader/Simple.fs");
 
 	// load models
 	// -----------
-	ourModel = new Model("./Model/Sphere-Bot_Basic/Armature_001-(FBX 7.4 binary mit Animation).FBX");
+	ourModel = new Model("../Resource/Model/Sphere-Bot_Basic/Armature_001-(FBX 7.4 binary mit Animation).FBX");
 
 	cloth = new Cloth(4, 4, 10, 10);
 

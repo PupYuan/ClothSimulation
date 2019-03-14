@@ -15,33 +15,51 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Cloth.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Collider.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
     <ClCompile Include="Spring.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glad.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Cloth.h">
+    <ClInclude Include="..\include\ClothSimulation\Cloth.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Collider.h">
+    <ClInclude Include="..\include\ClothSimulation\Collider.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Particles.h">
+    <ClInclude Include="..\include\ClothSimulation\Particles.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Spring.h">
+    <ClInclude Include="..\include\ClothSimulation\Physics.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ClothSimulation\RenderSystem.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ClothSimulation\RenderTarget.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ClothSimulation\ResourcesManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ClothSimulation\SceneManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ClothSimulation\Spring.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ClothSimulation\WindowsManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

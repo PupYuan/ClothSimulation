@@ -96,7 +96,7 @@ int WindowsInit() {
 
 														 // glfw window creation
 														 // --------------------
-	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Core-Profile-ClothSimulation", NULL, NULL);
+	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "GPGPU SpringForce", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
