@@ -7,9 +7,10 @@
 #include <ClothSimulation\Cloth.h>
 #include <iostream>
 #include <ClothSimulation\WindowsManager.h>
-#include <ClothSimulation\Physics.h>
 #include <ClothSimulation\RenderSystem.h>
 #include <ClothSimulation\SceneManager.h>
+
+
 
 SceneManager* scene;
 int Init() {

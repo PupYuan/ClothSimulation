@@ -55,9 +55,6 @@
     <ClInclude Include="..\include\ClothSimulation\Collider.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\ClothSimulation\Physics.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\ClothSimulation\RenderSystem.h">
       <Filter>头文件</Filter>
     </ClInclude>

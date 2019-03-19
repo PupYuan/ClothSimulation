@@ -5,6 +5,8 @@
 #include "ResourcesManager.h"
 #include <learnopengl/camera.h>
 
+
+
 class Light {
 public:
 	glm::vec3 lightPos = vec3(1.2f, 1.0f, 2.0f);
@@ -33,6 +35,16 @@ public:
 	// settings
 	static const unsigned int SCR_WIDTH = 800;
 	static const unsigned int SCR_HEIGHT = 600;
+
+	float timeStep = 1.0f / 60.0f;
+	//Simulation
+	glm::vec3 gravity = glm::vec3(0.0f, -0.981f, 0.0f);
+	double accumulator = timeStep;
+	//统计帧率用的信息
+	LARGE_INTEGER frequency;        // ticks per second
+	LARGE_INTEGER t1, t2;           // ticks
+	double frameTimeQP = 0;
+
 	//Function
 	SceneManager() {
 		SceneInit();

@@ -4,7 +4,7 @@ Camera SceneManager::camera(glm::vec3(0.0, 0.0, 6.0f));//¶¨Òå
 void SceneManager::CreateCloth()
 {
 	cloth = new Cloth(4, 4, 20, 20);
-	//cloth->SetScene(this);
+	cloth->SetScene(this);
 }
 
 void SceneManager::SceneInit() {
@@ -31,12 +31,8 @@ void SceneManager::RenderScene() {
 	ourShader->setVec3("light.position", light.lightPos);
 	ourShader->setVec3("viewPos", camera.Position);
 
-	// light properties
-	glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
-	glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f); // decrease the influence
-	glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); // low influence
-	ourShader->setVec3("light.ambient", ambientColor);
-	ourShader->setVec3("light.diffuse", diffuseColor);
+	ourShader->setVec3("light.ambient", light.ambientColor);
+	ourShader->setVec3("light.diffuse", light.diffuseColor);
 	ourShader->setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
 	// material properties
@@ -44,8 +40,8 @@ void SceneManager::RenderScene() {
 
 
 	// view/projection transformations
-	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-	glm::mat4 view = camera.GetViewMatrix();
+	projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+	view = camera.GetViewMatrix();
 	ourShader->setMat4("projection", projection);
 	ourShader->setMat4("view", view);
 
@@ -55,26 +51,6 @@ void SceneManager::RenderScene() {
 	//model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
 	ourShader->setMat4("model", model);
 	ourModel->Draw(*ourShader);
-
-	//ClothShader->use();
-	//ClothShader->setMat4("projection", projection);
-	//ClothShader->setMat4("view", view);
-	//glm::mat4 model1;
-	////model1 = glm::translate(model1, glm::vec3(-6.0f, 2.0f, -5.0f)); // translate it down so it's at the center of the scene
-	//ClothShader->setMat4("model", model1);
-
-	//// bind diffuse map
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, diffuseMap);
-
-	//ClothShader->setVec3("light.position", lightPos);
-	//ClothShader->setVec3("viewPos", camera.Position);
-	//ClothShader->setVec3("light.ambient", ambientColor);
-	//ClothShader->setVec3("light.diffuse", diffuseColor);
-	//ClothShader->setVec3("light.specular", 0.2f, 0.2f, 0.2f);
-
-	//ClothShader->setFloat("material.shininess", 16.0f);
-	//ClothShader->setVec3("material.specular", vec3(0.2f, 0.2f, 0.2f));
 
 	cloth->drawShaded();
 }

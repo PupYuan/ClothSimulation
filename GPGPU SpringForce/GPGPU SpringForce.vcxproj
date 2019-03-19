@@ -121,6 +121,7 @@
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="model.cpp" />
+    <ClCompile Include="Physics.cpp" />
     <ClCompile Include="ResourcesManager.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="Spring.cpp" />
@@ -129,7 +130,6 @@
     <ClInclude Include="..\include\ClothSimulation\Cloth.h" />
     <ClInclude Include="..\include\ClothSimulation\Collider.h" />
     <ClInclude Include="..\include\ClothSimulation\Particles.h" />
-    <ClInclude Include="..\include\ClothSimulation\Physics.h" />
     <ClInclude Include="..\include\ClothSimulation\RenderSystem.h" />
     <ClInclude Include="..\include\ClothSimulation\RenderTarget.h" />
     <ClInclude Include="..\include\ClothSimulation\ResourcesManager.h" />

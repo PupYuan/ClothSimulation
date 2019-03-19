@@ -9,7 +9,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "Spring.h"
-class Collider;
+#include <learnopengl/shader.h>
+class SceneManager;
+
+enum Mode { CPU, GPU };
 class Cloth
 {
 private:
@@ -26,6 +29,42 @@ private:
 	//绘制相关
 	unsigned int VBO, VAO, EBO;
 
+	//GPGPU相关
+	//位置数据
+	Mode current_mode = CPU;
+	const size_t total_points = (num_particles_width)*(num_particles_height);
+	std::vector<glm::vec4> X;
+	std::vector<glm::vec4> X_last;
+
+	int texture_size_x = 0;
+	int texture_size_y = 0;
+
+	GLuint fboID[2];
+	GLuint attachID[4];
+	int readID = 0, writeID = 1;
+	GLuint vboID;
+	GLenum mrt[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+
+
+	float* _data[2];
+	size_t i = 0;
+	GLfloat vRed[4] = { 1,0,0,1 };
+	GLfloat vWhite[4] = { 1,1,1,1 };
+
+	GLuint t_query;
+	GLuint64 elapsed_time;
+	float delta_time = 0;
+
+	//每次渲染的时候做几次物理迭代
+	const int NUM_ITER = 2;
+
+	Shader *verletShader;
+	Shader *renderShader;//渲染用的Shader
+	//Fuction
+	void InitFBO();
+	void InitVBO();
+	//Scene
+	SceneManager * scene;
 public:
 	Cloth(float width, float height, int num_particles_width, int num_particles_height);
 	~Cloth() {
@@ -50,10 +89,13 @@ public:
 	std::vector<Particle>& getParticles() {
 		return particles;
 	}
+	void RenderCPU();
+	void RenderGPU();
 	void drawShaded();
 	void addForce(const vec3 direction);
 	void timeStep(float dt);
 	void AddSpring(Particle* a, Particle* b, float ks, float kd);
-	void CollisionDetection(Collider * collider);
-
+	void SetScene(SceneManager* _scene) {
+		scene = _scene;
+	}
 };

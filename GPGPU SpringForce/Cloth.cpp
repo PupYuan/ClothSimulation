@@ -1,9 +1,11 @@
 #include <ClothSimulation\Cloth.h>
-#include <ClothSimulation\Collider.h>
+#include <ClothSimulation\SceneManager.h>
 float	KsStruct = 50.0f, KdStruct = -0.25f;
 float	KsShear = 50.0f, KdShear = -0.25f;
 float	KsBend = 50.0f, KdBend = -0.25f;
 int vertice_data_length = 8;
+#define CHECK_GL_ERRORS assert(glGetError()==GL_NO_ERROR);
+
 /* This is a important constructor for the entire system of particles and constraints*/
 Cloth::Cloth(float width, float height, int num_particles_width, int num_particles_height) : num_particles_width(num_particles_width), num_particles_height(num_particles_height)
 {
@@ -141,9 +143,28 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 		}
 	}
 }
+void Cloth::RenderCPU() {
+	//场景的信息要单独抽离出来
+	renderShader->use();
+	renderShader->setMat4("projection", scene->projection);
+	renderShader->setMat4("view", scene->view);
+	glm::mat4 model1;
+	//model1 = glm::translate(model1, glm::vec3(-6.0f, 2.0f, -5.0f)); // translate it down so it's at the center of the scene
+	renderShader->setMat4("model", model1);
 
-void Cloth::drawShaded()
-{
+	// bind diffuse map
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene->diffuseMap);
+
+	renderShader->setVec3("light.position", scene->light.lightPos);
+	renderShader->setVec3("viewPos", scene->camera.Position);
+	renderShader->setVec3("light.ambient", scene->light.ambientColor);
+	renderShader->setVec3("light.diffuse", scene->light.diffuseColor);
+	renderShader->setVec3("light.specular", 0.2f, 0.2f, 0.2f);
+
+	renderShader->setFloat("material.shininess", 16.0f);
+	renderShader->setVec3("material.specular", vec3(0.2f, 0.2f, 0.2f));
+
 	// reset normals (which where written to last frame)
 	std::vector<Particle>::iterator particle;
 	for (particle = particles.begin(); particle != particles.end(); particle++)
@@ -172,6 +193,95 @@ void Cloth::drawShaded()
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float)*vertices.size(), &vertices[0]);
 	glDrawElements(GL_TRIANGLES, 6 * (num_particles_height - 1)*(num_particles_width - 1), GL_UNSIGNED_INT, 0);
+}
+void Cloth::RenderGPU() {
+	//调整正交矩阵，渲染到2D平面
+	glViewport(0, 0, texture_size_x, texture_size_y);
+	CHECK_GL_ERRORS
+		glBeginQuery(GL_TIME_ELAPSED, t_query);
+	for (int i = 0; i < NUM_ITER; i++) {
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[writeID]);
+		glDrawBuffers(2, mrt);
+
+		CHECK_GL_ERRORS
+			glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, attachID[2 * readID]);
+
+		CHECK_GL_ERRORS
+			glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, attachID[2 * readID + 1]);
+
+		glClear(GL_COLOR_BUFFER_BIT);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+		//verletShader.use();
+		//把数据渲染到纹理上
+
+
+		//swap read/write pathways
+		int tmp = readID;
+		readID = writeID;
+		writeID = tmp;
+	}
+
+	CHECK_GL_ERRORS
+
+		//read back the results into the VBO
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID[readID]);
+
+	glReadBuffer(GL_COLOR_ATTACHMENT0);
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, vboID);
+	glReadPixels(0, 0, texture_size_x, texture_size_y, GL_RGBA, GL_FLOAT, 0);
+	glEndQuery(GL_TIME_ELAPSED);
+
+	// get the query result
+	glGetQueryObjectui64v(t_query, GL_QUERY_RESULT, &elapsed_time);
+	delta_time = elapsed_time / 1000000.0f;
+	CHECK_GL_ERRORS
+
+		glReadBuffer(GL_NONE);
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+
+	//reset default framebuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glReadBuffer(GL_BACK);
+	glDrawBuffer(GL_BACK);
+
+	//restore the rendering modes and viewport
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glViewport(0, 0, num_particles_width, num_particles_height);
+
+	CHECK_GL_ERRORS
+
+		//renderShader.Use();
+		//glBindBuffer(GL_ARRAY_BUFFER, vboID);
+		//glVertexPointer(4, GL_FLOAT, 0, 0);
+		//glEnableClientState(GL_VERTEX_ARRAY);
+		////draw plygons
+		//glUniform4fv(renderShader("color"), 1, vWhite);
+		//glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_SHORT, &(indices[0]));
+
+		////draw points			
+		//glUniform4fv(renderShader("color"), 1, vRed);
+		//glUniform1i(renderShader("selected_index"), selected_index);
+		//glDrawArrays(GL_POINTS, 0, total_points);
+		//glUniform1i(renderShader("selected_index"), -1);
+		//glDisableClientState(GL_VERTEX_ARRAY);
+		//renderShader.UnUse();
+}
+
+
+void Cloth::drawShaded()
+{
+	switch (current_mode) {
+	case CPU:
+		RenderCPU();
+		break;
+
+	case GPU:
+		RenderGPU();
+		break;
+	}
 }
 
 inline glm::vec3 GetVerletVelocity(glm::vec3 x_i, glm::vec3 xi_last, float dt) {
@@ -218,9 +328,4 @@ void Cloth::AddSpring(Particle* a, Particle* b, float ks, float kd) {
 	glm::vec3 deltaP = vec3(a->getPos() - b->getPos());
 	spring.restDistance = sqrt(glm::dot(deltaP, deltaP));
 	Springs.push_back(spring);
-}
-
-void Cloth::CollisionDetection(Collider * collider)
-{
-	collider->ClothCollisionSimulate(this);
 }

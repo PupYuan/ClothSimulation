@@ -1,5 +1,4 @@
-#pragma once
-#include "SceneManager.h"
+#include <ClothSimulation\SceneManager.h>
 
 void SceneManager::Simulation(float dt) {
 	ball_time++;
@@ -8,7 +7,7 @@ void SceneManager::Simulation(float dt) {
 
 	cloth->addForce(gravity);
 	cloth->timeStep(dt);
-	cloth->CollisionDetection(ball_collider);
+	ball_collider->ClothCollisionSimulate(cloth);
 }
 void SceneManager::StepPhysics() {
 	//Using high res. counter
