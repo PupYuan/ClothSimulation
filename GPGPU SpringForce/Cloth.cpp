@@ -142,6 +142,8 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 			}
 		}
 	}
+
+	renderShader = ResourcesManager::loadShader("ClothShader", "../Resource/Shader/Simple.vs", "../Resource/Shader/Simple.fs");
 }
 void Cloth::RenderCPU() {
 	//场景的信息要单独抽离出来

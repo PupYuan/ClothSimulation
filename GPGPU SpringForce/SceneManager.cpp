@@ -16,8 +16,7 @@ void SceneManager::SceneInit() {
 	// load models
 	// -----------
 	ourModel = new Model("../Resource/Model/Sphere-Bot_Basic/Armature_001-(FBX 7.4 binary mit Animation).FBX");
-
-	cloth = new Cloth(4, 4, 10, 10);
+	CreateCloth();
 
 	ball_pos = vec3(2.0f, -4.0f, cos(ball_time / 50.0) *2.0f);
 	ball_collider = new SphereCollider(ball_pos, 1.2f);
