@@ -120,6 +120,9 @@
     <ClCompile Include="Cloth.cpp" />
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="model.cpp" />
+    <ClCompile Include="ResourcesManager.cpp" />
+    <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="Spring.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -133,6 +136,7 @@
     <ClInclude Include="..\include\ClothSimulation\SceneManager.h" />
     <ClInclude Include="..\include\ClothSimulation\Spring.h" />
     <ClInclude Include="..\include\ClothSimulation\WindowsManager.h" />
+    <ClInclude Include="..\include\learnopengl\model.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

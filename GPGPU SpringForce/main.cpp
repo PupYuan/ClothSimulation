@@ -11,13 +11,13 @@
 #include <ClothSimulation\RenderSystem.h>
 #include <ClothSimulation\SceneManager.h>
 
-
+SceneManager* scene;
 int Init() {
 	if (WindowsInit() == -1) {
 		return -1;
 	}
 	RenderSystem::Init();
-	SceneInit();
+	scene = new SceneManager();
 }
 
 
@@ -26,10 +26,10 @@ void tick() {
 	CalcFPS(window);
 
 	//物理系统
-	StepPhysics();
+	scene->StepPhysics();
 
 	//渲染系统
-	RenderSystem::Render();
+	RenderSystem::Render(scene);
 }
 
 int main()

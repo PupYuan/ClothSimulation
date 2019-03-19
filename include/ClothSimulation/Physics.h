@@ -1,7 +1,7 @@
 #pragma once
 #include "SceneManager.h"
 
-void Simulation(float dt) {
+void SceneManager::Simulation(float dt) {
 	ball_time++;
 	ball_pos.z = cos(ball_time / 50.0) * 2.0f;
 	ball_collider->setPos(ball_pos);
@@ -10,7 +10,7 @@ void Simulation(float dt) {
 	cloth->timeStep(dt);
 	cloth->CollisionDetection(ball_collider);
 }
-void StepPhysics() {
+void SceneManager::StepPhysics() {
 	//Using high res. counter
 	QueryPerformanceCounter(&t2);
 	// compute and print the elapsed time in millisec

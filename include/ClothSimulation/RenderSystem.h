@@ -7,7 +7,7 @@ class RenderSystem
 public:
 	//static RenderSystem * Instance();
 	static void Init();
-	static void Render();
+	static void Render(SceneManager * _scene);
 	static bool PolygonMode;
 	static void SwitchPolygonMode();
 	static RenderTarget renderTarget;
@@ -47,7 +47,7 @@ void RenderSystem::Init()
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
-void RenderSystem::Render()
+void RenderSystem::Render(SceneManager* _scene)
 {
 	//äÖÈ¾ÏµÍ³
 	// render
@@ -56,7 +56,7 @@ void RenderSystem::Render()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//äÖÈ¾Ñ­»·
-	RenderScene();
+	_scene->RenderScene();
 	// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 	// -------------------------------------------------------------------------------
 	glfwSwapBuffers(window);

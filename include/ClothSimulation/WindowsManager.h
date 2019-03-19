@@ -8,8 +8,8 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 
-float lastX = SCR_WIDTH / 2.0f;
-float lastY = SCR_HEIGHT / 2.0f;
+float lastX = SceneManager::SCR_WIDTH / 2.0f;
+float lastY = SceneManager::SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
 float timeStep = 1.0f / 60.0f;
@@ -73,13 +73,13 @@ void processInput(GLFWwindow *window)
 		glfwSetWindowShouldClose(window, true);
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		camera.ProcessKeyboard(FORWARD, deltaTime);
+		SceneManager::camera.ProcessKeyboard(FORWARD, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		camera.ProcessKeyboard(BACKWARD, deltaTime);
+		SceneManager::camera.ProcessKeyboard(BACKWARD, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		camera.ProcessKeyboard(LEFT, deltaTime);
+		SceneManager::camera.ProcessKeyboard(LEFT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		camera.ProcessKeyboard(RIGHT, deltaTime);
+		SceneManager::camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 
 int WindowsInit() {
@@ -96,7 +96,7 @@ int WindowsInit() {
 
 														 // glfw window creation
 														 // --------------------
-	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "GPGPU SpringForce", NULL, NULL);
+	window = glfwCreateWindow(SceneManager::SCR_WIDTH, SceneManager::SCR_HEIGHT, "GPGPU SpringForce", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -151,12 +151,12 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	lastX = xpos;
 	lastY = ypos;
 
-	camera.ProcessMouseMovement(xoffset, yoffset);
+	SceneManager::camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	camera.ProcessMouseScroll(yoffset);
+	SceneManager::camera.ProcessMouseScroll(yoffset);
 }
