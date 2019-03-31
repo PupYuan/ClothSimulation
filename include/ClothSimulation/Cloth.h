@@ -64,11 +64,7 @@ private:
 	//Scene
 	SceneManager * scene;
 	//render for GPGPU
-	unsigned int framebuffer;
-	unsigned int textureColorbuffer;
-	unsigned int Texture1;
 	unsigned int quadVAO, quadVBO;
-
 	unsigned int vaoID;
 public:
 	Cloth(float width, float height, int num_particles_width, int num_particles_height);
