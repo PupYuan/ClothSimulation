@@ -193,29 +193,32 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 	// framebuffer configuration
 	// -------------------------
 	//unsigned int framebuffer;
-	glGenFramebuffers(1, &framebuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-	// create a color attachment texture
-	//unsigned int textureColorbuffer;
-	glGenTextures(1, &textureColorbuffer);
-	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, num_particles_width, num_particles_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);//大小为粒子数目
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, num_particles_width, num_particles_height, 0, GL_RGBA, GL_FLOAT, _data[0]); // NULL = Empty texture
+	glGenFramebuffers(2, fboID);
+	glGenTextures(4, attachID);
+	for (int j = 0; j < 2; j++) {//两个帧缓冲，用于输入和输出交替
+		glBindFramebuffer(GL_FRAMEBUFFER, fboID[j]);
+		for (int i = 0; i < 2; i++) {//两块纹理，用于verlet积分的当前位置和过去位置
+			glBindTexture(GL_TEXTURE_2D, attachID[i + 2 * j]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, num_particles_width, num_particles_height, 0, GL_RGBA, GL_FLOAT, _data[0]); // NULL = Empty texture
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, mrt[i], GL_TEXTURE_2D, attachID[i + 2 * j], 0);
+		}
+		
+	}
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	//这是一份普通的纹理，存于默认的渲染帧缓冲内
-	glGenTextures(1, &Texture1);
-	glBindTexture(GL_TEXTURE_2D, Texture1);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, num_particles_width, num_particles_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);//大小为粒子数目
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, num_particles_width, num_particles_height, 0, GL_RGBA, GL_FLOAT, _data[0]); // NULL = Empty texture
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	////glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	////这是一份普通的纹理，存于默认的渲染帧缓冲内
+	//glGenTextures(1, &Texture1);
+	//glBindTexture(GL_TEXTURE_2D, Texture1);
+	////glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, num_particles_width, num_particles_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);//大小为粒子数目
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, num_particles_width, num_particles_height, 0, GL_RGBA, GL_FLOAT, _data[0]); // NULL = Empty texture
 
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, Texture1, 0);
 }
 void Cloth::RenderCPU() {
 	//场景的信息要单独抽离出来
@@ -273,19 +276,49 @@ void Cloth::RenderGPU() {
 	// render
 	// ------
 	// bind to framebuffer and draw scene as we normally would to color texture 
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-	glDisable(GL_DEPTH_TEST);
+	for (int i = 0; i < NUM_ITER; i++) {
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[writeID]);
+		glDisable(GL_DEPTH_TEST);
 
-	// make sure we clear the framebuffer's content
-	glClear(GL_COLOR_BUFFER_BIT);
+        // make sure we clear the framebuffer's content
+        glClear(GL_COLOR_BUFFER_BIT);
+		glDrawBuffers(2, mrt);
 
-	verletShader->use();
-	// quad
-	glBindVertexArray(quadVAO);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, Texture1);	// use the color attachment texture as the texture of the quad plane
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+		
 
+		//CHECK_GL_ERRORS
+		//glActiveTexture(GL_TEXTURE1);
+		//glBindTexture(GL_TEXTURE_2D, attachID[2 * readID + 1]);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+		verletShader->use();
+		glBindVertexArray(quadVAO);
+		CHECK_GL_ERRORS
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, attachID[2 * readID]);
+	    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
+		//swap read/write pathways
+		int tmp = readID;
+		readID = writeID;
+		writeID = tmp;
+	}
+
+	//glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	//glDisable(GL_DEPTH_TEST);
+
+	//// make sure we clear the framebuffer's content
+	//glClear(GL_COLOR_BUFFER_BIT);
+
+	//verletShader->use();
+	//// quad
+	//glBindVertexArray(quadVAO);
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, Texture1);	// use the color attachment texture as the texture of the quad plane
+	//glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID[readID]);
 	//将framebuffer中的颜色附件读取进
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, vboID);
