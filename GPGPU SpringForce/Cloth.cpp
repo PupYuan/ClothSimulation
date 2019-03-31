@@ -1,8 +1,8 @@
 #include <ClothSimulation\Cloth.h>
 #include <ClothSimulation\SceneManager.h>
-float	KsStruct = 50.0f, KdStruct = -0.25f;
-float	KsShear = 50.0f, KdShear = -0.25f;
-float	KsBend = 50.0f, KdBend = -0.25f;
+float	KsStruct = 50.75f, KdStruct = -0.25f;
+float	KsShear = 50.75f, KdShear = -0.25f;
+float	KsBend = 50.95f, KdBend = -0.25f;
 int vertice_data_length = 8;
 #define CHECK_GL_ERRORS assert(glGetError()==GL_NO_ERROR);
 
@@ -33,8 +33,9 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 			//vec3 pos = vec3(width * (x / (float)num_particles_width),
 			//	-height * (y / (float)num_particles_height),
 			//	0);
-			vec3 pos = glm::vec3(width * (x / (float)num_particles_width), -height * (y / (float)num_particles_height),0 );
-
+			//vec3 pos = glm::vec3(width * (x / (float)num_particles_width), -height * (y / (float)num_particles_height),0 );
+			//vec3 pos = glm::vec3(((float(x) / (num_particles_width - 1)) * 2 - 1)* width/2, width + 1, ((float(y) / (num_particles_height - 1))* height));
+			vec3 pos = glm::vec3(((float(x) / (num_particles_width - 1)) * 2 - 1)* width / 2, 1.0, ((float(y) / (num_particles_height - 1))* height));
 			particles[y*num_particles_width + x] = Particle(pos); // insert particle in column x at y'th row
 			Particle *particle = &particles[y*num_particles_width + x];
 
@@ -163,6 +164,21 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 	//renderShader = ResourcesManager::loadShader("ClothShader", "../Resource/Shader/Simple.vs", "../Resource/Shader/Simple.fs");
 	renderShader = ResourcesManager::loadShader("renderShader", "render.vs", "render.fs");
 	verletShader = ResourcesManager::loadShader("verletShader","verlet.vs", "verlet.fs");
+	verletShader->use();
+	verletShader->setFloat("DEFAULT_DAMPING", DEFAULT_DAMPING);
+	verletShader->setFloat("mass", 1);
+	verletShader->setVec3("gravity", glm::vec3(0.0f, -0.0981f, 0.0f));
+	verletShader->setFloat("dt", 1.0f / 60.0f);
+	verletShader->setFloat("texsize_x", num_particles_width);
+	verletShader->setFloat("texsize_y", num_particles_height);
+	verletShader->setFloat("KsStruct", KsStruct);
+	verletShader->setFloat("KdStruct", KdStruct);
+	verletShader->setFloat("KsShear", KsShear);
+	verletShader->setFloat("KdShear", KdShear);
+	verletShader->setFloat("KsBend", KsBend);
+	verletShader->setFloat("KdBend", KdBend);
+	verletShader->setVec2("inv_cloth_size", float(width) /(num_particles_width-1), float(height) / (num_particles_height-1));
+	verletShader->setVec2("step", 1.0f / (num_particles_width-1.0f), 1.0f / (num_particles_height-1.0f));
 	//Init for GPGPU
 
 	const int size = num_particles_width * num_particles_height * 4 * sizeof(float);
