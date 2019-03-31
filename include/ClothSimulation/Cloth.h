@@ -31,7 +31,7 @@ private:
 
 	//GPGPU相关
 	//位置数据
-	Mode current_mode = CPU;
+	Mode current_mode = GPU;
 	const size_t total_points = (num_particles_width)*(num_particles_height);
 	std::vector<glm::vec4> X;
 	std::vector<glm::vec4> X_last;
@@ -60,11 +60,16 @@ private:
 
 	Shader *verletShader;
 	Shader *renderShader;//渲染用的Shader
-	//Fuction
-	void InitFBO();
-	void InitVBO();
+
 	//Scene
 	SceneManager * scene;
+	//render for GPGPU
+	unsigned int framebuffer;
+	unsigned int textureColorbuffer;
+	unsigned int Texture1;
+	unsigned int quadVAO, quadVBO;
+
+	unsigned int vaoID;
 public:
 	Cloth(float width, float height, int num_particles_width, int num_particles_height);
 	~Cloth() {

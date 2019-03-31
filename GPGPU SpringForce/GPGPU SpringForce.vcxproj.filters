@@ -75,4 +75,24 @@
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="verlet.vs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="verlet.fs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Resource\Shader\Simple.fs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Resource\Shader\Simple.vs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="render.vs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="render.fs">
+      <Filter>资源文件</Filter>
+    </None>
+  </ItemGroup>
 </Project>

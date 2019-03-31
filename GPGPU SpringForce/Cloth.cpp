@@ -6,9 +6,23 @@ float	KsBend = 50.0f, KdBend = -0.25f;
 int vertice_data_length = 8;
 #define CHECK_GL_ERRORS assert(glGetError()==GL_NO_ERROR);
 
+float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+	// positions   // texCoords
+	-1.0f,  1.0f,  0.0f, 1.0f,
+	-1.0f, -1.0f,  0.0f, 0.0f,
+	 1.0f, -1.0f,  1.0f, 0.0f,
+
+	-1.0f,  1.0f,  0.0f, 1.0f,
+	 1.0f, -1.0f,  1.0f, 0.0f,
+	 1.0f,  1.0f,  1.0f, 1.0f
+};
+
 /* This is a important constructor for the entire system of particles and constraints*/
 Cloth::Cloth(float width, float height, int num_particles_width, int num_particles_height) : num_particles_width(num_particles_width), num_particles_height(num_particles_height)
 {
+	X.resize(total_points);
+	X_last.resize(total_points);
+
 	particles.resize(num_particles_width*num_particles_height); //I am essentially using this vector as an array with room for num_particles_width*num_particles_height particles
 	vertices.resize(num_particles_width*num_particles_height * vertice_data_length);
 	// creating particles in a grid of particles from (0,0,0) to (width,-height,0)
@@ -23,6 +37,9 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 
 			particles[y*num_particles_width + x] = Particle(pos); // insert particle in column x at y'th row
 			Particle *particle = &particles[y*num_particles_width + x];
+
+			X[(y*num_particles_width + x)] = vec4(pos, 1);
+			X_last[(y*num_particles_width + x)] = vec4(pos, 1);
 			//同样保存一份在内存中：
 			//顶点位置,并且传递地址给particle
 			vertices[vertice_data_length*(y*num_particles_width + x)] = pos.x;
@@ -143,7 +160,62 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 		}
 	}
 
-	renderShader = ResourcesManager::loadShader("ClothShader", "../Resource/Shader/Simple.vs", "../Resource/Shader/Simple.fs");
+	//renderShader = ResourcesManager::loadShader("ClothShader", "../Resource/Shader/Simple.vs", "../Resource/Shader/Simple.fs");
+	renderShader = ResourcesManager::loadShader("renderShader", "render.vs", "render.fs");
+	verletShader = ResourcesManager::loadShader("verletShader","verlet.vs", "verlet.fs");
+	//Init for GPGPU
+
+	const int size = num_particles_width * num_particles_height * 4 * sizeof(float);
+	glGenVertexArrays(1, &vaoID);
+	glGenBuffers(1, &vboID);
+	glBindVertexArray(vaoID);
+	glBindBuffer(GL_ARRAY_BUFFER, vboID);
+	glBufferData(GL_ARRAY_BUFFER, size, 0, GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	_data[0] = &X[0].x;
+	// screen quad VAO
+	//unsigned int quadVAO, quadVBO;
+	glGenVertexArrays(1, &quadVAO);
+	glGenBuffers(1, &quadVBO);
+	glBindVertexArray(quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+	// framebuffer configuration
+	// -------------------------
+	//unsigned int framebuffer;
+	glGenFramebuffers(1, &framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	// create a color attachment texture
+	//unsigned int textureColorbuffer;
+	glGenTextures(1, &textureColorbuffer);
+	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, num_particles_width, num_particles_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);//大小为粒子数目
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, num_particles_width, num_particles_height, 0, GL_RGBA, GL_FLOAT, _data[0]); // NULL = Empty texture
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//这是一份普通的纹理，存于默认的渲染帧缓冲内
+	glGenTextures(1, &Texture1);
+	glBindTexture(GL_TEXTURE_2D, Texture1);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, num_particles_width, num_particles_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);//大小为粒子数目
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, num_particles_width, num_particles_height, 0, GL_RGBA, GL_FLOAT, _data[0]); // NULL = Empty texture
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 }
 void Cloth::RenderCPU() {
 	//场景的信息要单独抽离出来
@@ -197,79 +269,52 @@ void Cloth::RenderCPU() {
 	glDrawElements(GL_TRIANGLES, 6 * (num_particles_height - 1)*(num_particles_width - 1), GL_UNSIGNED_INT, 0);
 }
 void Cloth::RenderGPU() {
-	//调整正交矩阵，渲染到2D平面
-	glViewport(0, 0, texture_size_x, texture_size_y);
-	CHECK_GL_ERRORS
-		glBeginQuery(GL_TIME_ELAPSED, t_query);
-	for (int i = 0; i < NUM_ITER; i++) {
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[writeID]);
-		glDrawBuffers(2, mrt);
+	glViewport(0, 0, num_particles_width, num_particles_height);
+	// render
+	// ------
+	// bind to framebuffer and draw scene as we normally would to color texture 
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	glDisable(GL_DEPTH_TEST);
 
-		CHECK_GL_ERRORS
-			glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, attachID[2 * readID]);
+	// make sure we clear the framebuffer's content
+	glClear(GL_COLOR_BUFFER_BIT);
 
-		CHECK_GL_ERRORS
-			glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, attachID[2 * readID + 1]);
+	verletShader->use();
+	// quad
+	glBindVertexArray(quadVAO);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, Texture1);	// use the color attachment texture as the texture of the quad plane
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		glClear(GL_COLOR_BUFFER_BIT);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-		//verletShader.use();
-		//把数据渲染到纹理上
-
-
-		//swap read/write pathways
-		int tmp = readID;
-		readID = writeID;
-		writeID = tmp;
-	}
-
-	CHECK_GL_ERRORS
-
-		//read back the results into the VBO
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID[readID]);
-
+	//将framebuffer中的颜色附件读取进
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, vboID);
-	glReadPixels(0, 0, texture_size_x, texture_size_y, GL_RGBA, GL_FLOAT, 0);
-	glEndQuery(GL_TIME_ELAPSED);
+	glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RGBA, GL_FLOAT, 0);
 
-	// get the query result
-	glGetQueryObjectui64v(t_query, GL_QUERY_RESULT, &elapsed_time);
-	delta_time = elapsed_time / 1000000.0f;
-	CHECK_GL_ERRORS
-
-		glReadBuffer(GL_NONE);
+	//重置状态
+	glReadBuffer(GL_NONE);
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 
-	//reset default framebuffer
+	//渲染
+	// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glReadBuffer(GL_BACK);
 	glDrawBuffer(GL_BACK);
 
-	//restore the rendering modes and viewport
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glViewport(0, 0, num_particles_width, num_particles_height);
+	glEnable(GL_DEPTH_TEST);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessery actually, since we won't be able to see behind the quad anyways)
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	CHECK_GL_ERRORS
-
-		//renderShader.Use();
-		//glBindBuffer(GL_ARRAY_BUFFER, vboID);
-		//glVertexPointer(4, GL_FLOAT, 0, 0);
-		//glEnableClientState(GL_VERTEX_ARRAY);
-		////draw plygons
-		//glUniform4fv(renderShader("color"), 1, vWhite);
-		//glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_SHORT, &(indices[0]));
-
-		////draw points			
-		//glUniform4fv(renderShader("color"), 1, vRed);
-		//glUniform1i(renderShader("selected_index"), selected_index);
-		//glDrawArrays(GL_POINTS, 0, total_points);
-		//glUniform1i(renderShader("selected_index"), -1);
-		//glDisableClientState(GL_VERTEX_ARRAY);
-		//renderShader.UnUse();
+	glViewport(0, 0, scene->SCR_WIDTH, scene->SCR_HEIGHT);
+	renderShader->use();
+	renderShader->setMat4("projection", scene->projection);
+	renderShader->setMat4("view", scene->view);
+	glm::mat4 model1;
+	//model1 = glm::translate(model1, glm::vec3(-6.0f, 2.0f, -5.0f)); // translate it down so it's at the center of the scene
+	renderShader->setMat4("model", model1);
+	glPointSize(5);
+	glBindVertexArray(vaoID);
+	glDrawArrays(GL_POINTS, 0, num_particles_width * num_particles_height);
 }
 
 

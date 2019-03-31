@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core-Profile", "Core-Profil
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GPGPU SpringForce", "GPGPU SpringForce\GPGPU SpringForce.vcxproj", "{3FEAC31C-A550-4B09-88EC-6694C7D0828B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GPGPU Sample", "GPGPU Sample\GPGPU Sample.vcxproj", "{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{3FEAC31C-A550-4B09-88EC-6694C7D0828B}.Release|x64.Build.0 = Release|x64
 		{3FEAC31C-A550-4B09-88EC-6694C7D0828B}.Release|x86.ActiveCfg = Release|Win32
 		{3FEAC31C-A550-4B09-88EC-6694C7D0828B}.Release|x86.Build.0 = Release|Win32
+		{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}.Debug|x64.ActiveCfg = Debug|x64
+		{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}.Debug|x64.Build.0 = Debug|x64
+		{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}.Debug|x86.ActiveCfg = Debug|Win32
+		{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}.Debug|x86.Build.0 = Debug|Win32
+		{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}.Release|x64.ActiveCfg = Release|x64
+		{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}.Release|x64.Build.0 = Release|x64
+		{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}.Release|x86.ActiveCfg = Release|Win32
+		{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
