@@ -84,33 +84,7 @@ void main() {
  
 	vec3 force = gravity*mymass + vel*DEFAULT_DAMPING;
 
-	for (int k = 0; k < 12; k++)
-	{ 	    
-		vec2 coord = getNextNeighbor(k, ks, kd);
-		float j = coord.x;
-		float i = coord.y;
 
-		if (((iy + i) < 0.0) || ((iy + i) > (texsize_y - 1.0)))
-			continue;
-
-		if (((ix + j) < 0.0) || ((ix + j) > (texsize_x - 1.0)))
-			continue;
-
-		vec2 coord_neigh = vec2(ix + j, iy + i) * step;
-		
-		float rest_length = length(coord*inv_cloth_size);
-		 
-		vec3 p2 = texture2D(X, coord_neigh).xyz;
-		vec3 v2 = (p2- texture2D(X_last, coord_neigh).xyz)/dt;
-		vec3 deltaP = x_i - p2;	
-		vec3 deltaV = vel - v2;	 
-		float dist = length(deltaP);
-				
-		float   leftTerm = -ks * (dist-rest_length);
-		float  rightTerm = kd * (dot(deltaV, deltaP)/dist);		
-		vec3 springForce = (leftTerm + rightTerm)*normalize(deltaP);
-		force += springForce;			 			
-	} 
 
 	vec3 acc;
 	if(mymass == 0) 		

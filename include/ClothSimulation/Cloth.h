@@ -16,6 +16,8 @@ enum Mode { CPU, GPU };
 class Cloth
 {
 private:
+	int width;
+	int height;
 	int num_particles_width; // number of particles in "width" direction
 	int num_particles_height; // number of particles in "height" direction
 	// total number of particles is num_particles_width*num_particles_height
@@ -66,6 +68,8 @@ private:
 	//render for GPGPU
 	unsigned int quadVAO, quadVBO;
 	unsigned int vaoID;
+	void InitCPU();
+	void InitGPU();
 public:
 	Cloth(float width, float height, int num_particles_width, int num_particles_height);
 	~Cloth() {

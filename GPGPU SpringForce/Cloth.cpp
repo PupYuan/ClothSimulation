@@ -17,12 +17,7 @@ float quadVertices[] = { // vertex attributes for a quad that fills the entire s
 	 1.0f,  1.0f,  1.0f, 1.0f
 };
 
-/* This is a important constructor for the entire system of particles and constraints*/
-Cloth::Cloth(float width, float height, int num_particles_width, int num_particles_height) : num_particles_width(num_particles_width), num_particles_height(num_particles_height)
-{
-	X.resize(total_points);
-	X_last.resize(total_points);
-
+void Cloth::InitCPU() {
 	particles.resize(num_particles_width*num_particles_height); //I am essentially using this vector as an array with room for num_particles_width*num_particles_height particles
 	vertices.resize(num_particles_width*num_particles_height * vertice_data_length);
 	// creating particles in a grid of particles from (0,0,0) to (width,-height,0)
@@ -39,14 +34,11 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 			particles[y*num_particles_width + x] = Particle(pos); // insert particle in column x at y'th row
 			Particle *particle = &particles[y*num_particles_width + x];
 
-			X[(y*num_particles_width + x)] = vec4(pos, 1);
-			X_last[(y*num_particles_width + x)] = vec4(pos, 1);
-			//同样保存一份在内存中：
 			//顶点位置,并且传递地址给particle
 			vertices[vertice_data_length*(y*num_particles_width + x)] = pos.x;
 			particle->x = &vertices[vertice_data_length * (y*num_particles_width + x)];
 
-			vertices[vertice_data_length * (y*num_particles_width + x)+1] = pos.y;
+			vertices[vertice_data_length * (y*num_particles_width + x) + 1] = pos.y;
 			particle->y = &vertices[vertice_data_length * (y*num_particles_width + x) + 1];
 
 			vertices[vertice_data_length * (y*num_particles_width + x) + 2] = pos.z;
@@ -63,9 +55,9 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 			//纹理坐标
 			//x
 			float texture_val_x;
-			if(x%2==0)
+			if (x % 2 == 0)
 				texture_val_x = 0.0f;//左
-			else 
+			else
 				texture_val_x = 1.0f;//右边
 			vertices[vertice_data_length * (y*num_particles_width + x) + 6] = texture_val_x;
 			//y
@@ -75,7 +67,7 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 			else
 				texture_val_y = 0.0f;//左上
 			vertices[vertice_data_length * (y*num_particles_width + x) + 7] = texture_val_y;
-			
+
 
 		}
 	}
@@ -103,8 +95,6 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 		getParticle(0 + i, 0)->offsetPos(vec3(-0.5, 0.0, 0.0)); // moving the particle a bit towards the center, to make it hang more natural - because I like it ;)
 		getParticle(num_particles_width - 1 - i, 0)->makeUnmovable();
 	}
-
-
 	//初始化gl缓存对象
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
@@ -160,14 +150,30 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 			}
 		}
 	}
+}
 
+void Cloth::InitGPU() {
+	X.resize(total_points);
+	X_last.resize(total_points);
+
+	// creating particles in a grid of particles from (0,0,0) to (width,-height,0)
+	for (int y = 0; y < num_particles_height; y++)
+	{
+		for (int x = 0; x < num_particles_width; x++)
+		{
+			vec3 pos = glm::vec3(((float(x) / (num_particles_width - 1)) * 2 - 1)* width / 2, 1.0, ((float(y) / (num_particles_height - 1))* height));
+
+			X[(y*num_particles_width + x)] = vec4(pos, 1);
+			X_last[(y*num_particles_width + x)] = vec4(pos, 1);
+		}
+	}
 	//renderShader = ResourcesManager::loadShader("ClothShader", "../Resource/Shader/Simple.vs", "../Resource/Shader/Simple.fs");
 	renderShader = ResourcesManager::loadShader("renderShader", "render.vs", "render.fs");
-	verletShader = ResourcesManager::loadShader("verletShader","verlet.vs", "verlet.fs");
+	verletShader = ResourcesManager::loadShader("verletShader", "verlet.vs", "verlet.fs");
 	verletShader->use();
 	verletShader->setFloat("DEFAULT_DAMPING", DEFAULT_DAMPING);
 	verletShader->setFloat("mass", 1);
-	verletShader->setVec3("gravity", glm::vec3(0.0f, -0.0981f, 0.0f));
+	verletShader->setVec3("gravity", glm::vec3(0.0f, -0.981f, 0.0f));
 	verletShader->setFloat("dt", 1.0f / 60.0f);
 	verletShader->setFloat("texsize_x", num_particles_width);
 	verletShader->setFloat("texsize_y", num_particles_height);
@@ -177,8 +183,8 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 	verletShader->setFloat("KdShear", KdShear);
 	verletShader->setFloat("KsBend", KsBend);
 	verletShader->setFloat("KdBend", KdBend);
-	verletShader->setVec2("inv_cloth_size", float(width) /(num_particles_width-1), float(height) / (num_particles_height-1));
-	verletShader->setVec2("step", 1.0f / (num_particles_width-1.0f), 1.0f / (num_particles_height-1.0f));
+	verletShader->setVec2("inv_cloth_size", float(width) / (num_particles_width - 1), float(height) / (num_particles_height - 1));
+	verletShader->setVec2("step", 1.0f / (num_particles_width - 1.0f), 1.0f / (num_particles_height - 1.0f));
 	//Init for GPGPU
 
 	const int size = num_particles_width * num_particles_height * 4 * sizeof(float);
@@ -229,6 +235,21 @@ Cloth::Cloth(float width, float height, int num_particles_width, int num_particl
 	}
 	else {
 		printf("Problem with FBO setup.");
+	}
+}
+/* This is a important constructor for the entire system of particles and constraints*/
+Cloth::Cloth(float _width, float _height, int num_particles_width, int num_particles_height) : num_particles_width(num_particles_width), num_particles_height(num_particles_height)
+{
+	width = _width;
+	height = _height;
+	switch (current_mode) {
+	case CPU:
+		InitCPU();
+		break;
+
+	case GPU:
+		InitGPU();
+		break;
 	}
 }
 void Cloth::RenderCPU() {
@@ -289,14 +310,7 @@ void Cloth::RenderGPU() {
 	// bind to framebuffer and draw scene as we normally would to color texture 
 	for (int i = 0; i < NUM_ITER; i++) {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[writeID]);
-		glDisable(GL_DEPTH_TEST);
-
-        // make sure we clear the framebuffer's content
-        glClear(GL_COLOR_BUFFER_BIT);
 		glDrawBuffers(2, mrt);
-
-		verletShader->use();
-		glBindVertexArray(quadVAO);
 
 		CHECK_GL_ERRORS
 		glActiveTexture(GL_TEXTURE0);
@@ -305,6 +319,13 @@ void Cloth::RenderGPU() {
 		CHECK_GL_ERRORS
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, attachID[2 * readID + 1]);
+
+		glDisable(GL_DEPTH_TEST);
+		// make sure we clear the framebuffer's content
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		verletShader->use();
+		glBindVertexArray(quadVAO);
 	    glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
@@ -329,6 +350,8 @@ void Cloth::RenderGPU() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glReadBuffer(GL_BACK);
 	glDrawBuffer(GL_BACK);
+
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessery actually, since we won't be able to see behind the quad anyways)
