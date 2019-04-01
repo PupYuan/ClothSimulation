@@ -37,6 +37,8 @@ private:
 	const size_t total_points = (num_particles_width)*(num_particles_height);
 	std::vector<glm::vec4> X;
 	std::vector<glm::vec4> X_last;
+	std::vector<glm::vec3> Normal;
+	std::vector<glm::vec2> TexCoord;
 
 	int texture_size_x = 0;
 	int texture_size_y = 0;
@@ -45,6 +47,8 @@ private:
 	GLuint attachID[4];
 	int readID = 0, writeID = 1;
 	GLuint vboID;
+	GLuint vboID2;
+	GLuint vboID3;
 	GLenum mrt[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 
 

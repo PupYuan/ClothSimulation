@@ -155,7 +155,8 @@ void Cloth::InitCPU() {
 void Cloth::InitGPU() {
 	X.resize(total_points);
 	X_last.resize(total_points);
-
+	Normal.resize(total_points);
+	TexCoord.resize(total_points);
 	// creating particles in a grid of particles from (0,0,0) to (width,-height,0)
 	for (int y = 0; y < num_particles_height; y++)
 	{
@@ -165,6 +166,24 @@ void Cloth::InitGPU() {
 
 			X[(y*num_particles_width + x)] = vec4(pos, 1);
 			X_last[(y*num_particles_width + x)] = vec4(pos, 1);
+			Normal[(y*num_particles_width + x)] = vec3(0, 0, 1);
+			//纹理坐标
+			//x
+			vec2 temp(0, 0);
+			float texture_val_x;
+			if (x % 2 == 0)
+				texture_val_x = 0.0f;//左
+			else
+				texture_val_x = 1.0f;//右边
+			temp.x = texture_val_x;
+			//y
+			float texture_val_y;
+			if (y % 2 == 0)
+				texture_val_y = 1.0f;//上
+			else
+				texture_val_y = 0.0f;//左上
+			temp.y = texture_val_y;
+			TexCoord[(y*num_particles_width + x)] = temp;
 		}
 	}
 	//填充索引数据到indices中
@@ -201,19 +220,31 @@ void Cloth::InitGPU() {
 	verletShader->setVec2("step", 1.0f / (num_particles_width - 1.0f), 1.0f / (num_particles_height - 1.0f));
 	//Init for GPGPU
 
-	const int size = num_particles_width * num_particles_height * 4 * sizeof(float);
+	const int size = num_particles_width * num_particles_height *4* sizeof(float);
 	glGenVertexArrays(1, &vaoID);
-	glGenBuffers(1, &vboID);
 	glGenBuffers(1, &EBO);
 	glBindVertexArray(vaoID);
-	glBindBuffer(GL_ARRAY_BUFFER, vboID);
-	glBufferData(GL_ARRAY_BUFFER, size, 0, GL_DYNAMIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*indices.size(), &indices[0], GL_DYNAMIC_DRAW);
-
+	//顶点位置属性
+	glGenBuffers(1, &vboID);
+	glBindBuffer(GL_ARRAY_BUFFER, vboID);
+	glBufferData(GL_ARRAY_BUFFER, size, 0, GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	//顶点法线属性
+	glGenBuffers(1, &vboID2);
+	glBindBuffer(GL_ARRAY_BUFFER, vboID2);
+	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 3 * sizeof(float), &Normal[0], GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(1);
+	//顶点纹理属性
+	glGenBuffers(1, &vboID3);
+	glBindBuffer(GL_ARRAY_BUFFER, vboID3);
+	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 2 * sizeof(float), &TexCoord[0], GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -384,6 +415,20 @@ void Cloth::RenderGPU() {
 	glm::mat4 model1;
 	//model1 = glm::translate(model1, glm::vec3(-6.0f, 2.0f, -5.0f)); // translate it down so it's at the center of the scene
 	renderShader->setMat4("model", model1);
+
+	// bind diffuse map
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene->diffuseMap);
+
+	renderShader->setVec3("light.position", scene->light.lightPos);
+	renderShader->setVec3("viewPos", scene->camera.Position);
+	renderShader->setVec3("light.ambient", scene->light.ambientColor);
+	renderShader->setVec3("light.diffuse", scene->light.diffuseColor);
+	renderShader->setVec3("light.specular", 0.2f, 0.2f, 0.2f);
+
+	renderShader->setFloat("material.shininess", 16.0f);
+	renderShader->setVec3("material.specular", vec3(0.2f, 0.2f, 0.2f));
+
 	glBindVertexArray(vaoID);
 	glDrawElements(GL_TRIANGLES, 6 * (num_particles_height - 1)*(num_particles_width - 1), GL_UNSIGNED_INT, 0);
 	//glDrawArrays(GL_POINTS, 0, num_particles_width * num_particles_height);
