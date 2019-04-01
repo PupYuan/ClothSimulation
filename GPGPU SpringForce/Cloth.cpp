@@ -167,6 +167,20 @@ void Cloth::InitGPU() {
 			X_last[(y*num_particles_width + x)] = vec4(pos, 1);
 		}
 	}
+	//填充索引数据到indices中
+	for (int y = 0; y < num_particles_height - 1; y++)
+	{
+		for (int x = 0; x < num_particles_width - 1; x++)
+		{
+			indices.push_back((y)*num_particles_width + x + 1);
+			indices.push_back((y + 1)*num_particles_width + x + 1);
+			indices.push_back((y)*num_particles_width + x);
+
+			indices.push_back((y + 1)*num_particles_width + x + 1);
+			indices.push_back((y + 1)*num_particles_width + x);
+			indices.push_back((y)*num_particles_width + x);
+		}
+	}
 	//renderShader = ResourcesManager::loadShader("ClothShader", "../Resource/Shader/Simple.vs", "../Resource/Shader/Simple.fs");
 	renderShader = ResourcesManager::loadShader("renderShader", "render.vs", "render.fs");
 	verletShader = ResourcesManager::loadShader("verletShader", "verlet.vs", "verlet.fs");
@@ -190,9 +204,14 @@ void Cloth::InitGPU() {
 	const int size = num_particles_width * num_particles_height * 4 * sizeof(float);
 	glGenVertexArrays(1, &vaoID);
 	glGenBuffers(1, &vboID);
+	glGenBuffers(1, &EBO);
 	glBindVertexArray(vaoID);
 	glBindBuffer(GL_ARRAY_BUFFER, vboID);
 	glBufferData(GL_ARRAY_BUFFER, size, 0, GL_DYNAMIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*indices.size(), &indices[0], GL_DYNAMIC_DRAW);
+
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 
@@ -242,6 +261,7 @@ Cloth::Cloth(float _width, float _height, int num_particles_width, int num_parti
 {
 	width = _width;
 	height = _height;
+	//glfwSwapInterval(0);
 	switch (current_mode) {
 	case CPU:
 		InitCPU();
@@ -341,6 +361,7 @@ void Cloth::RenderGPU() {
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, vboID);
 	glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RGBA, GL_FLOAT, 0);
 
+	CHECK_GL_ERRORS
 	//重置状态
 	glReadBuffer(GL_NONE);
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
@@ -352,21 +373,20 @@ void Cloth::RenderGPU() {
 	glDrawBuffer(GL_BACK);
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
+	glViewport(0, 0, scene->SCR_WIDTH, scene->SCR_HEIGHT);
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessery actually, since we won't be able to see behind the quad anyways)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glViewport(0, 0, scene->SCR_WIDTH, scene->SCR_HEIGHT);
+	
 	renderShader->use();
 	renderShader->setMat4("projection", scene->projection);
 	renderShader->setMat4("view", scene->view);
 	glm::mat4 model1;
 	//model1 = glm::translate(model1, glm::vec3(-6.0f, 2.0f, -5.0f)); // translate it down so it's at the center of the scene
 	renderShader->setMat4("model", model1);
-	glPointSize(5);
 	glBindVertexArray(vaoID);
-	glDrawArrays(GL_POINTS, 0, num_particles_width * num_particles_height);
+	glDrawElements(GL_TRIANGLES, 6 * (num_particles_height - 1)*(num_particles_width - 1), GL_UNSIGNED_INT, 0);
+	//glDrawArrays(GL_POINTS, 0, num_particles_width * num_particles_height);
 }
 
 
