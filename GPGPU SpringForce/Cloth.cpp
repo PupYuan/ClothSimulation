@@ -172,11 +172,11 @@ void Cloth::InitGPU() {
 	verletShader = ResourcesManager::loadShader("verletShader", "verlet.vs", "verlet.fs");
 	verletShader->use();
 	verletShader->setFloat("DEFAULT_DAMPING", DEFAULT_DAMPING);
-	verletShader->setFloat("mass", 1);
-	verletShader->setVec3("gravity", glm::vec3(0.0f, -0.981f, 0.0f));
+	verletShader->setFloat("mass", 1.0f);
+	verletShader->setVec3("gravity", glm::vec3(0.0f, -9.81f, 0.0f));
 	verletShader->setFloat("dt", 1.0f / 60.0f);
-	verletShader->setFloat("texsize_x", num_particles_width);
-	verletShader->setFloat("texsize_y", num_particles_height);
+	verletShader->setFloat("texsize_x", float(num_particles_width));
+	verletShader->setFloat("texsize_y", float(num_particles_height));
 	verletShader->setFloat("KsStruct", KsStruct);
 	verletShader->setFloat("KdStruct", KdStruct);
 	verletShader->setFloat("KsShear", KsShear);
