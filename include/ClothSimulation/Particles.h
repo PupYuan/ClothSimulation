@@ -26,6 +26,7 @@ public:
 	Particle() {}
 	vec3& getPos() { return pos; }
 	vec3& getLastPos() { return old_pos; }
+	float getMass() { return mass; };
 	void resetNormal() { accumulated_normal = vec3(0, 0, 0); }
 	vec3& getNormal() { return accumulated_normal; } // notice, the normal is not unit length
 	vec3& getVelocity() {

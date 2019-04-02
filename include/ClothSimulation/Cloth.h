@@ -10,6 +10,7 @@
 #include <GLFW/glfw3.h>
 #include "Spring.h"
 #include <learnopengl/shader.h>
+#include "Constraint.h"
 class SceneManager;
 
 enum Mode { CPU, GPU };
@@ -24,6 +25,7 @@ private:
 
 	std::vector<Particle> particles; // all particles that are part of this cloth
 	std::vector<Spring> Springs; // alle Springs between particles as part of this cloth
+	std::vector<Constraint*> Constraints; // alle Springs between particles as part of this cloth
 	Particle* getParticle(int x, int y) { return &particles[y*num_particles_width + x]; }
 	//在内存中一份顶点数据
 	std::vector<float>vertices;
@@ -33,7 +35,7 @@ private:
 
 	//GPGPU相关
 	//位置数据
-	Mode current_mode = GPU;
+	Mode current_mode = CPU;
 	const size_t total_points = (num_particles_width)*(num_particles_height);
 	std::vector<glm::vec4> X;
 	std::vector<glm::vec4> X_last;
@@ -104,6 +106,7 @@ public:
 	void addForce(const vec3 direction);
 	void timeStep(float dt);
 	void AddSpring(Particle* a, Particle* b, float ks, float kd);
+	void AddConstraint(Particle * a, Particle * b, float k);
 	void SetScene(SceneManager* _scene) {
 		scene = _scene;
 	}

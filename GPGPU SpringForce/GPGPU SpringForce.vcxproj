@@ -119,6 +119,7 @@
     <ClCompile Include="..\src\glad.c" />
     <ClCompile Include="Cloth.cpp" />
     <ClCompile Include="Collider.cpp" />
+    <ClCompile Include="Constraint.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="Physics.cpp" />
@@ -128,7 +129,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\ClothSimulation\Cloth.h" />
-    <ClInclude Include="..\include\ClothSimulation\Collider.h" />
+    <ClInclude Include="..\include\ClothSimulation\Constraint.h" />
     <ClInclude Include="..\include\ClothSimulation\Particles.h" />
     <ClInclude Include="..\include\ClothSimulation\RenderSystem.h" />
     <ClInclude Include="..\include\ClothSimulation\RenderTarget.h" />

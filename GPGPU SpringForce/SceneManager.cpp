@@ -3,7 +3,7 @@ Camera SceneManager::camera(glm::vec3(0.0, 0.0, 6.0f));//¶¨Òå
 
 void SceneManager::CreateCloth()
 {
-	cloth = new Cloth(4, 4, 64, 64);
+	cloth = new Cloth(4, 4, 20, 20);
 	cloth->SetScene(this);
 }
 
@@ -11,7 +11,6 @@ void SceneManager::SceneInit() {
 	// build and compile shaders
 		// -------------------------
 	ourShader = ResourcesManager::loadShader("lightingMaps", "../Resource/Shader/lightingMaps.vs", "../Resource/Shader/lightingMaps.fs");
-	//ClothShader = ResourcesManager::loadShader("ClothShader", "../Resource/Shader/Simple.vs", "../Resource/Shader/Simple.fs");
 
 	// load models
 	// -----------

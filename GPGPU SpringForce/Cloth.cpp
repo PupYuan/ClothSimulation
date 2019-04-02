@@ -126,33 +126,42 @@ void Cloth::InitCPU() {
 	glBindVertexArray(0);
 
 	//Constraints
-		// Setup springs
-	// Ìí¼ÓSprings
+	//for (int x = 0; x < num_particles_width; x++)
+	//{
+	//	for (int y = 0; y < num_particles_height; y++)
+	//	{
+	//		// Structure Springs
+	//		if (x + 1 < num_particles_width)
+	//			AddSpring(getParticle(x, y), getParticle(x + 1, y), KsStruct, KdStruct);
+	//		if (y + 1 < num_particles_height)
+	//			AddSpring(getParticle(x, y), getParticle(x, y + 1), KsStruct, KdStruct);
+
+	//		//Shear Springs
+	//		if (y + 1 < num_particles_height && x + 1 < num_particles_width) {
+	//			AddSpring(getParticle(x, y), getParticle(x + 1, y + 1), KsShear, KdShear);
+	//			AddSpring(getParticle(x + 1, y), getParticle(x, y + 1), KsShear, KdShear);
+	//		}
+
+	//		//Bending Springs
+	//		if (x + 2 < num_particles_width)
+	//			AddSpring(getParticle(x, y), getParticle(x + 2, y), KsBend, KdBend);
+	//		if (y + 2 < num_particles_height)
+	//			AddSpring(getParticle(x, y), getParticle(x, y + 2), KsBend, KdBend);
+	//		if (y + 2 < num_particles_height && x + 2 < num_particles_width) {
+	//			AddSpring(getParticle(x, y), getParticle(x + 2, y + 2), KsBend, KdBend);
+	//			AddSpring(getParticle(x + 2, y), getParticle(x, y + 2), KsBend, KdBend);
+	//		}
+	//	}
+	//}
 	for (int x = 0; x < num_particles_width; x++)
 	{
 		for (int y = 0; y < num_particles_height; y++)
 		{
 			// Structure Springs
 			if (x + 1 < num_particles_width)
-				AddSpring(getParticle(x, y), getParticle(x + 1, y), KsStruct, KdStruct);
+				AddConstraint(getParticle(x, y), getParticle(x + 1, y),1);
 			if (y + 1 < num_particles_height)
-				AddSpring(getParticle(x, y), getParticle(x, y + 1), KsStruct, KdStruct);
-
-			//Shear Springs
-			if (y + 1 < num_particles_height && x + 1 < num_particles_width) {
-				AddSpring(getParticle(x, y), getParticle(x + 1, y + 1), KsShear, KdShear);
-				AddSpring(getParticle(x + 1, y), getParticle(x, y + 1), KsShear, KdShear);
-			}
-
-			//Bending Springs
-			if (x + 2 < num_particles_width)
-				AddSpring(getParticle(x, y), getParticle(x + 2, y), KsBend, KdBend);
-			if (y + 2 < num_particles_height)
-				AddSpring(getParticle(x, y), getParticle(x, y + 2), KsBend, KdBend);
-			if (y + 2 < num_particles_height && x + 2 < num_particles_width) {
-				AddSpring(getParticle(x, y), getParticle(x + 2, y + 2), KsBend, KdBend);
-				AddSpring(getParticle(x + 2, y), getParticle(x, y + 2), KsBend, KdBend);
-			}
+				AddConstraint(getParticle(x, y), getParticle(x, y + 1),1);
 		}
 	}
 }
@@ -482,10 +491,16 @@ void Cloth::timeStep(float dt) {
 		(*particle).addForce(DEFAULT_DAMPING * V);
 	}
 
-	std::vector<Spring>::iterator Spring;
-	for (Spring = Springs.begin(); Spring != Springs.end(); Spring++)
+	//std::vector<Spring>::iterator Spring;
+	//for (Spring = Springs.begin(); Spring != Springs.end(); Spring++)
+	//{
+	//	(*Spring).satisfySpring(dt); // satisfy Spring.
+	//}
+
+	std::vector<Constraint*>::iterator constraint;
+	for (constraint = Constraints.begin(); constraint != Constraints.end(); constraint++)
 	{
-		(*Spring).satisfySpring(dt); // satisfy Spring.
+		(*constraint)->satisfyConstraint(dt); // satisfy Spring.
 	}
 
 	for (particle = particles.begin(); particle != particles.end(); particle++)
@@ -503,4 +518,13 @@ void Cloth::AddSpring(Particle* a, Particle* b, float ks, float kd) {
 	glm::vec3 deltaP = vec3(a->getPos() - b->getPos());
 	spring.restDistance = sqrt(glm::dot(deltaP, deltaP));
 	Springs.push_back(spring);
+}
+
+void Cloth::AddConstraint(Particle* a, Particle* b, float k) {
+	DistanceConstraint* constraint = new DistanceConstraint();
+	constraint->particle1 = a;
+	constraint->particle2 = b;
+	glm::vec3 deltaP = vec3(a->getPos() - b->getPos());
+	constraint->restDistance = sqrt(glm::dot(deltaP, deltaP));
+	Constraints.push_back(constraint);
 }
