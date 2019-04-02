@@ -8,13 +8,17 @@ int vertice_data_length = 8;
 
 float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
 	// positions   // texCoords
-	-1.0f,  1.0f,  0.0f, 1.0f,
-	-1.0f, -1.0f,  0.0f, 0.0f,
-	 1.0f, -1.0f,  1.0f, 0.0f,
-
-	-1.0f,  1.0f,  0.0f, 1.0f,
-	 1.0f, -1.0f,  1.0f, 0.0f,
-	 1.0f,  1.0f,  1.0f, 1.0f
+	//-1.0f, -1.0f,  0.0f, 0.0f,
+	//1.0f, -1.0f,  1.0f, 0.0f,
+	//1.0f,  1.0f,  1.0f, 1.0f,
+	//1.0f,  1.0f,  1.0f, 1.0f,
+	//-1.0f,  1.0f,  0.0f, 1.0f,
+	//-1.0f, -1.0f,  0.0f, 0.0f,
+	// positions        // texture Coords
+	-1.0f,  1.0f, 0.0f, 1.0f,
+	-1.0f, -1.0f, 0.0f, 0.0f,
+	1.0f,  1.0f, 1.0f, 1.0f,
+	1.0f, -1.0f, 1.0f, 0.0f,
 };
 
 void Cloth::InitCPU() {
@@ -86,6 +90,7 @@ void Cloth::InitCPU() {
 		}
 	}
 
+	renderShader = ResourcesManager::loadShader("ClothShader", "../Resource/Shader/Simple.vs", "../Resource/Shader/Simple.fs");
 	// making the upper left most three and right most three particles unmovable
 	for (int i = 0; i < 3; i++)
 	{
@@ -216,8 +221,10 @@ void Cloth::InitGPU() {
 	verletShader->setFloat("KdShear", KdShear);
 	verletShader->setFloat("KsBend", KsBend);
 	verletShader->setFloat("KdBend", KdBend);
-	verletShader->setVec2("inv_cloth_size", float(width) / (num_particles_width - 1), float(height) / (num_particles_height - 1));
-	verletShader->setVec2("step", 1.0f / (num_particles_width - 1.0f), 1.0f / (num_particles_height - 1.0f));
+	//verletShader->setVec2("inv_cloth_size", float(width) / (num_particles_width-1), float(height) / (num_particles_height-1));
+	verletShader->setVec2("inv_cloth_size", 4.0 / 63.0, 4.0 / 63.0);
+	//verletShader->setVec2("step", 1.0f / (num_particles_width - 1.0f), 1.0f / (num_particles_height - 1.0f));
+	verletShader->setVec2("step", 1.0f / 63.0f, 1.0f / 63.0f);
 	//Init for GPGPU
 
 	const int size = num_particles_width * num_particles_height *4* sizeof(float);
@@ -269,14 +276,14 @@ void Cloth::InitGPU() {
 	glGenFramebuffers(2, fboID);
 	glGenTextures(4, attachID);
 	for (int j = 0; j < 2; j++) {//两个帧缓冲，用于输入和输出交替
-		glBindFramebuffer(GL_FRAMEBUFFER, fboID[j]);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[j]);
 		for (int i = 0; i < 2; i++) {//两块纹理，用于verlet积分的当前位置和过去位置
 			glBindTexture(GL_TEXTURE_2D, attachID[i + 2 * j]);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, num_particles_width, num_particles_height, 0, GL_RGBA, GL_FLOAT, _data[i]); // NULL = Empty texture
 
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, mrt[i], GL_TEXTURE_2D, attachID[i + 2 * j], 0);
+			glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, mrt[i], GL_TEXTURE_2D, attachID[i + 2 * j], 0);
 		}
 	}
 	GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
@@ -286,6 +293,7 @@ void Cloth::InitGPU() {
 	else {
 		printf("Problem with FBO setup.");
 	}
+	CHECK_GL_ERRORS
 }
 /* This is a important constructor for the entire system of particles and constraints*/
 Cloth::Cloth(float _width, float _height, int num_particles_width, int num_particles_height) : num_particles_width(num_particles_width), num_particles_height(num_particles_height)
@@ -355,6 +363,7 @@ void Cloth::RenderCPU() {
 	glDrawElements(GL_TRIANGLES, 6 * (num_particles_height - 1)*(num_particles_width - 1), GL_UNSIGNED_INT, 0);
 }
 void Cloth::RenderGPU() {
+	CHECK_GL_ERRORS
 	glViewport(0, 0, num_particles_width, num_particles_height);
 	// render
 	// ------
@@ -377,7 +386,8 @@ void Cloth::RenderGPU() {
 
 		verletShader->use();
 		glBindVertexArray(quadVAO);
-	    glDrawArrays(GL_TRIANGLES, 0, 6);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	    //glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
 		//swap read/write pathways
@@ -432,6 +442,7 @@ void Cloth::RenderGPU() {
 	glBindVertexArray(vaoID);
 	glDrawElements(GL_TRIANGLES, 6 * (num_particles_height - 1)*(num_particles_width - 1), GL_UNSIGNED_INT, 0);
 	//glDrawArrays(GL_POINTS, 0, num_particles_width * num_particles_height);
+	CHECK_GL_ERRORS
 }
 
 

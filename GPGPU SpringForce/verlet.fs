@@ -105,6 +105,7 @@ void main() {
 		vec3 deltaP = x_i - p2;	
 		vec3 deltaV = vel - v2;	 
 		float dist = length(deltaP);
+		//float dist = rest_length;
 				
 		float   leftTerm = -ks * (dist-rest_length);
 		float  rightTerm = kd * (dot(deltaV, deltaP)/dist);		
