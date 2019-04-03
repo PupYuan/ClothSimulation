@@ -76,6 +76,7 @@ private:
 	unsigned int vaoID;
 	void InitCPU();
 	void InitGPU();
+	 
 public:
 	Cloth(float width, float height, int num_particles_width, int num_particles_height);
 	~Cloth() {

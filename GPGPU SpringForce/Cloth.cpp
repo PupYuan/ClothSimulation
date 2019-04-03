@@ -3,6 +3,8 @@
 float	KsStruct = 50.75f, KdStruct = -0.25f;
 float	KsShear = 50.75f, KdShear = -0.25f;
 float	KsBend = 50.95f, KdBend = -0.25f;
+float kBend = 0.5f;
+float kStretch = 0.25f;
 int vertice_data_length = 8;
 #define CHECK_GL_ERRORS assert(glGetError()==GL_NO_ERROR);
 
@@ -157,11 +159,33 @@ void Cloth::InitCPU() {
 	{
 		for (int y = 0; y < num_particles_height; y++)
 		{
-			// Structure Springs
+			// Distance Constraints
 			if (x + 1 < num_particles_width)
-				AddConstraint(getParticle(x, y), getParticle(x + 1, y),1);
+				AddConstraint(getParticle(x, y), getParticle(x + 1, y), kStretch);
 			if (y + 1 < num_particles_height)
-				AddConstraint(getParticle(x, y), getParticle(x, y + 1),1);
+				AddConstraint(getParticle(x, y), getParticle(x, y + 1), kStretch);
+					//Shear Springs
+		    if (y + 1 < num_particles_height && x + 1 < num_particles_width) {
+				AddConstraint(getParticle(x, y), getParticle(x + 1, y + 1), kStretch);
+				AddConstraint(getParticle(x + 1, y), getParticle(x, y + 1), kStretch);
+		    }
+		}
+	}
+	for (int i = 0; i < num_particles_height - 1; ++i) {
+		for (int j = 0; j < num_particles_width - 1; ++j) {
+			int p1 = i * (num_particles_width) + j;
+			int p2 = p1 + 1;
+			int p3 = p1 + (num_particles_width);
+			int p4 = p3 + 1;
+
+			if ((j + i) % 2) {
+				BendingConstraint* constraint = new BendingConstraint(&particles[p3], &particles[p2], &particles[p1], &particles[p4], kBend);
+				Constraints.push_back(constraint);
+			}
+			else {
+				BendingConstraint* constraint = new BendingConstraint(&particles[p4], &particles[p1], &particles[p3], &particles[p2], kBend);
+				Constraints.push_back(constraint);
+			}
 		}
 	}
 }
@@ -524,6 +548,11 @@ void Cloth::AddConstraint(Particle* a, Particle* b, float k) {
 	DistanceConstraint* constraint = new DistanceConstraint();
 	constraint->particle1 = a;
 	constraint->particle2 = b;
+	constraint->k = k;
+	constraint->k_prime = 1.0f - pow((1.0f - k), 1.0f / Constraint::solver_iterations);
+	if (constraint->k_prime > 1.0)
+		constraint->k_prime = 1.0;
+
 	glm::vec3 deltaP = vec3(a->getPos() - b->getPos());
 	constraint->restDistance = sqrt(glm::dot(deltaP, deltaP));
 	Constraints.push_back(constraint);

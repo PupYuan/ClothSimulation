@@ -64,6 +64,7 @@ public:
 		}
 	}
 	void makeUnmovable() { movable = false; }
+	bool isMovable() { return movable; }
 	void offsetPos(const vec3 v) 
 	{ 
 		if (movable) pos += v;
