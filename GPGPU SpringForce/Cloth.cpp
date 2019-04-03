@@ -36,8 +36,8 @@ void Cloth::InitCPU() {
 			//	0);
 			//vec3 pos = glm::vec3(width * (x / (float)num_particles_width), -height * (y / (float)num_particles_height),0 );
 			//vec3 pos = glm::vec3(((float(x) / (num_particles_width - 1)) * 2 - 1)* width/2, width + 1, ((float(y) / (num_particles_height - 1))* height));
-			vec3 pos = glm::vec3(((float(x) / (num_particles_width - 1)) * 2 - 1)* width / 2, 1.0, ((float(y) / (num_particles_height - 1))* height));
-			particles[y*num_particles_width + x] = Particle(pos); // insert particle in column x at y'th row
+			vec3 pos = glm::vec3(((float(x) / (num_particles_width - 1)) * 2 - 1)* width / 2, 5, ((float(y) / (num_particles_height - 1))* height));
+			particles[y*num_particles_width + x] = Particle(pos,1.0f/ (num_particles_width * num_particles_height)); // insert particle in column x at y'th row
 			Particle *particle = &particles[y*num_particles_width + x];
 
 			//顶点位置,并且传递地址给particle
@@ -164,30 +164,44 @@ void Cloth::InitCPU() {
 				AddConstraint(getParticle(x, y), getParticle(x + 1, y), kStretch);
 			if (y + 1 < num_particles_height)
 				AddConstraint(getParticle(x, y), getParticle(x, y + 1), kStretch);
-					//Shear Springs
+			//Shear Springs
 		    if (y + 1 < num_particles_height && x + 1 < num_particles_width) {
 				AddConstraint(getParticle(x, y), getParticle(x + 1, y + 1), kStretch);
 				AddConstraint(getParticle(x + 1, y), getParticle(x, y + 1), kStretch);
 		    }
 		}
 	}
-	for (int i = 0; i < num_particles_height - 1; ++i) {
-		for (int j = 0; j < num_particles_width - 1; ++j) {
-			int p1 = i * (num_particles_width) + j;
-			int p2 = p1 + 1;
-			int p3 = p1 + (num_particles_width);
-			int p4 = p3 + 1;
-
-			if ((j + i) % 2) {
-				BendingConstraint* constraint = new BendingConstraint(&particles[p3], &particles[p2], &particles[p1], &particles[p4], kBend);
-				Constraints.push_back(constraint);
-			}
-			else {
-				BendingConstraint* constraint = new BendingConstraint(&particles[p4], &particles[p1], &particles[p3], &particles[p2], kBend);
-				Constraints.push_back(constraint);
-			}
+	for (int i = 0; i < num_particles_width; i++) {
+		for (int j = 0; j < num_particles_height - 2; j++) {
+			BendingConstraint2* constraint = new BendingConstraint2(getParticle(i, j), getParticle(i, j+1), getParticle(i, j+2), kBend);
+			Constraints.push_back(constraint);
 		}
 	}
+	//add horizontal constraints
+	for (int i = 0; i < num_particles_width - 2; i++) {
+		for (int j = 0; j < num_particles_height; j++) {
+			BendingConstraint2* constraint = new BendingConstraint2(getParticle(i, j), getParticle(i+1, j), getParticle(i+2, j), kBend);
+			Constraints.push_back(constraint);
+		}
+	}
+
+	//for (int i = 0; i < num_particles_height - 1; ++i) {
+	//	for (int j = 0; j < num_particles_width - 1; ++j) {
+	//		int p1 = i * (num_particles_width) + j;
+	//		int p2 = p1 + 1;
+	//		int p3 = p1 + (num_particles_width);
+	//		int p4 = p3 + 1;
+
+	//		if ((j + i) % 2) {
+	//			BendingConstraint2* constraint = new BendingConstraint2(&particles[p3], &particles[p2], &particles[p1], &particles[p4], kBend);
+	//			Constraints.push_back(constraint);
+	//		}
+	//		else {
+	//			BendingConstraint2* constraint = new BendingConstraint2(&particles[p4], &particles[p1], &particles[p3], &particles[p2], kBend);
+	//			Constraints.push_back(constraint);
+	//		}
+	//	}
+	//}
 }
 
 void Cloth::InitGPU() {
@@ -513,6 +527,9 @@ void Cloth::timeStep(float dt) {
 	{
 		glm::vec3 V = GetVerletVelocity((*particle).getPos(), (*particle).getLastPos(), dt);
 		(*particle).addForce(DEFAULT_DAMPING * V);
+		//直接按比例减少速度模拟摩擦力
+		//V *= global_dampening;
+		//particle->setVelocity(V);
 	}
 
 	//std::vector<Spring>::iterator Spring;
@@ -521,12 +538,14 @@ void Cloth::timeStep(float dt) {
 	//	(*Spring).satisfySpring(dt); // satisfy Spring.
 	//}
 
-	std::vector<Constraint*>::iterator constraint;
-	for (constraint = Constraints.begin(); constraint != Constraints.end(); constraint++)
-	{
-		(*constraint)->satisfyConstraint(dt); // satisfy Spring.
-	}
 
+	for (size_t si = 0; si < Constraint::solver_iterations; ++si) {
+		std::vector<Constraint*>::iterator constraint;
+		for (constraint = Constraints.begin(); constraint != Constraints.end(); constraint++)
+		{
+			(*constraint)->satisfyConstraint(dt); // satisfy Spring.
+		}
+	}
 	for (particle = particles.begin(); particle != particles.end(); particle++)
 	{
 		(*particle).timeStep(dt);

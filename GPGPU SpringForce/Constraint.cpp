@@ -133,3 +133,34 @@ void BendingConstraint::satisfyConstraint(float dt)
 		particle4->offsetPos(dP4*k_prime);
 	}
 }
+
+void BendingConstraint2::satisfyConstraint(float dt)
+{
+	size_t i = 0;
+
+	//global_k is a percentage of the global dampening constant 
+	float global_k = global_dampening * 0.01f;
+	glm::vec3 center = 0.3333f * (particle1->getPos() + particle2->getPos() + particle3->getPos());
+	glm::vec3 dir_center = particle3->getPos() - center;
+	float dist_center = glm::length(dir_center);
+
+	float W1 = 1 / (particle1->getMass());
+	float W2 = 1 / (particle2->getMass());
+	float W3 = 1 / (particle3->getMass());
+
+	float diff = 1.0f - ((global_k + rest_length) / dist_center);
+	glm::vec3 dir_force = dir_center * diff;
+	glm::vec3 fa = k_prime * ((2.0f*W1) / w) * dir_force;
+	glm::vec3 fb =k_prime * ((2.0f*W2) /w) * dir_force;
+	glm::vec3 fc = -k_prime * ((4.0f*W3) / w) * dir_force;
+
+	if (W1 > 0.0) {
+		particle1->offsetPos(fa);
+	}
+	if (W2 > 0.0) {
+		particle2->offsetPos(fb);
+	}
+	if (W3 > 0.0) {
+		particle3->offsetPos(fb);
+	}
+}

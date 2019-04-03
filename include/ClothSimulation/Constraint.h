@@ -1,6 +1,7 @@
 #pragma once
 #include <ClothSimulation/Particles.h>
 #define PI 3.1415926536f
+
 class Constraint {
 public:
 	virtual void satisfyConstraint(float dt);
@@ -43,4 +44,25 @@ public:
 		float d = glm::dot(n1, n2);
 		return acos(d);
 	}
+};
+
+class BendingConstraint2 :public Constraint
+{
+public:
+	BendingConstraint2(Particle *_particle1, Particle *_particle2, Particle *_particle3, float _k = 1) :
+		k(_k), particle1(_particle1), particle2(_particle2), particle3(_particle3)
+	{
+		w = 1 / (particle1->getMass()) + 1 / (particle2->getMass()) + 2 / (particle3->getMass());
+		glm::vec3 center = 0.3333f * (particle3->getPos() + particle2->getPos() + particle1->getPos());
+		rest_length = glm::length(particle3->getPos() - center);
+		k_prime = 1.0f - pow((1.0f - k), 1.0f / solver_iterations);  //1.0f-pow((1.0f-c.k), 1.0f/ns);
+		if (k_prime > 1.0)
+			k_prime = 1.0;
+	}
+	const float global_dampening = 0.98f; //DevO: 24.07.2011  //global velocity dampening !!!
+	Particle *particle1, *particle2, *particle3;
+	float rest_length;
+	float w;
+	float k = 1;//stifness
+	virtual void satisfyConstraint(float dt);
 };

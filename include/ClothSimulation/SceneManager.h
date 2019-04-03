@@ -38,7 +38,7 @@ public:
 
 	float timeStep = 1.0f / 60.0f;
 	//Simulation
-	glm::vec3 gravity = glm::vec3(0.0f, -0.981f, 0.0f);
+	glm::vec3 gravity = glm::vec3(0.0f, -0.00981f, 0.0f);
 	double accumulator = timeStep;
 	//统计帧率用的信息
 	LARGE_INTEGER frequency;        // ticks per second

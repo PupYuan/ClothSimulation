@@ -76,7 +76,7 @@ private:
 	unsigned int vaoID;
 	void InitCPU();
 	void InitGPU();
-	 
+	const float global_dampening = 0.98f; //DevO: 24.07.2011  //global velocity dampening !!!
 public:
 	Cloth(float width, float height, int num_particles_width, int num_particles_height);
 	~Cloth() {

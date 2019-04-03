@@ -22,7 +22,7 @@ public:
 	float * normal_x;
 	float * normal_y;
 	float * normal_z;
-	Particle(vec3 pos) : pos(pos), old_pos(pos), acceleration(vec3(0, 0, 0)), mass(1), movable(true), accumulated_normal(vec3(0, 0, 0)) {}
+	Particle(vec3 pos,float _mass=1) : pos(pos), old_pos(pos), acceleration(vec3(0, 0, 0)), mass(_mass), movable(true), accumulated_normal(vec3(0, 0, 0)) {}
 	Particle() {}
 	vec3& getPos() { return pos; }
 	vec3& getLastPos() { return old_pos; }
@@ -31,6 +31,9 @@ public:
 	vec3& getNormal() { return accumulated_normal; } // notice, the normal is not unit length
 	vec3& getVelocity() {
 		return velocity;
+	}
+	void setVelocity(vec3 V) {
+		velocity = V;
 	}
 	void addToNormal(vec3 normal)
 	{
@@ -50,12 +53,13 @@ public:
 		if (movable)
 		{
 			vec3 temp = pos;
+			//pos = pos + velocity* dt + acceleration * dt*dt;
 			pos = pos + (pos - old_pos) + acceleration * dt*dt;
 			old_pos = temp;
 			acceleration = vec3(0, 0, 0); // acceleration is reset since it HAS been translated into a change in position (and implicitely into velocity)
 
 			if (pos.y <-10.0f) {
-				pos.y = -10.0f;
+				pos.y = -10.0;
 			}
 			//然后把数据传递给之前的顶点数据
 			*x = pos.x;
