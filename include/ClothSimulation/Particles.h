@@ -25,10 +25,14 @@ public:
 	Particle(vec3 pos,float _mass=1) : pos(pos), old_pos(pos), acceleration(vec3(0, 0, 0)), mass(_mass), movable(true), accumulated_normal(vec3(0, 0, 0)) {}
 	Particle() {}
 	vec3& getPos() { return pos; }
+	vec3 getCurrentPos() { return pos; }
 	vec3& getLastPos() { return old_pos; }
 	float getMass() { return mass; };
 	void resetNormal() { accumulated_normal = vec3(0, 0, 0); }
 	vec3& getNormal() { return accumulated_normal; } // notice, the normal is not unit length
+	vec3 getAcceleration() {
+		return acceleration;
+	}
 	vec3& getVelocity() {
 		return velocity;
 	}
@@ -53,8 +57,9 @@ public:
 		if (movable)
 		{
 			vec3 temp = pos;
+			pos = pos + velocity * dt;
 			//pos = pos + velocity* dt + acceleration * dt*dt;
-			pos = pos + (pos - old_pos) + acceleration * dt*dt;
+			//pos = pos + (pos - old_pos) + acceleration * dt*dt;
 			old_pos = temp;
 			acceleration = vec3(0, 0, 0); // acceleration is reset since it HAS been translated into a change in position (and implicitely into velocity)
 

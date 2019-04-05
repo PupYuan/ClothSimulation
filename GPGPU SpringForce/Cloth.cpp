@@ -26,6 +26,7 @@ float quadVertices[] = { // vertex attributes for a quad that fills the entire s
 void Cloth::InitCPU() {
 	particles.resize(num_particles_width*num_particles_height); //I am essentially using this vector as an array with room for num_particles_width*num_particles_height particles
 	vertices.resize(num_particles_width*num_particles_height * vertice_data_length);
+	Ri.resize(total_points);
 	// creating particles in a grid of particles from (0,0,0) to (width,-height,0)
 	for (int y = 0; y < num_particles_height; y++)
 	{
@@ -36,7 +37,7 @@ void Cloth::InitCPU() {
 			//	0);
 			//vec3 pos = glm::vec3(width * (x / (float)num_particles_width), -height * (y / (float)num_particles_height),0 );
 			//vec3 pos = glm::vec3(((float(x) / (num_particles_width - 1)) * 2 - 1)* width/2, width + 1, ((float(y) / (num_particles_height - 1))* height));
-			vec3 pos = glm::vec3(((float(x) / (num_particles_width - 1)) * 2 - 1)* width / 2, 5, ((float(y) / (num_particles_height - 1))* height));
+			vec3 pos = glm::vec3(((float(x) / (num_particles_width - 1)) * 2 - 1)* width / 2, 1, ((float(y) / (num_particles_height - 1))* height));
 			particles[y*num_particles_width + x] = Particle(pos,1.0f/ (num_particles_width * num_particles_height)); // insert particle in column x at y'th row
 			Particle *particle = &particles[y*num_particles_width + x];
 
@@ -171,19 +172,19 @@ void Cloth::InitCPU() {
 		    }
 		}
 	}
-	for (int i = 0; i < num_particles_width; i++) {
-		for (int j = 0; j < num_particles_height - 2; j++) {
-			BendingConstraint2* constraint = new BendingConstraint2(getParticle(i, j), getParticle(i, j+1), getParticle(i, j+2), kBend);
-			Constraints.push_back(constraint);
-		}
-	}
-	//add horizontal constraints
-	for (int i = 0; i < num_particles_width - 2; i++) {
-		for (int j = 0; j < num_particles_height; j++) {
-			BendingConstraint2* constraint = new BendingConstraint2(getParticle(i, j), getParticle(i+1, j), getParticle(i+2, j), kBend);
-			Constraints.push_back(constraint);
-		}
-	}
+	//for (int i = 0; i < num_particles_width; i++) {
+	//	for (int j = 0; j < num_particles_height - 2; j++) {
+	//		BendingConstraint2* constraint = new BendingConstraint2(getParticle(i, j), getParticle(i, j+1), getParticle(i, j+2), kBend);
+	//		Constraints.push_back(constraint);
+	//	}
+	//}
+	////add horizontal constraints
+	//for (int i = 0; i < num_particles_width - 2; i++) {
+	//	for (int j = 0; j < num_particles_height; j++) {
+	//		BendingConstraint2* constraint = new BendingConstraint2(getParticle(i, j), getParticle(i+1, j), getParticle(i+2, j), kBend);
+	//		Constraints.push_back(constraint);
+	//	}
+	//}
 
 	//for (int i = 0; i < num_particles_height - 1; ++i) {
 	//	for (int j = 0; j < num_particles_width - 1; ++j) {
@@ -521,34 +522,67 @@ void Cloth::addForce(const vec3 direction)
 
 //物理模拟
 void Cloth::timeStep(float dt) {
+	glm::vec3 Xcm = glm::vec3(0);
+	glm::vec3 Vcm = glm::vec3(0);
+	float sumM = 0;
 	//摩擦力
 	std::vector<Particle>::iterator particle;
 	for (particle = particles.begin(); particle != particles.end(); particle++)
 	{
 		glm::vec3 V = GetVerletVelocity((*particle).getPos(), (*particle).getLastPos(), dt);
-		(*particle).addForce(DEFAULT_DAMPING * V);
-		//直接按比例减少速度模拟摩擦力
-		//V *= global_dampening;
-		//particle->setVelocity(V);
+        //(*particle).addForce(DEFAULT_DAMPING * V);
+        //直接按比例减少速度模拟摩擦力
+		//glm::vec3 V = particle->getVelocity();
+        V *= global_dampening;
+		vec3 acc = particle->getAcceleration();
+		V = V + acc * dt;
+        particle->setVelocity(V);
+
+		Xcm += ((*particle).getPos() * (*particle).getMass());
+		Vcm += ((*particle).getVelocity() * (*particle).getMass());
+		sumM += (*particle).getMass();
+	}
+	Xcm /= sumM;
+	Vcm /= sumM;
+	glm::mat3 I = glm::mat3(1);
+	glm::vec3 L = glm::vec3(0);
+	glm::vec3 w = glm::vec3(0);//angular velocity
+	int i = 0;
+	for (particle = particles.begin(); particle != particles.end(); particle++) {
+		vec3 Xi = particle->getCurrentPos();
+		Ri[i] = (Xi - Xcm);
+		L += cross(Ri[i], particle->getVelocity() * particle->getMass());
+
+		glm::mat3 tmp = glm::mat3(0, -Ri[i].z, Ri[i].y,
+			Ri[i].z, 0, -Ri[i].x,
+			-Ri[i].y, Ri[i].x, 0);
+		I += (tmp*glm::transpose(tmp))*particle->getMass();
+		i++;
+	}
+	w = glm::inverse(I)*L;
+	i = 0;
+	for (particle = particles.begin(); particle != particles.end(); i++, particle++) {
+		glm::vec3 delVi = Vcm + glm::cross(w, Ri[i]) - particle->getVelocity();
+		glm::vec3 V = particle->getVelocity();
+		V += kDamp * delVi;
+		particle->setVelocity(V);
 	}
 
+	for (particle = particles.begin(); particle != particles.end(); particle++)
+	{
+		(*particle).timeStep(dt);
+	}
 	//std::vector<Spring>::iterator Spring;
 	//for (Spring = Springs.begin(); Spring != Springs.end(); Spring++)
 	//{
 	//	(*Spring).satisfySpring(dt); // satisfy Spring.
 	//}
-
-
 	for (size_t si = 0; si < Constraint::solver_iterations; ++si) {
 		std::vector<Constraint*>::iterator constraint;
 		for (constraint = Constraints.begin(); constraint != Constraints.end(); constraint++)
 		{
 			(*constraint)->satisfyConstraint(dt); // satisfy Spring.
 		}
-	}
-	for (particle = particles.begin(); particle != particles.end(); particle++)
-	{
-		(*particle).timeStep(dt);
 	}
 }
 

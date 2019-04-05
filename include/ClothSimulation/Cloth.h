@@ -22,7 +22,8 @@ private:
 	int num_particles_width; // number of particles in "width" direction
 	int num_particles_height; // number of particles in "height" direction
 	// total number of particles is num_particles_width*num_particles_height
-
+	float kDamp = 0.00125f;
+	std::vector<glm::vec3> Ri; //Ri = Xi-Xcm 
 	std::vector<Particle> particles; // all particles that are part of this cloth
 	std::vector<Spring> Springs; // alle Springs between particles as part of this cloth
 	std::vector<Constraint*> Constraints; // alle Springs between particles as part of this cloth
