@@ -63,9 +63,6 @@ public:
 			old_pos = temp;
 			acceleration = vec3(0, 0, 0); // acceleration is reset since it HAS been translated into a change in position (and implicitely into velocity)
 
-			if (pos.y <-10.0f) {
-				pos.y = -10.0;
-			}
 			//然后把数据传递给之前的顶点数据
 			*x = pos.x;
 			*y = pos.y;
@@ -80,6 +77,14 @@ public:
 		*x = pos.x;
 		*y = pos.y;
 		*z = pos.z;
+	}
+
+	void checkGround(float _y)
+	{
+		if (pos.y < _y) {
+			pos.y = _y;
+		}
+		*y = pos.y;
 	}
 	void setPos(const vec3 p)
 	{

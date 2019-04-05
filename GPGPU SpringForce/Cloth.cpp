@@ -172,19 +172,19 @@ void Cloth::InitCPU() {
 		    }
 		}
 	}
-	//for (int i = 0; i < num_particles_width; i++) {
-	//	for (int j = 0; j < num_particles_height - 2; j++) {
-	//		BendingConstraint2* constraint = new BendingConstraint2(getParticle(i, j), getParticle(i, j+1), getParticle(i, j+2), kBend);
-	//		Constraints.push_back(constraint);
-	//	}
-	//}
-	////add horizontal constraints
-	//for (int i = 0; i < num_particles_width - 2; i++) {
-	//	for (int j = 0; j < num_particles_height; j++) {
-	//		BendingConstraint2* constraint = new BendingConstraint2(getParticle(i, j), getParticle(i+1, j), getParticle(i+2, j), kBend);
-	//		Constraints.push_back(constraint);
-	//	}
-	//}
+	for (int i = 0; i < num_particles_width; i++) {
+		for (int j = 0; j < num_particles_height - 2; j++) {
+			BendingConstraint2* constraint = new BendingConstraint2(getParticle(i, j), getParticle(i, j+1), getParticle(i, j+2), kBend);
+			Constraints.push_back(constraint);
+		}
+	}
+	//add horizontal constraints
+	for (int i = 0; i < num_particles_width - 2; i++) {
+		for (int j = 0; j < num_particles_height; j++) {
+			BendingConstraint2* constraint = new BendingConstraint2(getParticle(i, j), getParticle(i+1, j), getParticle(i+2, j), kBend);
+			Constraints.push_back(constraint);
+		}
+	}
 
 	//for (int i = 0; i < num_particles_height - 1; ++i) {
 	//	for (int j = 0; j < num_particles_width - 1; ++j) {
@@ -572,17 +572,20 @@ void Cloth::timeStep(float dt) {
 	{
 		(*particle).timeStep(dt);
 	}
-	//std::vector<Spring>::iterator Spring;
-	//for (Spring = Springs.begin(); Spring != Springs.end(); Spring++)
-	//{
-	//	(*Spring).satisfySpring(dt); // satisfy Spring.
-	//}
 	for (size_t si = 0; si < Constraint::solver_iterations; ++si) {
 		std::vector<Constraint*>::iterator constraint;
 		for (constraint = Constraints.begin(); constraint != Constraints.end(); constraint++)
 		{
 			(*constraint)->satisfyConstraint(dt); // satisfy Spring.
 		}
+	}
+	GroundCollision();
+}
+void Cloth::GroundCollision()
+{
+	for (auto particle = particles.begin(); particle != particles.end(); particle++)
+	{
+		particle->checkGround(-10);
 	}
 }
 

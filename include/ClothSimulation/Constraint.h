@@ -55,6 +55,7 @@ public:
 		w = 1 / (particle1->getMass()) + 1 / (particle2->getMass()) + 2 / (particle3->getMass());
 		glm::vec3 center = 0.3333f * (particle3->getPos() + particle2->getPos() + particle1->getPos());
 		rest_length = glm::length(particle3->getPos() - center);
+		k = _k;
 		k_prime = 1.0f - pow((1.0f - k), 1.0f / solver_iterations);  //1.0f-pow((1.0f-c.k), 1.0f/ns);
 		if (k_prime > 1.0)
 			k_prime = 1.0;

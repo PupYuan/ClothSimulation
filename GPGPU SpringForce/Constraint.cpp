@@ -22,8 +22,6 @@ void DistanceConstraint::satisfyConstraint(float dt)
 	particle2->offsetPos(deltaP2);
 }
 
-
-
 void BendingConstraint::satisfyConstraint(float dt)
 {
 	//Using the dihedral angle approach of the position based dynamics		
@@ -136,8 +134,6 @@ void BendingConstraint::satisfyConstraint(float dt)
 
 void BendingConstraint2::satisfyConstraint(float dt)
 {
-	size_t i = 0;
-
 	//global_k is a percentage of the global dampening constant 
 	float global_k = global_dampening * 0.01f;
 	glm::vec3 center = 0.3333f * (particle1->getPos() + particle2->getPos() + particle3->getPos());
@@ -161,6 +157,6 @@ void BendingConstraint2::satisfyConstraint(float dt)
 		particle2->offsetPos(fb);
 	}
 	if (W3 > 0.0) {
-		particle3->offsetPos(fb);
+		particle3->offsetPos(fc);
 	}
 }

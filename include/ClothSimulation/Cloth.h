@@ -107,6 +107,7 @@ public:
 	void drawShaded();
 	void addForce(const vec3 direction);
 	void timeStep(float dt);
+	void GroundCollision();
 	void AddSpring(Particle* a, Particle* b, float ks, float kd);
 	void AddConstraint(Particle * a, Particle * b, float k);
 	void SetScene(SceneManager* _scene) {
