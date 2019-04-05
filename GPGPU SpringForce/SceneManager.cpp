@@ -11,16 +11,27 @@ void SceneManager::CreateCloth()
 void SceneManager::SceneInit() {
 
 	CreateCloth();
-	renderable = new ShpereRenderable(this);
-	ball_pos = vec3(0.0f, cos(ball_time / 50.0) *2.0f, 1.0f);
-	ball_collider = new SphereCollider(ball_pos, 1.2f);
+
+	Renderable* renderable = new ShpereRenderable(this);
+	renderable->scale = vec3(0.5,0.5,0.5);
+	renderableList.push_back(renderable);
+
+	Renderable* renderable1 = new ShpereRenderable(this);
+	renderable1->scale = vec3(0.5, 0.5, 0.5);
+	renderableList.push_back(renderable1);
+
+	//ball_pos = vec3(0.0f, cos(ball_time / 50.0) *2.0f, 1.0f);
+	renderable->ball_collider = new SphereCollider(vec3(0.0f, cos(ball_time / 50.0) *2.0f, 1.0f), 0.8f);
+	renderable1->ball_collider = new SphereCollider(vec3(0.0f, cos(ball_time / 50.0) *2.0f, 5.0f), 0.8f);
 
 	diffuseMap = loadTexture("../Resource/Textures/ClothTextures.png");
 }
 
 void SceneManager::RenderScene() {
-	renderable->translate(ball_pos);
-	renderable->render();
+	for (auto iter = renderableList.begin(); iter != renderableList.end(); iter++) {
+		(*iter)->pos = (*iter)->ball_collider->getCenter();
+		(*iter)->render();
+	}
 
 	cloth->drawShaded();
 }

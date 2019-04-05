@@ -20,7 +20,9 @@ void Renderable::render()
 	shader->setMat4("projection", scene->projection);
 	shader->setMat4("view", scene->view);
 
-	//model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+	glm::mat4 modelMat;
+	modelMat = glm::translate(modelMat, pos);
+	modelMat = glm::scale(modelMat, scale);
 	shader->setMat4("model", modelMat);
 	model->Draw(*shader);
 }

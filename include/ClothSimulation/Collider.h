@@ -18,4 +18,7 @@ public:
 	void setPos(vec3 _pos) {
 		center = _pos;
 	}
+	vec3 getCenter() {
+		return center;
+	}
 };

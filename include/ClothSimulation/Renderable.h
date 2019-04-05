@@ -10,14 +10,11 @@ protected:
 	Model *model;
 	Shader *shader;
 	SceneManager* scene;
-	glm::mat4 modelMat;
 public:
+	glm::vec3 pos = vec3(0,0,0);
+	glm::vec3 scale = vec3(1,1,1);
 	void render();
-	void translate(glm::vec3 delta) {
-		glm::mat4 originMat;
-		originMat = glm::translate(originMat, delta);
-		modelMat = originMat;
-	}
+	SphereCollider* ball_collider;
 };
 
 class ShpereRenderable:public Renderable {

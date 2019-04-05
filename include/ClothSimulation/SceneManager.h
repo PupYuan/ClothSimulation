@@ -19,13 +19,12 @@ public:
 	glm::mat4 projection;
 	glm::mat4 view;
 	Cloth * cloth;
-	Renderable* renderable;
+	vector<Renderable*>renderableList;
 	// lighting
 	Light light;
 
 	float ball_time = 0;
-	vec3 ball_pos;
-	SphereCollider* ball_collider;
+	//SphereCollider* ball_collider;
 	// camera
 	static Camera camera;//ÉùÃ÷
 	//ÌùÍ¼
