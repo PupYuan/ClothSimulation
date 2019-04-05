@@ -4,8 +4,7 @@
 #include <ClothSimulation\Collider.h>
 #include "ResourcesManager.h"
 #include <learnopengl/camera.h>
-
-
+class Renderable;
 
 class Light {
 public:
@@ -19,9 +18,8 @@ class SceneManager {
 public:
 	glm::mat4 projection;
 	glm::mat4 view;
-	Shader * ourShader;
-	Model *ourModel;
 	Cloth * cloth;
+	Renderable* renderable;
 	// lighting
 	Light light;
 

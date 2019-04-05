@@ -2,7 +2,7 @@
 
 void SceneManager::Simulation(float dt) {
 	ball_time++;
-	ball_pos.z = cos(ball_time / 50.0) * 2.0f;
+	ball_pos.y = cos(ball_time / 50.0) * 2.0f;
 	ball_collider->setPos(ball_pos);
 
 	cloth->addForce(gravity);

@@ -45,6 +45,9 @@
     <ClCompile Include="Constraint.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Renderable.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\ClothSimulation\Cloth.h">
@@ -75,6 +78,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\include\ClothSimulation\Constraint.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ClothSimulation\Renderable.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

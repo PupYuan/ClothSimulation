@@ -8,14 +8,7 @@ float kStretch = 0.25f;
 int vertice_data_length = 8;
 #define CHECK_GL_ERRORS assert(glGetError()==GL_NO_ERROR);
 
-float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-	// positions   // texCoords
-	//-1.0f, -1.0f,  0.0f, 0.0f,
-	//1.0f, -1.0f,  1.0f, 0.0f,
-	//1.0f,  1.0f,  1.0f, 1.0f,
-	//1.0f,  1.0f,  1.0f, 1.0f,
-	//-1.0f,  1.0f,  0.0f, 1.0f,
-	//-1.0f, -1.0f,  0.0f, 0.0f,
+float quadVertices[] = {
 	// positions        // texture Coords
 	-1.0f,  1.0f, 0.0f, 1.0f,
 	-1.0f, -1.0f, 0.0f, 0.0f,
@@ -32,12 +25,7 @@ void Cloth::InitCPU() {
 	{
 		for (int x = 0; x < num_particles_width; x++)
 		{
-			//vec3 pos = vec3(width * (x / (float)num_particles_width),
-			//	-height * (y / (float)num_particles_height),
-			//	0);
-			//vec3 pos = glm::vec3(width * (x / (float)num_particles_width), -height * (y / (float)num_particles_height),0 );
-			//vec3 pos = glm::vec3(((float(x) / (num_particles_width - 1)) * 2 - 1)* width/2, width + 1, ((float(y) / (num_particles_height - 1))* height));
-			vec3 pos = glm::vec3(((float(x) / (num_particles_width - 1)) * 2 - 1)* width / 2, 1, ((float(y) / (num_particles_height - 1))* height));
+			vec3 pos = glm::vec3(((float(x) / (num_particles_width - 1)) * 2 - 1)* width / 2, 0, ((float(y) / (num_particles_height - 1))* height));
 			particles[y*num_particles_width + x] = Particle(pos,1.0f/ (num_particles_width * num_particles_height)); // insert particle in column x at y'th row
 			Particle *particle = &particles[y*num_particles_width + x];
 
@@ -95,13 +83,25 @@ void Cloth::InitCPU() {
 
 	renderShader = ResourcesManager::loadShader("ClothShader", "../Resource/Shader/Simple.vs", "../Resource/Shader/Simple.fs");
 	// making the upper left most three and right most three particles unmovable
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 2; i++)
 	{
-		getParticle(0 + i, 0)->offsetPos(vec3(0.5, 0.0, 0.0)); // moving the particle a bit towards the center, to make it hang more natural - because I like it ;)
+		getParticle(0 + i, 0)->offsetPos(vec3(0.5, 0.0, 0.0)); 
 		getParticle(0 + i, 0)->makeUnmovable();
 
-		getParticle(0 + i, 0)->offsetPos(vec3(-0.5, 0.0, 0.0)); // moving the particle a bit towards the center, to make it hang more natural - because I like it ;)
+		getParticle(num_particles_width - 1 - i, 0)->offsetPos(vec3(-0.5, 0.0, 0.0));
 		getParticle(num_particles_width - 1 - i, 0)->makeUnmovable();
+
+		getParticle(0 + i, num_particles_height-1)->offsetPos(vec3(0.5, 0.0, 0.0));
+		getParticle(0 + i, num_particles_height - 1)->makeUnmovable();
+
+		getParticle(num_particles_width - 1 - i, num_particles_height - 1)->offsetPos(vec3(-0.5, 0.0, 0.0));
+		getParticle(num_particles_width - 1 - i, num_particles_height - 1)->makeUnmovable();
+
+		getParticle(0 + i, num_particles_height/2 - 1)->offsetPos(vec3(0.5, 0.0, 0.0));
+		getParticle(0 + i, num_particles_height/2 - 1)->makeUnmovable();
+
+		getParticle(num_particles_width - 1 - i, num_particles_height/2 - 1)->offsetPos(vec3(-0.5, 0.0, 0.0));
+		getParticle(num_particles_width - 1 - i, num_particles_height/2 - 1)->makeUnmovable();
 	}
 	//初始化gl缓存对象
 	glGenVertexArrays(1, &VAO);
@@ -128,34 +128,6 @@ void Cloth::InitCPU() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	//Constraints
-	//for (int x = 0; x < num_particles_width; x++)
-	//{
-	//	for (int y = 0; y < num_particles_height; y++)
-	//	{
-	//		// Structure Springs
-	//		if (x + 1 < num_particles_width)
-	//			AddSpring(getParticle(x, y), getParticle(x + 1, y), KsStruct, KdStruct);
-	//		if (y + 1 < num_particles_height)
-	//			AddSpring(getParticle(x, y), getParticle(x, y + 1), KsStruct, KdStruct);
-
-	//		//Shear Springs
-	//		if (y + 1 < num_particles_height && x + 1 < num_particles_width) {
-	//			AddSpring(getParticle(x, y), getParticle(x + 1, y + 1), KsShear, KdShear);
-	//			AddSpring(getParticle(x + 1, y), getParticle(x, y + 1), KsShear, KdShear);
-	//		}
-
-	//		//Bending Springs
-	//		if (x + 2 < num_particles_width)
-	//			AddSpring(getParticle(x, y), getParticle(x + 2, y), KsBend, KdBend);
-	//		if (y + 2 < num_particles_height)
-	//			AddSpring(getParticle(x, y), getParticle(x, y + 2), KsBend, KdBend);
-	//		if (y + 2 < num_particles_height && x + 2 < num_particles_width) {
-	//			AddSpring(getParticle(x, y), getParticle(x + 2, y + 2), KsBend, KdBend);
-	//			AddSpring(getParticle(x + 2, y), getParticle(x, y + 2), KsBend, KdBend);
-	//		}
-	//	}
-	//}
 	for (int x = 0; x < num_particles_width; x++)
 	{
 		for (int y = 0; y < num_particles_height; y++)
@@ -172,6 +144,7 @@ void Cloth::InitCPU() {
 		    }
 		}
 	}
+	//add vertical constraints
 	for (int i = 0; i < num_particles_width; i++) {
 		for (int j = 0; j < num_particles_height - 2; j++) {
 			BendingConstraint2* constraint = new BendingConstraint2(getParticle(i, j), getParticle(i, j+1), getParticle(i, j+2), kBend);
@@ -185,24 +158,6 @@ void Cloth::InitCPU() {
 			Constraints.push_back(constraint);
 		}
 	}
-
-	//for (int i = 0; i < num_particles_height - 1; ++i) {
-	//	for (int j = 0; j < num_particles_width - 1; ++j) {
-	//		int p1 = i * (num_particles_width) + j;
-	//		int p2 = p1 + 1;
-	//		int p3 = p1 + (num_particles_width);
-	//		int p4 = p3 + 1;
-
-	//		if ((j + i) % 2) {
-	//			BendingConstraint2* constraint = new BendingConstraint2(&particles[p3], &particles[p2], &particles[p1], &particles[p4], kBend);
-	//			Constraints.push_back(constraint);
-	//		}
-	//		else {
-	//			BendingConstraint2* constraint = new BendingConstraint2(&particles[p4], &particles[p1], &particles[p3], &particles[p2], kBend);
-	//			Constraints.push_back(constraint);
-	//		}
-	//	}
-	//}
 }
 
 void Cloth::InitGPU() {
