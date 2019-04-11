@@ -214,7 +214,7 @@ void Cloth::InitGPU() {
 	verletShader->use();
 	verletShader->setFloat("DEFAULT_DAMPING", DEFAULT_DAMPING);
 	verletShader->setFloat("mass", 1.0f);
-	verletShader->setVec3("gravity", glm::vec3(0.0f, -9.81f, 0.0f));
+	verletShader->setVec3("gravity", glm::vec3(0.0f, -0.981f, 0.0f));
 	verletShader->setFloat("dt", 1.0f / 60.0f);
 	verletShader->setFloat("texsize_x", float(num_particles_width));
 	verletShader->setFloat("texsize_y", float(num_particles_height));
@@ -224,10 +224,10 @@ void Cloth::InitGPU() {
 	verletShader->setFloat("KdShear", KdShear);
 	verletShader->setFloat("KsBend", KsBend);
 	verletShader->setFloat("KdBend", KdBend);
-	//verletShader->setVec2("inv_cloth_size", float(width) / (num_particles_width-1), float(height) / (num_particles_height-1));
-	verletShader->setVec2("inv_cloth_size", 4.0 / 63.0, 4.0 / 63.0);
-	//verletShader->setVec2("step", 1.0f / (num_particles_width - 1.0f), 1.0f / (num_particles_height - 1.0f));
-	verletShader->setVec2("step", 1.0f / 63.0f, 1.0f / 63.0f);
+	verletShader->setVec2("inv_cloth_size", float(width) / (num_particles_width-1), float(height) / (num_particles_height-1));
+	//verletShader->setVec2("inv_cloth_size", 4.0 / 63.0, 4.0 / 63.0);
+	verletShader->setVec2("step", 1.0f / (num_particles_width - 1.0f), 1.0f / (num_particles_height - 1.0f));
+	//verletShader->setVec2("step", 1.0f / 63.0f, 1.0f / 63.0f);
 	//Init for GPGPU
 
 	const int size = num_particles_width * num_particles_height *4* sizeof(float);
@@ -282,10 +282,14 @@ void Cloth::InitGPU() {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[j]);
 		for (int i = 0; i < 2; i++) {//两块纹理，用于verlet积分的当前位置和过去位置
 			glBindTexture(GL_TEXTURE_2D, attachID[i + 2 * j]);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, num_particles_width, num_particles_height, 0, GL_RGBA, GL_FLOAT, _data[i]); // NULL = Empty texture
 
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 			glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, mrt[i], GL_TEXTURE_2D, attachID[i + 2 * j], 0);
 		}
 	}
@@ -303,7 +307,7 @@ Cloth::Cloth(float _width, float _height, int num_particles_width, int num_parti
 {
 	width = _width;
 	height = _height;
-	//glfwSwapInterval(0);
+	glfwSwapInterval(0);
 	switch (current_mode) {
 	case CPU:
 		InitCPU();

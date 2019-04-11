@@ -119,8 +119,8 @@ void main() {
 	else
 	   acc = force/mymass;
 
-	if(x_i.y<0)
-	   x_i.y=0;
+	if(x_i.y<-10)
+	   x_i.y=-10;
 
 	// verlet integration
 	vec3 tmp = x_i;
