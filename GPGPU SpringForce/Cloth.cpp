@@ -423,8 +423,8 @@ void Cloth::RenderGPU() {
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glViewport(0, 0, scene->SCR_WIDTH, scene->SCR_HEIGHT);
 	glEnable(GL_DEPTH_TEST);
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessery actually, since we won't be able to see behind the quad anyways)
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessery actually, since we won't be able to see behind the quad anyways)
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	renderShader->use();
 	renderShader->setMat4("projection", scene->projection);

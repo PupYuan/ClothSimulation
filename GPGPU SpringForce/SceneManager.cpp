@@ -4,7 +4,7 @@ Camera SceneManager::camera(glm::vec3(0.0, 0.0, 6.0f));//¶¨Òå
 
 void SceneManager::CreateCloth()
 {
-	cloth = new Cloth(4, 4, 20, 20);
+	cloth = new Cloth(8, 8, 64, 64);
 	cloth->SetScene(this);
 }
 
@@ -25,6 +25,7 @@ void SceneManager::SceneInit() {
 	renderable1->ball_collider = new SphereCollider(vec3(0.0f, cos(ball_time / 50.0) *2.0f, 5.0f), 0.8f);
 
 	diffuseMap = loadTexture("../Resource/Textures/ClothTextures.png");
+
 }
 
 void SceneManager::RenderScene() {

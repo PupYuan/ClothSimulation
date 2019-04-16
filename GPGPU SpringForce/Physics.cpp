@@ -14,14 +14,14 @@ void SceneManager::Simulation(float dt) {
 		(*iter)->ball_collider->ClothCollisionSimulate(cloth);
 	}
 }
-void SceneManager::StepPhysics() {
-	//Using high res. counter
-	QueryPerformanceCounter(&t2);
-	// compute and print the elapsed time in millisec
-	frameTimeQP = (t2.QuadPart - t1.QuadPart) * 1000.0 / frequency.QuadPart;
-	t1 = t2;
-	accumulator += frameTimeQP;
 
+
+void SceneManager::StepPhysics() {
+	//物理模拟有自己单独的模拟频率
+	float newTime = (float)glfwGetTime();
+	deltaTime = newTime - lastFrameTime;
+	accumulator += deltaTime;
+	lastFrameTime = newTime;
 	//Fixed time stepping + rendering at different fps
 	if (accumulator >= timeStep)
 	{
