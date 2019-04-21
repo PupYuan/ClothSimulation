@@ -17,6 +17,7 @@ enum Mode { CPU, GPU };
 class Cloth
 {
 private:
+	Mode current_mode = CPU;
 	int width;
 	int height;
 	int num_particles_width; // number of particles in "width" direction
@@ -36,12 +37,15 @@ private:
 
 	//GPGPU相关
 	//位置数据
-	Mode current_mode = CPU;
 	const size_t total_points = (num_particles_width)*(num_particles_height);
 	std::vector<glm::vec4> X;
 	std::vector<glm::vec4> X_last;
 	std::vector<glm::vec3> Normal;
 	std::vector<glm::vec2> TexCoord;
+
+	//GPGPU Constraint
+	std::vector<glm::vec4> DistancePos;
+	std::vector<glm::vec2> DistanceIndex;
 
 	int texture_size_x = 0;
 	int texture_size_y = 0;
