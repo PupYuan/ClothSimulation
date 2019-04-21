@@ -4,7 +4,7 @@ Camera SceneManager::camera(glm::vec3(0.0, 0.0, 6.0f));//¶¨Òå
 
 void SceneManager::CreateCloth()
 {
-	cloth = new Cloth(8, 8, 64, 64);
+	cloth = new Cloth(4, 6, 20, 20);
 	cloth->SetScene(this);
 }
 

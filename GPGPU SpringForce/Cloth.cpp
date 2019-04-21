@@ -525,10 +525,6 @@ void Cloth::timeStep(float dt) {
 		glm::vec3 V = particle->getVelocity();
 		V += kDamp * delVi;
 		particle->setVelocity(V);
-	}
-
-	for (particle = particles.begin(); particle != particles.end(); particle++)
-	{
 		(*particle).timeStep(dt);
 	}
 	for (size_t si = 0; si < Constraint::solver_iterations; ++si) {

@@ -36,7 +36,7 @@ private:
 
 	//GPGPU相关
 	//位置数据
-	Mode current_mode = GPU;
+	Mode current_mode = CPU;
 	const size_t total_points = (num_particles_width)*(num_particles_height);
 	std::vector<glm::vec4> X;
 	std::vector<glm::vec4> X_last;
