@@ -215,20 +215,25 @@ void Cloth::InitGPU() {
 		{
 			// Distance Constraints
 			if (x + 1 < num_particles_width) {
-				DistanceIndex.push_back(vec2((float)x / num_particles_width, (float)y / num_particles_height));
-				DistanceIndex.push_back(vec2((float)(x+1)/num_particles_width,(float)y/num_particles_height));
+				vec4 index(vec2((float)x / num_particles_width, (float)y / num_particles_height), 
+					vec2((float)(x + 1) / num_particles_width, (float)y / num_particles_height));
+				DistanceIndex.push_back(index);
 			}
 			if (y + 1 < num_particles_height) {
-				DistanceIndex.push_back(vec2((float)x / num_particles_width, (float)y / num_particles_height));
-				DistanceIndex.push_back(vec2((float)x / num_particles_width, (float)(y+1) / num_particles_height));
+				vec4 index(vec2((float)x / num_particles_width, (float)y / num_particles_height),
+					vec2((float)x / num_particles_width, (float)(y + 1) / num_particles_height));
+
+				DistanceIndex.push_back(index);
 			}
 			//Shear Springs
 			if (y + 1 < num_particles_height && x + 1 < num_particles_width) {
+				vec4 index1(vec2((float)x / num_particles_width, (float)y / num_particles_height),
+					vec2((float)(x + 1) / num_particles_width, (float)(y + 1) / num_particles_height));
+				vec4 index2(vec2((float)(x + 1) / num_particles_width, (float)y / num_particles_height),
+					vec2((float)x / num_particles_width, (float)(y + 1) / num_particles_height));
 
-				DistanceIndex.push_back(vec2((float)x / num_particles_width, (float)y / num_particles_height));
-				DistanceIndex.push_back(vec2((float)(x+1) / num_particles_width, (float)(y + 1) / num_particles_height));
-				DistanceIndex.push_back(vec2((float)(x+1) / num_particles_width, (float)y / num_particles_height));
-				DistanceIndex.push_back(vec2((float)x / num_particles_width, (float)(y + 1) / num_particles_height));
+				DistanceIndex.push_back(index1);
+				DistanceIndex.push_back(index2);
 			}
 		}
 	}
@@ -282,7 +287,7 @@ void Cloth::InitGPU() {
 	glGenTextures(4, attachID);
 	for (int j = 0; j < 2; j++) {//两个帧缓冲，用于输入和输出交替
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[j]);
-		for (int i = 0; i < 2; i++) {//两块纹理，用于
+		for (int i = 0; i < 2; i++) {
 			glBindTexture(GL_TEXTURE_2D, attachID[i + 2 * j]);
 
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -295,7 +300,42 @@ void Cloth::InitGPU() {
 			glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, mrt[i], GL_TEXTURE_2D, attachID[i + 2 * j], 0);
 		}
 	}
+	//前面创建了约束要索引的顶点数据，接下来创建约束的纹理
+	Cdata[0] = &DistanceIndex[0].x;
+	Cdata[1] = &DistanceIndex[0].x;
+	glGenFramebuffers(2, CfboID);
+	glGenTextures(4, CattachID);
 
+	//约束的输入纹理
+	glGenTextures(1, &Cinput);
+	glBindTexture(GL_TEXTURE_2D, Cinput);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, DistanceIndex.size(), 1, 0, GL_RGBA, GL_FLOAT, Cdata[0]); // NULL = Empty texture
+	//约束的输出纹理
+	for (int j = 0; j < 2; j++) {
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, CfboID[j]);
+		//约束的输出纹理，约束fragment shader会把数据输出到这里来
+		//输出位置偏差delta
+		glBindTexture(GL_TEXTURE_2D, CattachID[0 + 2 * j]);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, DistanceIndex.size(), 1, 0, GL_RGBA, GL_FLOAT, NULL); // NULL = Empty texture
+		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, mrt[0], GL_TEXTURE_2D, CattachID[0 + 2 * j], 0);
+		//输出坐标
+		glBindTexture(GL_TEXTURE_2D, CattachID[1 + 2 * j]);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, DistanceIndex.size(), 1, 0, GL_RG, GL_FLOAT, NULL); // NULL = Empty texture
+		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, mrt[1], GL_TEXTURE_2D, CattachID[1 + 2 * j], 0);
+	}
+	//检查帧缓冲的设置有没有问题
 	GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 	if (status == GL_FRAMEBUFFER_COMPLETE) {
 		printf("FBO setup succeeded.");
@@ -374,21 +414,41 @@ void Cloth::RenderCPU() {
 }
 void Cloth::RenderGPU() {
 	CHECK_GL_ERRORS
-		glViewport(0, 0, num_particles_width, num_particles_height);
+	glViewport(0, 0, DistanceIndex.size(), 1);
 	// render
 	// ------
 	// bind to framebuffer and draw scene as we normally would to color texture 
 	for (int i = 0; i < NUM_ITER; i++) {
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[writeID]);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, CfboID[writeID]);
 		glDrawBuffers(2, mrt);
 
 		CHECK_GL_ERRORS
+	    //粒子数据的纹理
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, attachID[2 * readID]);
 
 		CHECK_GL_ERRORS
+		//约束纹理
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, attachID[2 * readID + 1]);
+		glBindTexture(GL_TEXTURE_2D, CattachID[2 * readID]);
+
+		glDisable(GL_DEPTH_TEST);
+		// make sure we clear the framebuffer's content
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		DistanceConstraintShader->use();
+		glBindVertexArray(quadVAO);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[writeID]);
+		glDrawBuffers(2, mrt);
+
+		//under-relaxation阶段，把所有的索引、位置偏差进行综合和添加衰减因子
+		glViewport(0, 0, num_particles_width, num_particles_height);
+		CHECK_GL_ERRORS
+		//约束纹理
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, attachID[2 * readID]);
 
 		glDisable(GL_DEPTH_TEST);
 		// make sure we clear the framebuffer's content
@@ -397,8 +457,6 @@ void Cloth::RenderGPU() {
 		verletShader->use();
 		glBindVertexArray(quadVAO);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	    //glDrawArrays(GL_TRIANGLES, 0, 6);
-
 
 		//swap read/write pathways
 		int tmp = readID;
@@ -423,11 +481,8 @@ void Cloth::RenderGPU() {
 	glReadBuffer(GL_BACK);
 	glDrawBuffer(GL_BACK);
 
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glViewport(0, 0, scene->SCR_WIDTH, scene->SCR_HEIGHT);
 	glEnable(GL_DEPTH_TEST);
-	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessery actually, since we won't be able to see behind the quad anyways)
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	renderShader->use();
 	renderShader->setMat4("projection", scene->projection);
@@ -451,7 +506,6 @@ void Cloth::RenderGPU() {
 
 	glBindVertexArray(vaoID);
 	glDrawElements(GL_TRIANGLES, 6 * (num_particles_height - 1)*(num_particles_width - 1), GL_UNSIGNED_INT, 0);
-	//glDrawArrays(GL_POINTS, 0, num_particles_width * num_particles_height);
 	CHECK_GL_ERRORS
 }
 

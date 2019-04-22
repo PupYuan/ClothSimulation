@@ -44,8 +44,7 @@ private:
 	std::vector<glm::vec2> TexCoord;
 
 	//GPGPU Constraint
-	std::vector<glm::vec4> DistancePos;
-	std::vector<glm::vec2> DistanceIndex;
+	std::vector<glm::vec4> DistanceIndex;
 
 	int texture_size_x = 0;
 	int texture_size_y = 0;
@@ -57,7 +56,11 @@ private:
 	GLuint vboID2;
 	GLuint vboID3;
 	GLenum mrt[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-
+	//约束用的缓冲
+	GLuint CfboID[2];
+	GLuint CattachID[4];
+	GLuint Cinput;
+	float* Cdata[2];
 
 	float* _data[2];
 	size_t i = 0;
@@ -71,6 +74,7 @@ private:
 	//每次渲染的时候做几次物理迭代
 	const int NUM_ITER = 2;
 
+	Shader *DistanceConstraintShader;
 	Shader *verletShader;
 	Shader *renderShader;//渲染用的Shader
 

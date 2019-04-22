@@ -211,6 +211,7 @@ void Cloth::InitGPU() {
 	//renderShader = ResourcesManager::loadShader("ClothShader", "../Resource/Shader/Simple.vs", "../Resource/Shader/Simple.fs");
 	renderShader = ResourcesManager::loadShader("renderShader", "render.vs", "render.fs");
 	verletShader = ResourcesManager::loadShader("verletShader", "verlet.vs", "verlet.fs");
+	DistanceConstraintShader = ResourcesManager::loadShader("DistanceConstraintShader", "DistanceConstraint.vs", "DistanceConstraint.fs");
 	verletShader->use();
 	verletShader->setFloat("DEFAULT_DAMPING", DEFAULT_DAMPING);
 	verletShader->setFloat("mass", 1.0f);
