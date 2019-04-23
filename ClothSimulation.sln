@@ -9,6 +9,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GPGPU SpringForce", "GPGPU 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GPGPU Sample", "GPGPU Sample\GPGPU Sample.vcxproj", "{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PositionBasedDynamics Jacobi Simulation", "PositionBasedDynamics Jacobi Simulation\PositionBasedDynamics Jacobi Simulation.vcxproj", "{2C97D0A4-905E-4FBE-8CA6-DA684158E15B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ComputeShaderSample", "ComputeShaderSample\ComputeShaderSample.vcxproj", "{959B268F-3006-4D10-A387-60E70A9DD6F2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -41,6 +45,22 @@ Global
 		{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}.Release|x64.Build.0 = Release|x64
 		{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}.Release|x86.ActiveCfg = Release|Win32
 		{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}.Release|x86.Build.0 = Release|Win32
+		{2C97D0A4-905E-4FBE-8CA6-DA684158E15B}.Debug|x64.ActiveCfg = Debug|x64
+		{2C97D0A4-905E-4FBE-8CA6-DA684158E15B}.Debug|x64.Build.0 = Debug|x64
+		{2C97D0A4-905E-4FBE-8CA6-DA684158E15B}.Debug|x86.ActiveCfg = Debug|Win32
+		{2C97D0A4-905E-4FBE-8CA6-DA684158E15B}.Debug|x86.Build.0 = Debug|Win32
+		{2C97D0A4-905E-4FBE-8CA6-DA684158E15B}.Release|x64.ActiveCfg = Release|x64
+		{2C97D0A4-905E-4FBE-8CA6-DA684158E15B}.Release|x64.Build.0 = Release|x64
+		{2C97D0A4-905E-4FBE-8CA6-DA684158E15B}.Release|x86.ActiveCfg = Release|Win32
+		{2C97D0A4-905E-4FBE-8CA6-DA684158E15B}.Release|x86.Build.0 = Release|Win32
+		{959B268F-3006-4D10-A387-60E70A9DD6F2}.Debug|x64.ActiveCfg = Debug|x64
+		{959B268F-3006-4D10-A387-60E70A9DD6F2}.Debug|x64.Build.0 = Debug|x64
+		{959B268F-3006-4D10-A387-60E70A9DD6F2}.Debug|x86.ActiveCfg = Debug|Win32
+		{959B268F-3006-4D10-A387-60E70A9DD6F2}.Debug|x86.Build.0 = Debug|Win32
+		{959B268F-3006-4D10-A387-60E70A9DD6F2}.Release|x64.ActiveCfg = Release|x64
+		{959B268F-3006-4D10-A387-60E70A9DD6F2}.Release|x64.Build.0 = Release|x64
+		{959B268F-3006-4D10-A387-60E70A9DD6F2}.Release|x86.ActiveCfg = Release|Win32
+		{959B268F-3006-4D10-A387-60E70A9DD6F2}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
