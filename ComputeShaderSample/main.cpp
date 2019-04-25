@@ -60,7 +60,7 @@ GLfloat v[500];
 int main(int argc, char **argv) {
 	int i;
 	// create test data
-	unsigned unNoData = 4 * unSize;        //total number of Data
+	unsigned unNoData = 3 * unSize;        //total number of Data
 	pfInput = new float[unNoData];
 	float *pfOutput = new float[unNoData];
 	for (i = 0; i < unNoData; i++) pfInput[i] = i * 0.001f;
@@ -88,6 +88,7 @@ int main(int argc, char **argv) {
 	performCompute(inputTexID, intermediateTexID);
 
 	performCompute(intermediateTexID, outputTexID);
+	//performCompute(inputTexID, outputTexID);
 
 	// get GPU results
 	transferFromTexture(pfOutput);
@@ -221,7 +222,7 @@ void performCompute(const GLuint inputTexID, const GLuint outputTexID) {
  * Transfers data from currently texture to host memory.
  */
 void transferFromTexture(float *data) {
-	glReadBuffer(GL_COLOR_ATTACHMENT1);
+	glReadBuffer(GL_COLOR_ATTACHMENT2);
 	glReadPixels(0, 0, unWidth, unHeight, textureParameters.texFormat, type, data);
 }
 

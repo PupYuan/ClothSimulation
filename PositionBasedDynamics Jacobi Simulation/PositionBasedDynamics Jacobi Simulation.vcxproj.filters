@@ -54,13 +54,7 @@
     <None Include="DistanceConstraint.fs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="DistanceConstraint.vs">
-      <Filter>资源文件</Filter>
-    </None>
     <None Include="under-relaxation.fs">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="under-relaxation.vs">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>

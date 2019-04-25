@@ -17,7 +17,7 @@ enum Mode { CPU, GPU };
 class Cloth
 {
 private:
-	Mode current_mode = CPU;
+	Mode current_mode = GPU;
 	int width;
 	int height;
 	int num_particles_width; // number of particles in "width" direction

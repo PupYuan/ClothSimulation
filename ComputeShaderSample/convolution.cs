@@ -8,14 +8,15 @@ uniform float v[4];
 layout (rgba32f, binding = 0) uniform image2D input_image;
 layout (rgba32f, binding = 1) uniform image2D output_image;
 
-shared vec4 scanline[16][16];
+//shared vec4 scanline[16][16];
 
 void main(void)
 {
     ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
-    scanline[pos.x][pos.y] = imageLoad(input_image, pos);
+    //scanline[pos.x][pos.y] = imageLoad(input_image, pos);
+    vec4 data = imageLoad(input_image, pos); 
     barrier();
-    vec4 data = scanline[pos.x][pos.y];
+    //vec4 data = scanline[pos.x][pos.y];
     data.r = v[0] + data.r;
     data.g = v[1] + data.g;
     data.b = v[3] + data.b;

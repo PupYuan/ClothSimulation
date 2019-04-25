@@ -313,7 +313,7 @@ void Cloth::InitGPU() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, DistanceIndex.size(), 1, 0, GL_RGBA, GL_FLOAT, Cdata[0]); // NULL = Empty texture
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, DistanceIndex.size(), 1, 0, GL_RGBA, GL_FLOAT, Cdata[0]); 
 	//约束的输出纹理
 	for (int j = 0; j < 2; j++) {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, CfboID[j]);
