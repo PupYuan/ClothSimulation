@@ -6,6 +6,12 @@ Shader* ResourcesManager::loadShader(string shaderName, const char* vertexPath, 
 	return &shaderList[shaderName];
 }
 
+Shader* ResourcesManager::loadComputeShader(string shaderName, const char* Path) {
+	Shader *shader = new Shader(Path);
+	shaderList[shaderName] = *shader;
+	return &shaderList[shaderName];
+}
+
 //Òª³õÊ¼»¯
 std::map<string, Shader> ResourcesManager::shaderList;
 

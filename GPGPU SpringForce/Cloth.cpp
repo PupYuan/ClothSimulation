@@ -160,6 +160,25 @@ void Cloth::InitCPU() {
 	}
 }
 
+/**
+ * Sets up a floating point texture with the NEAREST filtering.
+ */
+void setupTexture(const GLuint texID,int width,int height,float *data) {
+	// make active and bind
+	glBindTexture(GL_TEXTURE_2D, texID);
+	//glTexStorage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height);
+	// turn off filtering and wrap modes
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	// define texture with floating point format
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0,
+		GL_RGBA, GL_FLOAT, data);
+}
+
 void Cloth::InitGPU() {
 	X.resize(total_points);
 	X_last.resize(total_points);
@@ -211,24 +230,37 @@ void Cloth::InitGPU() {
 	//renderShader = ResourcesManager::loadShader("ClothShader", "../Resource/Shader/Simple.vs", "../Resource/Shader/Simple.fs");
 	renderShader = ResourcesManager::loadShader("renderShader", "render.vs", "render.fs");
 	verletShader = ResourcesManager::loadShader("verletShader", "verlet.vs", "verlet.fs");
-	//DistanceConstraintShader = ResourcesManager::loadShader("DistanceConstraintShader", "DistanceConstraint.vs", "DistanceConstraint.fs");
-	verletShader->use();
-	verletShader->setFloat("DEFAULT_DAMPING", DEFAULT_DAMPING);
-	verletShader->setFloat("mass", 1.0f);
-	verletShader->setVec3("gravity", glm::vec3(0.0f, -0.981f, 0.0f));
-	verletShader->setFloat("dt", 1.0f / 60.0f);
-	verletShader->setFloat("texsize_x", float(num_particles_width));
-	verletShader->setFloat("texsize_y", float(num_particles_height));
-	verletShader->setFloat("KsStruct", KsStruct);
-	verletShader->setFloat("KdStruct", KdStruct);
-	verletShader->setFloat("KsShear", KsShear);
-	verletShader->setFloat("KdShear", KdShear);
-	verletShader->setFloat("KsBend", KsBend);
-	verletShader->setFloat("KdBend", KdBend);
-	verletShader->setVec2("inv_cloth_size", float(width) / (num_particles_width-1), float(height) / (num_particles_height-1));
-	//verletShader->setVec2("inv_cloth_size", 4.0 / 63.0, 4.0 / 63.0);
-	verletShader->setVec2("step", 1.0f / (num_particles_width - 1.0f), 1.0f / (num_particles_height - 1.0f));
-	//verletShader->setVec2("step", 1.0f / 63.0f, 1.0f / 63.0f);
+	computeShader = ResourcesManager::loadComputeShader("computeShader", "ParticleSimulation.fs");
+
+	_data[0] = &X[0].x;
+	_data[1] = &X_last[0].x;
+
+	//设置compute shader
+	//创建compute shader所需的纹理
+	glGenTextures(2, computeTex);
+	// set up textures
+	setupTexture(computeTex[0],num_particles_width, num_particles_height, _data[0]);
+	setupTexture(computeTex[1],num_particles_width, num_particles_height, _data[0]);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, computeTex[0], 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, computeTex[1], 0);
+	
+	CHECK_GL_ERRORS
+	//设置verlet shader
+	//verletShader->use();
+	//verletShader->setFloat("DEFAULT_DAMPING", DEFAULT_DAMPING);
+	//verletShader->setFloat("mass", 1.0f);
+	//verletShader->setVec3("gravity", glm::vec3(0.0f, -0.981f, 0.0f));
+	//verletShader->setFloat("dt", 1.0f / 60.0f);
+	//verletShader->setFloat("texsize_x", float(num_particles_width));
+	//verletShader->setFloat("texsize_y", float(num_particles_height));
+	//verletShader->setFloat("KsStruct", KsStruct);
+	//verletShader->setFloat("KdStruct", KdStruct);
+	//verletShader->setFloat("KsShear", KsShear);
+	//verletShader->setFloat("KdShear", KdShear);
+	//verletShader->setFloat("KsBend", KsBend);
+	//verletShader->setFloat("KdBend", KdBend);
+	//verletShader->setVec2("inv_cloth_size", float(width) / (num_particles_width-1), float(height) / (num_particles_height-1));
+	//verletShader->setVec2("step", 1.0f / (num_particles_width - 1.0f), 1.0f / (num_particles_height - 1.0f));
 	//Init for GPGPU
 
 	const int size = num_particles_width * num_particles_height *4* sizeof(float);
@@ -259,48 +291,47 @@ void Cloth::InitGPU() {
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	_data[0] = &X[0].x;
-	_data[1] = &X_last[0].x;
+
 	// screen quad VAO
 	//unsigned int quadVAO, quadVBO;
-	glGenVertexArrays(1, &quadVAO);
-	glGenBuffers(1, &quadVBO);
-	glBindVertexArray(quadVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	//glGenVertexArrays(1, &quadVAO);
+	//glGenBuffers(1, &quadVBO);
+	//glBindVertexArray(quadVAO);
+	//glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+	//glEnableVertexAttribArray(0);
+	//glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	//glEnableVertexAttribArray(1);
+	//glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
 	// framebuffer configuration
 	// -------------------------
 	//unsigned int framebuffer;
-	glGenFramebuffers(2, fboID);
-	glGenTextures(4, attachID);
-	for (int j = 0; j < 2; j++) {//两个帧缓冲，用于输入和输出交替
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[j]);
-		for (int i = 0; i < 2; i++) {//两块纹理，用于verlet积分的当前位置和过去位置
-			glBindTexture(GL_TEXTURE_2D, attachID[i + 2 * j]);
+	//glGenFramebuffers(2, fboID);
+	//glGenTextures(4, attachID);
+	//for (int j = 0; j < 2; j++) {//两个帧缓冲，用于输入和输出交替
+	//	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[j]);
+	//	for (int i = 0; i < 2; i++) {//两块纹理，用于verlet积分的当前位置和过去位置
+	//		glBindTexture(GL_TEXTURE_2D, attachID[i + 2 * j]);
 
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, num_particles_width, num_particles_height, 0, GL_RGBA, GL_FLOAT, _data[i]); // NULL = Empty texture
+	//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, num_particles_width, num_particles_height, 0, GL_RGBA, GL_FLOAT, _data[i]); // NULL = Empty texture
 
 
-			glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, mrt[i], GL_TEXTURE_2D, attachID[i + 2 * j], 0);
-		}
-	}
-	GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-	if (status == GL_FRAMEBUFFER_COMPLETE) {
-		printf("FBO setup succeeded.");
-	}
-	else {
-		printf("Problem with FBO setup.");
-	}
+	//		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, mrt[i], GL_TEXTURE_2D, attachID[i + 2 * j], 0);
+	//	}
+	//}
+	//GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+	//if (status == GL_FRAMEBUFFER_COMPLETE) {
+	//	printf("FBO setup succeeded.");
+	//}
+	//else {
+	//	printf("Problem with FBO setup.");
+	//}
 	CHECK_GL_ERRORS
 }
 /* This is a important constructor for the entire system of particles and constraints*/
@@ -372,48 +403,65 @@ void Cloth::RenderCPU() {
 }
 void Cloth::RenderGPU() {
 	CHECK_GL_ERRORS
-	glViewport(0, 0, num_particles_width, num_particles_height);
-	// render
-	// ------
-	// bind to framebuffer and draw scene as we normally would to color texture 
 	for (int i = 0; i < NUM_ITER; i++) {
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[writeID]);
-		glDrawBuffers(2, mrt);
+		computeShader->use();
+		glBindImageTexture(0, computeTex[readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+		glBindImageTexture(1, computeTex[writeID], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+		glDispatchCompute(1, 1, 1);
 
-		CHECK_GL_ERRORS
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, attachID[2 * readID]);
+		glFinish();
 
-		CHECK_GL_ERRORS
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, attachID[2 * readID + 1]);
-
-		glDisable(GL_DEPTH_TEST);
-		// make sure we clear the framebuffer's content
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		verletShader->use();
-		glBindVertexArray(quadVAO);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	    //glDrawArrays(GL_TRIANGLES, 0, 6);
-
-
-		//swap read/write pathways
 		int tmp = readID;
-		readID = writeID;
-		writeID = tmp;
+	    readID = writeID;
+	    writeID = tmp;
 	}
-
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID[readID]);
-	//将framebuffer中的颜色附件读取进
+	//读取
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, vboID);
 	glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RGBA, GL_FLOAT, 0);
 
-	CHECK_GL_ERRORS
-	//重置状态
-	glReadBuffer(GL_NONE);
-	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+	//glViewport(0, 0, num_particles_width, num_particles_height);
+	//// render
+	//// ------
+	//// bind to framebuffer and draw scene as we normally would to color texture 
+	//for (int i = 0; i < NUM_ITER; i++) {
+	//	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[writeID]);
+	//	glDrawBuffers(2, mrt);
+
+	//	CHECK_GL_ERRORS
+	//	glActiveTexture(GL_TEXTURE0);
+	//	glBindTexture(GL_TEXTURE_2D, attachID[2 * readID]);
+
+	//	CHECK_GL_ERRORS
+	//	glActiveTexture(GL_TEXTURE1);
+	//	glBindTexture(GL_TEXTURE_2D, attachID[2 * readID + 1]);
+
+	//	glDisable(GL_DEPTH_TEST);
+	//	// make sure we clear the framebuffer's content
+	//	glClear(GL_COLOR_BUFFER_BIT);
+
+	//	verletShader->use();
+	//	glBindVertexArray(quadVAO);
+	//	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	//    //glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
+	//	//swap read/write pathways
+	//	int tmp = readID;
+	//	readID = writeID;
+	//	writeID = tmp;
+	//}
+
+	//glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID[readID]);
+	////将framebuffer中的颜色附件读取进
+	//glReadBuffer(GL_COLOR_ATTACHMENT0);
+	//glBindBuffer(GL_PIXEL_PACK_BUFFER, vboID);
+	//glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RGBA, GL_FLOAT, 0);
+
+	//CHECK_GL_ERRORS
+	////重置状态
+	//glReadBuffer(GL_NONE);
+	//glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 
 	//渲染
 	// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture

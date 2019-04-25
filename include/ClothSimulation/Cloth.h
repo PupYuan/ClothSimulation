@@ -1,4 +1,5 @@
 #pragma once
+#include <learnopengl/shader.h>
 #include <ClothSimulation\Particles.h>
 #include <math.h>
 #include <vector>
@@ -9,7 +10,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "Spring.h"
-#include <learnopengl/shader.h>
 #include "Constraint.h"
 class SceneManager;
 
@@ -70,11 +70,14 @@ private:
 	GLuint t_query;
 	GLuint64 elapsed_time;
 	float delta_time = 0;
+	//compute shader所需的纹理
+	// 纹理标识
+	GLuint computeTex[2];
 
 	//每次渲染的时候做几次物理迭代
 	const int NUM_ITER = 2;
 
-	Shader *DistanceConstraintShader;
+	Shader *computeShader;
 	Shader *verletShader;
 	Shader *renderShader;//渲染用的Shader
 

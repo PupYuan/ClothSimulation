@@ -27,9 +27,6 @@
     <ClCompile Include="Spring.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\glad.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="SceneManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -46,6 +43,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Renderable.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\glad.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -83,6 +83,9 @@
     <ClInclude Include="..\include\ClothSimulation\Renderable.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\learnopengl\shader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="verlet.vs">
@@ -103,5 +106,9 @@
     <None Include="render.fs">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="ParticleSimulation.fs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

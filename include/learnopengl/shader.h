@@ -1,9 +1,7 @@
 #ifndef SHADER_H
 #define SHADER_H
-
 #include <glad/glad.h>
 #include <glm/glm.hpp>
-
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -15,6 +13,41 @@ public:
     unsigned int ID;
 	// Constructor
 	Shader() { };
+	//µº»Îcompute shader
+	Shader(const char* computePath)
+	{
+		// 1. retrieve the compute source code from filePath
+		std::string computeCode;
+		std::ifstream vShaderFile;
+		// ensure ifstream objects can throw exceptions:
+		vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+		try
+		{
+			// open files
+			vShaderFile.open(computePath);
+			std::stringstream vShaderStream;
+			// read file's buffer contents into streams
+			vShaderStream << vShaderFile.rdbuf();
+			// close file handlers
+			vShaderFile.close();
+			// convert stream into string
+			computeCode = vShaderStream.str();
+		}
+		catch (std::ifstream::failure e)
+		{
+			std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+		}
+		const char* vShaderCode = computeCode.c_str();
+		// 2. compile shaders
+		unsigned int vertex;
+		int success;
+		char infoLog[512];
+		// vertex shader
+		vertex = glCreateShader(GL_COMPUTE_SHADER);
+		glShaderSource(vertex, 1, &vShaderCode, NULL);
+		glCompileShader(vertex);
+		checkCompileErrors(vertex, "COMPUTE");
+	}
     // constructor generates the shader on the fly
     // ------------------------------------------------------------------------
     Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr)
