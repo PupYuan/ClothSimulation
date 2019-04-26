@@ -1,11 +1,15 @@
 #include <ClothSimulation\SceneManager.h>
 #include <ClothSimulation\Renderable.h>
 Camera SceneManager::camera(glm::vec3(0.0, 0.0, 6.0f));//¶¨Òå
+glm::vec3 SceneManager::gravity = glm::vec3(0.0f, -0.00981f, 0.0f);
 
 void SceneManager::CreateCloth()
 {
-	cloth = new Cloth(4, 6, 20, 20);
-	cloth->SetScene(this);
+	GPUCloth * gpuCloth = new GPUCloth(4, 6, 20, 20);
+	gpuCloth->SetScene(this);
+	simulateList.push_back(gpuCloth);
+	//cloth = new Cloth(4, 6, 20, 20);
+	//cloth->SetScene(this);
 }
 
 void SceneManager::SceneInit() {
@@ -33,6 +37,7 @@ void SceneManager::RenderScene() {
 		(*iter)->pos = (*iter)->ball_collider->getCenter();
 		(*iter)->render();
 	}
-
-	cloth->drawShaded();
+	for (auto iter = simulateList.begin(); iter != simulateList.end(); iter++) {
+		(*iter)->render();
+	}
 }

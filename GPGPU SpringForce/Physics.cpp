@@ -8,11 +8,15 @@ void SceneManager::Simulation(float dt) {
 		CurPos.y = cos(ball_time / 50.0) *2.0f;
 		(*iter)->ball_collider->setPos(CurPos);
 	}
-	cloth->addForce(gravity);
-	cloth->timeStep(dt);
-	for (auto iter = renderableList.begin(); iter != renderableList.end(); iter++) {
-		(*iter)->ball_collider->ClothCollisionSimulate(cloth);
+	//cloth->addForce(gravity);
+	//cloth->timeStep(dt);
+	for (auto iter2 = simulateList.begin(); iter2 != simulateList.end(); iter2++) {
+		(*iter2)->timeStep(dt);
+		for (auto iter = renderableList.begin(); iter != renderableList.end(); iter++) {
+			(*iter)->ball_collider->ClothCollisionSimulate(*iter2);
+		}
 	}
+	
 }
 
 

@@ -1,6 +1,6 @@
 #include <ClothSimulation\Collider.h>
 
-void SphereCollider::ClothCollisionSimulate(Cloth* c)
+void SphereCollider::ClothCollisionSimulate(PositionBasedUnit* c)
 {
 	std::vector<Particle>* particles =  & (c->getParticles());
 	std::vector<Particle>::iterator particle;
@@ -17,7 +17,7 @@ void SphereCollider::ClothCollisionSimulate(Cloth* c)
 	}
 }
 
-void Collider::ClothCollisionSimulate(Cloth *c)
+void Collider::ClothCollisionSimulate(PositionBasedUnit *c)
 {
 
 }

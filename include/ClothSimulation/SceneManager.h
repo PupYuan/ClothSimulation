@@ -18,7 +18,9 @@ class SceneManager {
 public:
 	glm::mat4 projection;
 	glm::mat4 view;
-	Cloth * cloth;
+	/*Cloth * cloth;
+	GPUCloth* gpuCloth;*/
+	vector<PositionBasedUnit*>simulateList;
 	vector<Renderable*>renderableList;
 	// lighting
 	Light light;
@@ -35,7 +37,7 @@ public:
 
 	float timeStep = 1.0f / 60.0f;
 	//Simulation
-	glm::vec3 gravity = glm::vec3(0.0f, -0.00981f, 0.0f);
+	static glm::vec3 gravity;
 	double accumulator = timeStep;
 	//统计帧率用的信息
 	LARGE_INTEGER frequency;        // ticks per second
