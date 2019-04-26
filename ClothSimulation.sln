@@ -3,13 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core-Profile", "Core-Profile\Core-Profile.vcxproj", "{D1002D44-B6A6-4D31-AB35-7E791AC71C59}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GPGPU SpringForce", "GPGPU SpringForce\GPGPU SpringForce.vcxproj", "{3FEAC31C-A550-4B09-88EC-6694C7D0828B}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GPGPU Sample", "GPGPU Sample\GPGPU Sample.vcxproj", "{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PositionBasedDynamics Jacobi Simulation", "PositionBasedDynamics Jacobi Simulation\PositionBasedDynamics Jacobi Simulation.vcxproj", "{2C97D0A4-905E-4FBE-8CA6-DA684158E15B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ComputeShaderSample", "ComputeShaderSample\ComputeShaderSample.vcxproj", "{959B268F-3006-4D10-A387-60E70A9DD6F2}"
 EndProject
@@ -21,14 +15,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D1002D44-B6A6-4D31-AB35-7E791AC71C59}.Debug|x64.ActiveCfg = Debug|x64
-		{D1002D44-B6A6-4D31-AB35-7E791AC71C59}.Debug|x64.Build.0 = Debug|x64
-		{D1002D44-B6A6-4D31-AB35-7E791AC71C59}.Debug|x86.ActiveCfg = Debug|Win32
-		{D1002D44-B6A6-4D31-AB35-7E791AC71C59}.Debug|x86.Build.0 = Debug|Win32
-		{D1002D44-B6A6-4D31-AB35-7E791AC71C59}.Release|x64.ActiveCfg = Release|x64
-		{D1002D44-B6A6-4D31-AB35-7E791AC71C59}.Release|x64.Build.0 = Release|x64
-		{D1002D44-B6A6-4D31-AB35-7E791AC71C59}.Release|x86.ActiveCfg = Release|Win32
-		{D1002D44-B6A6-4D31-AB35-7E791AC71C59}.Release|x86.Build.0 = Release|Win32
 		{3FEAC31C-A550-4B09-88EC-6694C7D0828B}.Debug|x64.ActiveCfg = Debug|x64
 		{3FEAC31C-A550-4B09-88EC-6694C7D0828B}.Debug|x64.Build.0 = Debug|x64
 		{3FEAC31C-A550-4B09-88EC-6694C7D0828B}.Debug|x86.ActiveCfg = Debug|Win32
@@ -37,22 +23,6 @@ Global
 		{3FEAC31C-A550-4B09-88EC-6694C7D0828B}.Release|x64.Build.0 = Release|x64
 		{3FEAC31C-A550-4B09-88EC-6694C7D0828B}.Release|x86.ActiveCfg = Release|Win32
 		{3FEAC31C-A550-4B09-88EC-6694C7D0828B}.Release|x86.Build.0 = Release|Win32
-		{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}.Debug|x64.ActiveCfg = Debug|x64
-		{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}.Debug|x64.Build.0 = Debug|x64
-		{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}.Debug|x86.ActiveCfg = Debug|Win32
-		{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}.Debug|x86.Build.0 = Debug|Win32
-		{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}.Release|x64.ActiveCfg = Release|x64
-		{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}.Release|x64.Build.0 = Release|x64
-		{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}.Release|x86.ActiveCfg = Release|Win32
-		{B3D20772-10F5-4936-B2FF-EEBFEFF622B1}.Release|x86.Build.0 = Release|Win32
-		{2C97D0A4-905E-4FBE-8CA6-DA684158E15B}.Debug|x64.ActiveCfg = Debug|x64
-		{2C97D0A4-905E-4FBE-8CA6-DA684158E15B}.Debug|x64.Build.0 = Debug|x64
-		{2C97D0A4-905E-4FBE-8CA6-DA684158E15B}.Debug|x86.ActiveCfg = Debug|Win32
-		{2C97D0A4-905E-4FBE-8CA6-DA684158E15B}.Debug|x86.Build.0 = Debug|Win32
-		{2C97D0A4-905E-4FBE-8CA6-DA684158E15B}.Release|x64.ActiveCfg = Release|x64
-		{2C97D0A4-905E-4FBE-8CA6-DA684158E15B}.Release|x64.Build.0 = Release|x64
-		{2C97D0A4-905E-4FBE-8CA6-DA684158E15B}.Release|x86.ActiveCfg = Release|Win32
-		{2C97D0A4-905E-4FBE-8CA6-DA684158E15B}.Release|x86.Build.0 = Release|Win32
 		{959B268F-3006-4D10-A387-60E70A9DD6F2}.Debug|x64.ActiveCfg = Debug|x64
 		{959B268F-3006-4D10-A387-60E70A9DD6F2}.Debug|x64.Build.0 = Debug|x64
 		{959B268F-3006-4D10-A387-60E70A9DD6F2}.Debug|x86.ActiveCfg = Debug|Win32
