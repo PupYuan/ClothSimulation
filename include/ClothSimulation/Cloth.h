@@ -27,6 +27,7 @@ enum Mode { CPU, GPU };
 class Cloth:public PositionBasedUnit
 {
 private:
+	size_t total_points;
 	int width;
 	int height;
 	int num_particles_width; // number of particles in "width" direction
@@ -43,40 +44,10 @@ private:
 	//绘制相关
 	unsigned int VBO, VAO, EBO;
 
-	//GPGPU相关
-	//位置数据
-	const size_t total_points = (num_particles_width)*(num_particles_height);
-	std::vector<glm::vec4> X;
-	std::vector<glm::vec4> X_last;
-	std::vector<glm::vec3> Normal;
-	std::vector<glm::vec2> TexCoord;
-
-	GLuint fboID[2];
-	GLuint attachID[4];
-	int readID = 0, writeID = 1;
-	GLuint vboID;
-	GLuint vboID2;
-	GLuint vboID3;
-	GLenum mrt[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-	float* _data[2];
-
-	GLuint t_query;
-	GLuint64 elapsed_time;
-	float delta_time = 0;
-
-	//每次渲染的时候做几次物理迭代
-	const int NUM_ITER = 2;
-
-	Shader *verletShader;
 	Shader *renderShader;//渲染用的Shader
 
 	//Scene
 	SceneManager * scene;
-	//render for GPGPU
-	unsigned int quadVAO, quadVBO;
-	unsigned int vaoID;
-	void InitCPU();
-	void InitGPU();
 	const float global_dampening = 0.98f; //DevO: 24.07.2011  //global velocity dampening !!!
 public:
 	Cloth(float width, float height, int num_particles_width, int num_particles_height);
@@ -102,9 +73,6 @@ public:
 	virtual std::vector<Particle>& getParticles() {
 		return particles;
 	}
-	void RenderCPU();
-	void RenderGPU();
-	void drawShaded();
 	void addForce(const vec3 direction);
 	virtual void timeStep(float dt);
 	void GroundCollision();
@@ -167,6 +135,5 @@ private:
 	//render for GPGPU
 	unsigned int quadVAO, quadVBO;
 	unsigned int vaoID;
-	void InitGPU();
 	const float global_dampening = 0.98f; //DevO: 24.07.2011  //global velocity dampening !!!
 };

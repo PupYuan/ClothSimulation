@@ -19,6 +19,7 @@ int Init() {
 	}
 	RenderSystem::Init();
 	scene = new SceneManager();
+	scene->BeginPhysicsSimulation();
 }
 
 

@@ -52,6 +52,7 @@ public:
 	void RenderScene();
 	void CreateCloth();
 	void Simulation(float dt);
+	void BeginPhysicsSimulation();
 	void StepPhysics();
 	//由场景负责创建物体，同时把场景信息传给物体
 private:
