@@ -113,6 +113,7 @@ private:
 	std::vector<glm::vec3> Normal;
 	std::vector<glm::vec2> TexCoord;
 
+	unsigned int vaoID;
 	GLuint fboID[2];
 	GLuint attachID[4];
 	int readID = 0, writeID = 1;
@@ -136,6 +137,61 @@ private:
 	SceneManager * scene;
 	//render for GPGPU
 	unsigned int quadVAO, quadVBO;
-	unsigned int vaoID;
 	const float global_dampening = 0.98f; //DevO: 24.07.2011  //global velocity dampening !!!
+};
+
+class ComputeShaderCloth :public PositionBasedUnit {
+public:
+	virtual void timeStep(float dt);
+	ComputeShaderCloth(float width, float height, int num_particles_width, int num_particles_height);
+	void SetScene(SceneManager* _scene) {
+		scene = _scene;
+	}
+	virtual void render();
+private:
+	int vertice_data_length = 8;
+	std::vector<float>vertices;
+	std::vector<unsigned int>indices;
+	//绘制相关
+	unsigned int VBO, VAO, EBO;
+	int width;
+	int height;
+	int num_particles_width; // number of particles in "width" direction
+	int num_particles_height; // number of particles in "height" direction
+	//GPGPU相关
+	//位置数据
+	const size_t total_points = (num_particles_width)*(num_particles_height);
+	std::vector<glm::vec4> X;
+	std::vector<glm::vec4> X_last;
+	std::vector<glm::vec3> Normal;
+	std::vector<glm::vec2> TexCoord;
+
+	GLuint fboID[2];
+	GLuint attachID[4];
+	int readID = 0, writeID = 1;
+	GLuint vboID;
+	GLuint vboID2;
+	GLuint vboID3;
+	GLenum mrt[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	float* _data[2];
+
+	//每次渲染的时候做几次物理迭代
+	const int NUM_ITER = 4;
+
+	Shader *computeShader;
+	Shader *renderShader;//渲染用的Shader
+
+	//Scene
+	SceneManager * scene;
+	const float global_dampening = 0.98f;
+
+	//compute shader 相关
+	unsigned int vaoID;
+	// FBO 标识
+	GLuint fb;
+	// 纹理标识
+	GLuint outputTexID;
+	GLuint intermediateTexID;
+	GLuint inputTexID;
+	float *pfInput;            //输入数据
 };

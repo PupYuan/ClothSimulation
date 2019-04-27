@@ -121,6 +121,7 @@
     <ClCompile Include="..\src\glad.c" />
     <ClCompile Include="Cloth.cpp" />
     <ClCompile Include="Collider.cpp" />
+    <ClCompile Include="ComputeShaderCloth.cpp" />
     <ClCompile Include="Constraint.cpp" />
     <ClCompile Include="GPUCloth.cpp" />
     <ClCompile Include="main.cpp" />

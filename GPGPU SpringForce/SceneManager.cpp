@@ -5,13 +5,17 @@ glm::vec3 SceneManager::gravity = glm::vec3(0.0f, -0.00981f, 0.0f);
 
 void SceneManager::CreateCloth()
 {
-	Cloth * cloth = new Cloth(4, 6, 20, 20);
-	cloth->SetScene(this);
-	simulateList.push_back(cloth);
+	//Cloth * cloth = new Cloth(4, 6, 20, 20);
+	//cloth->SetScene(this);
+	//simulateList.push_back(cloth);
 
-	GPUCloth * gpuCloth = new GPUCloth(4, 6, 20, 20);
-	gpuCloth->SetScene(this);
-	simulateList.push_back(gpuCloth);
+	//GPUCloth * gpuCloth = new GPUCloth(4, 6, 20, 20);
+	//gpuCloth->SetScene(this);
+	//simulateList.push_back(gpuCloth);
+
+	ComputeShaderCloth * cCloth = new ComputeShaderCloth(4, 6, 20, 20);
+	cCloth->SetScene(this);
+	simulateList.push_back(cCloth);
 }
 
 void SceneManager::SceneInit() {
