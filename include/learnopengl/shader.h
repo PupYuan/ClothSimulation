@@ -47,6 +47,14 @@ public:
 		glShaderSource(vertex, 1, &vShaderCode, NULL);
 		glCompileShader(vertex);
 		checkCompileErrors(vertex, "COMPUTE");
+
+		// shader Program
+		ID = glCreateProgram();
+		glAttachShader(ID, vertex);
+		glLinkProgram(ID);
+		checkCompileErrors(ID, "PROGRAM");
+		// delete the shaders as they're linked into our program now and no longer necessery
+		glDeleteShader(vertex);
 	}
     // constructor generates the shader on the fly
     // ------------------------------------------------------------------------
