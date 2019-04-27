@@ -26,8 +26,8 @@ void SceneManager::StepPhysics() {
 	//物理模拟有自己单独的模拟频率
 	float newTime = (float)glfwGetTime();
 	deltaTime = newTime - lastFrameTime;
-	accumulator += deltaTime;
 	lastFrameTime = newTime;
+	accumulator += deltaTime;
 
 	//StepPhycis调用频率和渲染一致，若渲染过慢，则两次渲染帧之间可能有多次物理模拟
 	//若渲染很快，则可能accumulator
@@ -35,5 +35,4 @@ void SceneManager::StepPhysics() {
 		Simulation(timeStep);
 		accumulator -= timeStep;
 	}
-
 }

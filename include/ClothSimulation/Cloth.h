@@ -12,7 +12,7 @@
 #include "Spring.h"
 #include "Constraint.h"
 class SceneManager;
-
+#define CHECK_GL_ERRORS assert(glGetError()==GL_NO_ERROR);
 //pbd模拟的基本单元，包括布料、沙粒、发束
 class PositionBasedUnit {
 public:
@@ -27,6 +27,7 @@ enum Mode { CPU, GPU };
 class Cloth:public PositionBasedUnit
 {
 private:
+	int vertice_data_length = 8;
 	size_t total_points;
 	int width;
 	int height;
@@ -94,6 +95,7 @@ public:
 	}
 	virtual void render();
 private:
+	int vertice_data_length = 8;
 	//在内存中一份顶点数据
 	std::vector<float>vertices;
 	std::vector<unsigned int>indices;
@@ -125,7 +127,7 @@ private:
 	float delta_time = 0;
 
 	//每次渲染的时候做几次物理迭代
-	const int NUM_ITER = 2;
+	const int NUM_ITER = 4;
 
 	Shader *verletShader;
 	Shader *renderShader;//渲染用的Shader

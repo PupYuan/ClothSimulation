@@ -35,7 +35,7 @@ public:
 	static const unsigned int SCR_WIDTH = 800;
 	static const unsigned int SCR_HEIGHT = 600;
 
-	float timeStep = 1.0f / 60.0f;
+	float timeStep = 1.0f / 50.0f;
 	//Simulation
 	static glm::vec3 gravity;
 	double accumulator = timeStep;

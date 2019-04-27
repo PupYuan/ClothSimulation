@@ -122,6 +122,7 @@
     <ClCompile Include="Cloth.cpp" />
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="Constraint.cpp" />
+    <ClCompile Include="GPUCloth.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="Physics.cpp" />
