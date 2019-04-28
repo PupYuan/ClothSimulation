@@ -7,7 +7,7 @@ void ComputeShaderCloth::timeStep(float dt)
 	CHECK_GL_ERRORS
 	for (int i = 0; i < NUM_ITER; i++) {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[writeID]);
-		glDrawBuffer(GL_COLOR_ATTACHMENT0);
+		//glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		computeShader->use();
 		glFinish();
 		glBindImageTexture(0, attachID[readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
@@ -203,8 +203,8 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32UI, DistanceConstraintIndexData1.size(), 1, 0,
-		GL_RG,GL_INT, &DistanceConstraintIndexData1[0].x);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32I, DistanceConstraintIndexData1.size(), 1, 0,
+		GL_RG_INTEGER, GL_INT, &DistanceConstraintIndexData1[0].x);
 	glCheckError();
 
 	glBindTexture(GL_TEXTURE_2D, DistanceTexID2);
@@ -212,8 +212,8 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32UI, DistanceConstraintIndexData2.size(), 1, 0,
-		GL_RG, GL_INT, &DistanceConstraintIndexData2[0].x);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32I, DistanceConstraintIndexData2.size(), 1, 0,
+		GL_RG_INTEGER, GL_INT, &DistanceConstraintIndexData2[0].x);
 
 	//glCheckError();
 }

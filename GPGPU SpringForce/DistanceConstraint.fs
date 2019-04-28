@@ -3,10 +3,10 @@
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 layout(rgba32f, binding = 0) uniform image2D input_PosData;
-layout(rgba32f, binding = 1) uniform image2D input_IndexData1;//每个约束都存储索引
-layout(rgba32f, binding = 1) uniform image2D input_IndexData2;//影响两个粒子就用两个纹理
+layout(rg32i, binding = 1) uniform iimage2D input_IndexData1;//每个约束都存储索引
+layout(rg32i, binding = 2) uniform iimage2D input_IndexData2;//影响两个粒子就用两个纹理
 
-layout(rgba32f, binding = 2) uniform image2D output_PosDeltaData;//粒子数目宽高的输出图像
+layout(rgba32f, binding = 3) uniform image2D output_PosDeltaData;//粒子数目宽高的输出图像
 
 
 void main(void)
