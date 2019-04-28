@@ -155,7 +155,7 @@
     <None Include="ParticleSimulation.fs" />
     <None Include="render.fs" />
     <None Include="render.vs" />
-    <None Include="under-relaxation.fs" />
+    <None Include="SOR.fs" />
     <None Include="verlet.fs" />
     <None Include="verlet.vs" />
   </ItemGroup>

@@ -181,7 +181,7 @@ private:
 	Shader *computeShader;
 	Shader *renderShader;//‰÷»æ”√µƒShader
 	Shader *DistanceConstraintCompute;
-	Shader *UnderRelaxationCompute;
+	Shader *SuccessiveOverRelaxationCompute;
 	//Scene
 	SceneManager * scene;
 	const float global_dampening = 0.98f;
@@ -191,5 +191,7 @@ private:
 	GLuint DistanceTexID2;
 	std::vector<i32vec2>DistanceConstraintIndexData1;
 	std::vector<i32vec2>DistanceConstraintIndexData2;
+	std::vector<int>Ni;
 	GLuint DistanceDeltaTexID;
+	GLuint NiTexID;
 };

@@ -122,7 +122,7 @@
     <None Include="DistanceConstraint.fs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="under-relaxation.fs">
+    <None Include="SOR.fs">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>

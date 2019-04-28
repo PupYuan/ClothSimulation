@@ -16,10 +16,11 @@ void ComputeShaderCloth::timeStep(float dt)
 		glDispatchCompute(DistanceConstraintIndexData1.size(), 1, 1);
 		glFinish();
 
-		UnderRelaxationCompute->use();
+		SuccessiveOverRelaxationCompute->use();
 		glFinish();
 		glBindImageTexture(0, DistanceDeltaTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 		glBindImageTexture(1, attachID[readID], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+		glBindImageTexture(2, NiTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32I);
 		glDispatchCompute(num_particles_width, num_particles_height, 1);
 		glFinish();
 		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[writeID]);
@@ -84,6 +85,7 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	X_last.resize(total_points);
 	Normal.resize(total_points);
 	TexCoord.resize(total_points);
+	Ni.resize(total_points,0);
 	// creating particles in a grid of particles from (0,0,0) to (width,-height,0)
 	for (int y = 0; y < num_particles_height; y++)
 	{
@@ -136,20 +138,28 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 			// Distance Constraints
 			if (x + 1 < num_particles_width) {
 				DistanceConstraintIndexData1.push_back(i32vec2(x, y));
+				Ni[(y*num_particles_width + x)]++;
 				DistanceConstraintIndexData2.push_back(i32vec2(x+1, y));
+				Ni[(y*num_particles_width + x + 1)]++;
 			}
 				
 			if (y + 1 < num_particles_height) {
 				DistanceConstraintIndexData1.push_back(i32vec2(x, y));
+				Ni[(y*num_particles_width + x)]++;
 				DistanceConstraintIndexData2.push_back(i32vec2(x, y+1));
+				Ni[((y+1)*num_particles_width + x)]++;
 			}
 			//Shear Springs
 			if (y + 1 < num_particles_height && x + 1 < num_particles_width) {
 				DistanceConstraintIndexData1.push_back(i32vec2(x, y));
+				Ni[((y)*num_particles_width + x)]++;
 				DistanceConstraintIndexData2.push_back(i32vec2(x+1, y + 1));
+				Ni[((y+1)*num_particles_width + x+1)]++;
 
 				DistanceConstraintIndexData1.push_back(i32vec2(x+1, y));
+				Ni[((y)*num_particles_width + x + 1)]++;
 				DistanceConstraintIndexData2.push_back(i32vec2(x, y + 1));
+				Ni[((y+1)*num_particles_width + x)]++;
 			}
 		}
 	}
@@ -157,7 +167,7 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	renderShader = ResourcesManager::loadShader("GPU_renderShader", "render.vs", "render.fs");
 	computeShader = ResourcesManager::loadComputeShader("ParticleSimulation", "ParticleSimulation.fs");
 	DistanceConstraintCompute = ResourcesManager::loadComputeShader("DistanceConstraint", "DistanceConstraint.fs");
-	UnderRelaxationCompute = ResourcesManager::loadComputeShader("UnderRelaxation", "under-relaxation.fs");
+	SuccessiveOverRelaxationCompute = ResourcesManager::loadComputeShader("SOR", "SOR.fs");
 
 	const int size = num_particles_width * num_particles_height * 4 * sizeof(float);
 	glGenVertexArrays(1, &vaoID);
@@ -234,6 +244,15 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	//存储DistanceConstraint约束的输出结果，其纹理宽高为粒子数目宽高
 	glGenTextures(1, &DistanceDeltaTexID);
 	setupTexture(DistanceDeltaTexID, nullptr, num_particles_width, num_particles_height);//attachID里面存放顶点数据
+
+	glGenTextures(1, &NiTexID);
+	glBindTexture(GL_TEXTURE_2D, NiTexID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, num_particles_width, num_particles_height, 0,
+		GL_RED_INTEGER, GL_INT, &Ni[0]);
 	//glCheckError();
 }
 
