@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -142,6 +142,7 @@
     <ClInclude Include="..\include\ClothSimulation\ResourcesManager.h" />
     <ClInclude Include="..\include\ClothSimulation\SceneManager.h" />
     <ClInclude Include="..\include\ClothSimulation\Spring.h" />
+    <ClInclude Include="..\include\ClothSimulation\util.h" />
     <ClInclude Include="..\include\ClothSimulation\WindowsManager.h" />
     <ClInclude Include="..\include\learnopengl\model.h" />
     <ClInclude Include="..\include\learnopengl\shader.h" />
@@ -149,6 +150,7 @@
   <ItemGroup>
     <None Include="..\Resource\Shader\Simple.fs" />
     <None Include="..\Resource\Shader\Simple.vs" />
+    <None Include="DistanceConstraint.fs" />
     <None Include="packages.config" />
     <None Include="ParticleSimulation.fs" />
     <None Include="render.fs" />

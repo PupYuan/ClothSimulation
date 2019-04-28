@@ -92,6 +92,9 @@
     <ClInclude Include="..\include\learnopengl\shader.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\ClothSimulation\util.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="verlet.vs">
@@ -116,5 +119,8 @@
       <Filter>资源文件</Filter>
     </None>
     <None Include="packages.config" />
+    <None Include="DistanceConstraint.fs">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
 </Project>

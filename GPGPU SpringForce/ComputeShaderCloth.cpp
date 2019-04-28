@@ -1,5 +1,6 @@
 #include <ClothSimulation\Cloth.h>
 #include <ClothSimulation\SceneManager.h>
+#include <ClothSimulation\util.h>
 
 void ComputeShaderCloth::timeStep(float dt)
 {
@@ -111,8 +112,36 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 			indices.push_back((y)*num_particles_width + x);
 		}
 	}
+
+	//填充约束数据
+	for (int x = 0; x < num_particles_width; x++)
+	{
+		for (int y = 0; y < num_particles_height; y++)
+		{
+			// Distance Constraints
+			if (x + 1 < num_particles_width) {
+				DistanceConstraintIndexData1.push_back(i32vec2(x, y));
+				DistanceConstraintIndexData2.push_back(i32vec2(x+1, y));
+			}
+				
+			if (y + 1 < num_particles_height) {
+				DistanceConstraintIndexData1.push_back(i32vec2(x, y));
+				DistanceConstraintIndexData2.push_back(i32vec2(x, y+1));
+			}
+			//Shear Springs
+			if (y + 1 < num_particles_height && x + 1 < num_particles_width) {
+				DistanceConstraintIndexData1.push_back(i32vec2(x, y));
+				DistanceConstraintIndexData2.push_back(i32vec2(x+1, y + 1));
+
+				DistanceConstraintIndexData1.push_back(i32vec2(x+1, y));
+				DistanceConstraintIndexData2.push_back(i32vec2(x, y + 1));
+			}
+		}
+	}
+
 	renderShader = ResourcesManager::loadShader("GPU_renderShader", "render.vs", "render.fs");
 	computeShader = ResourcesManager::loadComputeShader("ParticleSimulation", "ParticleSimulation.fs");
+	DistanceConstraintCompute = ResourcesManager::loadComputeShader("DistanceConstraint", "DistanceConstraint.fs");
 
 	const int size = num_particles_width * num_particles_height * 4 * sizeof(float);
 	glGenVertexArrays(1, &vaoID);
@@ -147,14 +176,15 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 
 	// framebuffer configuration
 	// -------------------------
-	unsigned int framebuffer;
 	glGenFramebuffers(2, fboID);
 	glGenTextures(4, attachID);
 	for (int j = 0; j < 2; j++) {//两个帧缓冲，用于输入和输出交替
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[j]);
-		setupTexture(attachID[j], _data[0],num_particles_width, num_particles_height);
+		setupTexture(attachID[j], _data[0],num_particles_width, num_particles_height);//attachID里面存放顶点数据
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, attachID[j], 0);
+	
 	}
+
 	GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 	if (status == GL_FRAMEBUFFER_COMPLETE) {
 		printf("FBO setup succeeded.");
@@ -162,7 +192,30 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	else {
 		printf("Problem with FBO setup.");
 	}
-	CHECK_GL_ERRORS
+	glCheckError();
+
+	glGenTextures(1, &DistanceTexID1);
+	glGenTextures(1, &DistanceTexID2);
+	//DistanceConstraint纹理存储在默认帧缓冲中?
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindTexture(GL_TEXTURE_2D, DistanceTexID1);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32UI, DistanceConstraintIndexData1.size(), 1, 0,
+		GL_RG,GL_INT, &DistanceConstraintIndexData1[0].x);
+	glCheckError();
+
+	glBindTexture(GL_TEXTURE_2D, DistanceTexID2);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32UI, DistanceConstraintIndexData2.size(), 1, 0,
+		GL_RG, GL_INT, &DistanceConstraintIndexData2[0].x);
+
+	//glCheckError();
 }
 
 void ComputeShaderCloth::render()
