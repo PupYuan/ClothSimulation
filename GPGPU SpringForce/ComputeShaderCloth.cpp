@@ -7,6 +7,17 @@ void ComputeShaderCloth::timeStep(float dt)
 	CHECK_GL_ERRORS
 	for (int i = 0; i < NUM_ITER; i++) {
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		IntegrationShader->use();
+		glFinish();
+
+		glBindImageTexture(0, attachID[2 * readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+		glBindImageTexture(1, attachID[2 * readID +1], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+		glBindImageTexture(2, attachID[2 * writeID], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+		glBindImageTexture(3, attachID[2 * writeID + 1], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+		glDispatchCompute(num_particles_width, num_particles_height, 1);
+		glFinish();
+
+
 		DistanceConstraintCompute->use();
 		glFinish();
 		glBindImageTexture(0, attachID[2*readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
@@ -156,9 +167,17 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	}
 
 	renderShader = ResourcesManager::loadShader("GPU_renderShader", "render.vs", "render.fs");
-	computeShader = ResourcesManager::loadComputeShader("ParticleSimulation", "ParticleSimulation.fs");
 	DistanceConstraintCompute = ResourcesManager::loadComputeShader("DistanceConstraint", "DistanceConstraint.fs");
 	SuccessiveOverRelaxationCompute = ResourcesManager::loadComputeShader("SOR", "SOR.fs");
+	IntegrationShader = ResourcesManager::loadComputeShader("IntegrationShader", "Integration.fs");
+
+	glCheckError();
+	IntegrationShader->use();
+	IntegrationShader->setFloat("DEFAULT_DAMPING", DEFAULT_DAMPING);
+	IntegrationShader->setFloat("mass", 1.0f);
+	IntegrationShader->setVec3("gravity", glm::vec3(0.0f, -0.0098f, 0.0f));
+	IntegrationShader->setFloat("dt", 1.0f / 50.0f);
+	IntegrationShader->setInt("width", (num_particles_width));
 
 	const int size = num_particles_width * num_particles_height * 4 * sizeof(float);
 	glGenVertexArrays(1, &vaoID);

@@ -115,14 +115,14 @@
     <None Include="render.fs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="ParticleSimulation.fs">
-      <Filter>资源文件</Filter>
-    </None>
     <None Include="packages.config" />
     <None Include="DistanceConstraint.fs">
       <Filter>资源文件</Filter>
     </None>
     <None Include="SOR.fs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="Integration.fs">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>

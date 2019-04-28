@@ -21,6 +21,6 @@ void main(void)
 	//约束对这两个粒子起作用
 
 	//输出到粒子数目宽高的纹理中
-	imageStore(output_PosDeltaData, index1, vec4(0,-0.01,0,0));
-	imageStore(output_PosDeltaData, index2, vec4(0,-0.01,0,0));
+	imageStore(output_PosDeltaData, index1, vec4(0,0,0,0));
+	imageStore(output_PosDeltaData, index2, vec4(0,0,0,0));
 }

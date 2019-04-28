@@ -152,7 +152,7 @@
     <None Include="..\Resource\Shader\Simple.vs" />
     <None Include="DistanceConstraint.fs" />
     <None Include="packages.config" />
-    <None Include="ParticleSimulation.fs" />
+    <None Include="Integration.fs" />
     <None Include="render.fs" />
     <None Include="render.vs" />
     <None Include="SOR.fs" />

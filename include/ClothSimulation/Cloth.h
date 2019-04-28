@@ -182,6 +182,7 @@ private:
 	Shader *renderShader;//äÖÈ¾ÓÃµÄShader
 	Shader *DistanceConstraintCompute;
 	Shader *SuccessiveOverRelaxationCompute;
+	Shader* IntegrationShader;
 	//Scene
 	SceneManager * scene;
 	const float global_dampening = 0.98f;
