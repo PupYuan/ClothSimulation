@@ -18,12 +18,9 @@ void main(void)
 
 	vec4 Pos1 = imageLoad(input_PosData, index1);
 	vec4 Pos2 = imageLoad(input_PosData, index2);
-
-	Pos1.y = Pos1.y - 0.01;
-	Pos2.y = Pos2.y - 0.01;
 	//约束对这两个粒子起作用
 
 	//输出到粒子数目宽高的纹理中
-	imageStore(output_PosDeltaData, index1, Pos1);
-	imageStore(output_PosDeltaData, index2, Pos2);
+	imageStore(output_PosDeltaData, index1, vec4(0,-0.01,0,0));
+	imageStore(output_PosDeltaData, index2, vec4(0,-0.01,0,0));
 }

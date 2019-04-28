@@ -6,17 +6,22 @@ void ComputeShaderCloth::timeStep(float dt)
 {
 	CHECK_GL_ERRORS
 	for (int i = 0; i < NUM_ITER; i++) {
-		//简单地运行一下DistanceConstraint
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		DistanceConstraintCompute->use();
 		glFinish();
 		glBindImageTexture(0, attachID[readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 		glBindImageTexture(1, DistanceTexID1, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
 		glBindImageTexture(2, DistanceTexID2, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
-		glBindImageTexture(3, attachID[writeID], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+		glBindImageTexture(3, DistanceDeltaTexID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 		glDispatchCompute(DistanceConstraintIndexData1.size(), 1, 1);
 		glFinish();
 
+		UnderRelaxationCompute->use();
+		glFinish();
+		glBindImageTexture(0, DistanceDeltaTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+		glBindImageTexture(1, attachID[readID], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+		glDispatchCompute(num_particles_width, num_particles_height, 1);
+		glFinish();
 		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[writeID]);
 		////glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		//computeShader->use();
@@ -152,6 +157,7 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	renderShader = ResourcesManager::loadShader("GPU_renderShader", "render.vs", "render.fs");
 	computeShader = ResourcesManager::loadComputeShader("ParticleSimulation", "ParticleSimulation.fs");
 	DistanceConstraintCompute = ResourcesManager::loadComputeShader("DistanceConstraint", "DistanceConstraint.fs");
+	UnderRelaxationCompute = ResourcesManager::loadComputeShader("UnderRelaxation", "under-relaxation.fs");
 
 	const int size = num_particles_width * num_particles_height * 4 * sizeof(float);
 	glGenVertexArrays(1, &vaoID);
@@ -206,6 +212,7 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 
 	glGenTextures(1, &DistanceTexID1);
 	glGenTextures(1, &DistanceTexID2);
+	
 	//DistanceConstraint纹理存储在默认帧缓冲中?
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, DistanceTexID1);
@@ -224,7 +231,9 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32I, DistanceConstraintIndexData2.size(), 1, 0,
 		GL_RG_INTEGER, GL_INT, &DistanceConstraintIndexData2[0].x);
-
+	//存储DistanceConstraint约束的输出结果，其纹理宽高为粒子数目宽高
+	glGenTextures(1, &DistanceDeltaTexID);
+	setupTexture(DistanceDeltaTexID, nullptr, num_particles_width, num_particles_height);//attachID里面存放顶点数据
 	//glCheckError();
 }
 
