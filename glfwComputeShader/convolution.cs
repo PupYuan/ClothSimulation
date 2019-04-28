@@ -17,9 +17,9 @@ void main(void)
     vec4 data = imageLoad(input_image, pos); 
     barrier();
     //vec4 data = scanline[pos.x][pos.y];
-    data.r = v[0] + data.r;
-    data.g = v[1] + data.g;
-    data.b = v[3] + data.b;
+    data.r = 0 + data.r;
+    data.g = 1 + data.g;
+    data.b = 2 + data.b;
     data.a = data.a;
     imageStore(output_image, pos.xy, data);
 }

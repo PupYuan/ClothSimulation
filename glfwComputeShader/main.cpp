@@ -44,6 +44,8 @@ GLuint fb;
 // 提供GL环境
 GLuint glutWindowHandle;
 
+Shader * computeShader;
+
 struct structTextureParameters {
 	GLenum texTarget;
 	GLenum texInternalFormat;
@@ -67,8 +69,8 @@ int main(int argc, char **argv) {
 	// glfw: initialize and configure
 	// ------------------------------
 	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
@@ -110,7 +112,7 @@ int main(int argc, char **argv) {
 	textureParameters.texFormat = GL_RGBA;
 	CReader reader;
 
-	Shader * computeShader = new Shader("convolution.cs");
+	computeShader = new Shader("convolution.cs");
 	// 初始化FBO
 	initFBO(unWidth, unHeight);
 	createTextures();
@@ -216,12 +218,12 @@ void setupTexture(const GLuint texID) {
 
 void performCompute(const GLuint inputTexID, const GLuint outputTexID) {
 
-
+	computeShader->use();
 	// enable GLSL program
-	glUseProgram(glslProgram);
+	//glUseProgram(glslProgram);
 	// enable the read-only texture x
 	//glActiveTexture(GL_TEXTURE0);
-	glUniform1fv(glGetUniformLocation(glslProgram, "v"), 4, v);
+	//glUniform1fv(glGetUniformLocation(glslProgram, "v"), 4, v);
 
 	// Synchronize for the timing reason.
 	glFinish();
