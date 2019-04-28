@@ -6,16 +6,26 @@ void ComputeShaderCloth::timeStep(float dt)
 {
 	CHECK_GL_ERRORS
 	for (int i = 0; i < NUM_ITER; i++) {
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[writeID]);
-		//glDrawBuffer(GL_COLOR_ATTACHMENT0);
-		computeShader->use();
+		//简单地运行一下DistanceConstraint
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		DistanceConstraintCompute->use();
 		glFinish();
 		glBindImageTexture(0, attachID[readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-		glBindImageTexture(1, attachID[writeID], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-		glDispatchCompute(num_particles_width, num_particles_height, 1);
-		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		glBindImageTexture(1, DistanceTexID1, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
+		glBindImageTexture(2, DistanceTexID2, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
+		glBindImageTexture(3, attachID[writeID], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+		glDispatchCompute(DistanceConstraintIndexData1.size(), 1, 1);
 		glFinish();
 
+		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[writeID]);
+		////glDrawBuffer(GL_COLOR_ATTACHMENT0);
+		//computeShader->use();
+		//glFinish();
+		//glBindImageTexture(0, attachID[readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+		//glBindImageTexture(1, attachID[writeID], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+		//glDispatchCompute(num_particles_width, num_particles_height, 1);
+		//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		//glFinish();
 		//swap read/write pathways
 		int tmp = readID;
 		readID = writeID;
