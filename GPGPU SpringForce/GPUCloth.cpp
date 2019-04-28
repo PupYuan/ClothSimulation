@@ -26,11 +26,11 @@ void GPUCloth::timeStep(float dt)
 		glDrawBuffers(2, mrt);
 
 		CHECK_GL_ERRORS
-			glActiveTexture(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, attachID[2 * readID]);
 
 		CHECK_GL_ERRORS
-			glActiveTexture(GL_TEXTURE1);
+		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, attachID[2 * readID + 1]);
 
 		glDisable(GL_DEPTH_TEST);

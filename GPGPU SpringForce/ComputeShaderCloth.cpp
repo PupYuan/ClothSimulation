@@ -9,7 +9,7 @@ void ComputeShaderCloth::timeStep(float dt)
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		DistanceConstraintCompute->use();
 		glFinish();
-		glBindImageTexture(0, attachID[readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+		glBindImageTexture(0, attachID[2*readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 		glBindImageTexture(1, DistanceTexID1, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
 		glBindImageTexture(2, DistanceTexID2, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
 		glBindImageTexture(3, DistanceDeltaTexID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
@@ -19,19 +19,10 @@ void ComputeShaderCloth::timeStep(float dt)
 		SuccessiveOverRelaxationCompute->use();
 		glFinish();
 		glBindImageTexture(0, DistanceDeltaTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-		glBindImageTexture(1, attachID[readID], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+		glBindImageTexture(1, attachID[2*readID], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 		glBindImageTexture(2, NiTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32I);
 		glDispatchCompute(num_particles_width, num_particles_height, 1);
 		glFinish();
-		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[writeID]);
-		////glDrawBuffer(GL_COLOR_ATTACHMENT0);
-		//computeShader->use();
-		//glFinish();
-		//glBindImageTexture(0, attachID[readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-		//glBindImageTexture(1, attachID[writeID], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-		//glDispatchCompute(num_particles_width, num_particles_height, 1);
-		//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-		//glFinish();
 		//swap read/write pathways
 		int tmp = readID;
 		readID = writeID;
@@ -206,11 +197,12 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	glGenTextures(4, attachID);
 	for (int j = 0; j < 2; j++) {//两个帧缓冲，用于输入和输出交替
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[j]);
-		setupTexture(attachID[j], _data[0],num_particles_width, num_particles_height);//attachID里面存放顶点数据
-		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, attachID[j], 0);
-	
+		for (int i = 0; i < 2; i++) {//两块纹理，用于verlet积分的当前位置和过去位置
+			setupTexture(attachID[i+2*j], _data[i], num_particles_width, num_particles_height);
+			glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, mrt[i], GL_TEXTURE_2D, attachID[i + 2 * j], 0);
+		}
+		//glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, attachID[j], 0);
 	}
-
 	GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 	if (status == GL_FRAMEBUFFER_COMPLETE) {
 		printf("FBO setup succeeded.");
