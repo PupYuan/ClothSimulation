@@ -184,14 +184,6 @@ private:
 	//Scene
 	SceneManager * scene;
 	const float global_dampening = 0.98f;
-
 	//compute shader 相关
 	unsigned int vaoID;
-	// FBO 标识
-	GLuint fb;
-	// 纹理标识
-	GLuint outputTexID;
-	GLuint intermediateTexID;
-	GLuint inputTexID;
-	float *pfInput;            //输入数据
 };

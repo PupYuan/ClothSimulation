@@ -4,10 +4,6 @@
 void ComputeShaderCloth::timeStep(float dt)
 {
 	CHECK_GL_ERRORS
-	//glViewport(0, 0, num_particles_width, num_particles_height);
-	// render
-	// ------
-	// bind to framebuffer and draw scene as we normally would to color texture 
 	for (int i = 0; i < NUM_ITER; i++) {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[writeID]);
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
@@ -18,15 +14,6 @@ void ComputeShaderCloth::timeStep(float dt)
 		glDispatchCompute(num_particles_width, num_particles_height, 1);
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		glFinish();
-		//CHECK_GL_ERRORS
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_2D, attachID[2 * readID]);
-		//CHECK_GL_ERRORS
-		//glActiveTexture(GL_TEXTURE1);
-		//glBindTexture(GL_TEXTURE_2D, attachID[2 * readID + 1]);
-		//glDisable(GL_DEPTH_TEST);
-		// make sure we clear the framebuffer's content
-		//glClear(GL_COLOR_BUFFER_BIT);
 
 		//swap read/write pathways
 		int tmp = readID;
@@ -167,18 +154,6 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[j]);
 		setupTexture(attachID[j], _data[0],num_particles_width, num_particles_height);
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, attachID[j], 0);
-		//for (int i = 0; i < 2; i++) {//两块纹理，用于verlet积分的当前位置和过去位置
-		//	glBindTexture(GL_TEXTURE_2D, attachID[i + 2 * j]);
-
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, num_particles_width, num_particles_height, 0, GL_RGBA, GL_FLOAT, _data[i]); // NULL = Empty texture
-
-
-		//	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, mrt[i], GL_TEXTURE_2D, attachID[i + 2 * j], 0);
-		//}
 	}
 	GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 	if (status == GL_FRAMEBUFFER_COMPLETE) {
