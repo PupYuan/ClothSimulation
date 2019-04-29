@@ -200,6 +200,9 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	float k_prime = 1.0f - pow((1.0f - kStretch), 1.0f / Constraint::solver_iterations);
 	DistanceConstraintCompute->setFloat("k_prime", k_prime);
 
+	SuccessiveOverRelaxationCompute->use();
+	SuccessiveOverRelaxationCompute->setInt("width", (num_particles_width));
+
 	const int size = num_particles_width * num_particles_height * 4 * sizeof(float);
 	glGenVertexArrays(1, &vaoID);
 	glGenBuffers(1, &EBO);

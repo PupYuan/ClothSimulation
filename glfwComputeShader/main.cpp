@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
 	unsigned unNoData = 4 * unSize;        //total number of Data
 	pfInput = new float[unNoData];
 	float *pfOutput = new float[unNoData];
-	for (i = 0; i < unNoData; i++) pfInput[i] = 0.555;
+	for (i = 0; i < unNoData; i++) pfInput[i] = -0.555;
 	for (i = 0; i < 500; i++) {
 		v[i] = i;
 	}
