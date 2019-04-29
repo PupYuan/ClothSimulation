@@ -165,6 +165,7 @@ private:
 	std::vector<glm::vec4> X_last;
 	std::vector<glm::vec3> Normal;
 	std::vector<glm::vec2> TexCoord;
+	std::vector<glm::vec4> Null_X;
 
 	GLuint fboID[2];
 	GLuint attachID[4];

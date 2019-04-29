@@ -20,7 +20,7 @@ void main(void)
 
 	//Successive Over-Relaxation
 	float ni = float(imageLoad(input_ni, pos));
-	totalDelta =1.5 * totalDelta / ni;//ni是影响该粒子的约束数目
+	totalDelta = totalDelta / ni;//ni是影响该粒子的约束数目
 	if ((pos.x==0&&pos.y==0) || (pos.x==width-1&&pos.y==0))
 		 totalDelta = vec4(0);
 	//输出到粒子数目宽高的纹理中

@@ -40,6 +40,8 @@ void ComputeShaderCloth::timeStep(float dt)
 		glDispatchCompute(num_particles_width, num_particles_height, 1);
 		glFinish();
 
+		//清空DistanceDeltaTexID缓存里面的数据
+		glClearTexImage(DistanceDeltaTexID, 0, GL_RGBA, GL_FLOAT, &Null_X[0].x);
 		//swap read/write pathways
 		int tmp = readID;
 		readID = writeID;
@@ -94,7 +96,8 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	Normal.resize(total_points);
 	TexCoord.resize(total_points);
 	Ni.resize(total_points,0);
-	RestDistanceData.resize(total_points, 0);
+
+	Null_X.resize(total_points,vec4(0,0,0,0));
 	// creating particles in a grid of particles from (0,0,0) to (width,-height,0)
 	for (int y = 0; y < num_particles_height; y++)
 	{
@@ -190,7 +193,7 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	IntegrationShader->use();
 	IntegrationShader->setFloat("DEFAULT_DAMPING", DEFAULT_DAMPING);
 	IntegrationShader->setFloat("mass", 1.0f);
-	IntegrationShader->setVec3("gravity", glm::vec3(0.0f, -0.98f, 0.0f));
+	IntegrationShader->setVec3("gravity", glm::vec3(0.0f, -0.098f, 0.0f));
 	IntegrationShader->setFloat("dt", 1.0f / 50.0f);
 	IntegrationShader->setInt("width", (num_particles_width));
 
@@ -278,7 +281,7 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 		GL_RG_INTEGER, GL_INT, &DistanceConstraintIndexData2[0].x);
 	//存储DistanceConstraint约束的输出结果，其纹理宽高为粒子数目宽高
 	glGenTextures(1, &DistanceDeltaTexID);
-	setupTexture(DistanceDeltaTexID, nullptr, num_particles_width, num_particles_height);//attachID里面存放顶点数据
+	setupTexture(DistanceDeltaTexID, &Null_X[0].x, num_particles_width, num_particles_height);//attachID里面存放顶点数据
 
 	glGenTextures(1, &NiTexID);
 	glBindTexture(GL_TEXTURE_2D, NiTexID);
