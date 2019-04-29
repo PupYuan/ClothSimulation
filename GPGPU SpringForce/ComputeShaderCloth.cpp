@@ -5,35 +5,41 @@
 void ComputeShaderCloth::timeStep(float dt)
 {
 	CHECK_GL_ERRORS
-	for (int i = 0; i < NUM_ITER; i++) {
+	IntegrationShader->use();
+	glFinish();
+	glBindImageTexture(0, attachID[2 * readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+	glBindImageTexture(1, attachID[2 * readID + 1], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+	glBindImageTexture(2, attachID[2 * writeID], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	glBindImageTexture(3, attachID[2 * writeID + 1], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	glDispatchCompute(num_particles_width, num_particles_height, 1);
+	glFinish();
+	//swap read/write pathways
+	int tmp = readID;
+	readID = writeID;
+	writeID = tmp;
+
+	for (int i = 0; i < Constraint::solver_iterations; i++) {
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		IntegrationShader->use();
-		glFinish();
-
-		glBindImageTexture(0, attachID[2 * readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-		glBindImageTexture(1, attachID[2 * readID +1], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-		glBindImageTexture(2, attachID[2 * writeID], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-		glBindImageTexture(3, attachID[2 * writeID + 1], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-		glDispatchCompute(num_particles_width, num_particles_height, 1);
-		glFinish();
-
-
 		DistanceConstraintCompute->use();
 		glFinish();
 		glBindImageTexture(0, attachID[2*readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 		glBindImageTexture(1, DistanceTexID1, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
 		glBindImageTexture(2, DistanceTexID2, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
 		glBindImageTexture(3, DistanceDeltaTexID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-		glDispatchCompute(DistanceConstraintIndexData1.size(), 1, 1);
+		glBindImageTexture(4, RestDistanceTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32F);
+		//glDispatchCompute(DistanceConstraintIndexData1.size(), 1, 1);
+		glDispatchCompute(1, 1, 1);
+		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		glFinish();
 
 		SuccessiveOverRelaxationCompute->use();
 		glFinish();
 		glBindImageTexture(0, DistanceDeltaTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-		glBindImageTexture(1, attachID[2*readID], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+		glBindImageTexture(1, attachID[2* writeID], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 		glBindImageTexture(2, NiTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32I);
 		glDispatchCompute(num_particles_width, num_particles_height, 1);
 		glFinish();
+
 		//swap read/write pathways
 		int tmp = readID;
 		readID = writeID;
@@ -88,6 +94,7 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	Normal.resize(total_points);
 	TexCoord.resize(total_points);
 	Ni.resize(total_points,0);
+	RestDistanceData.resize(total_points, 0);
 	// creating particles in a grid of particles from (0,0,0) to (width,-height,0)
 	for (int y = 0; y < num_particles_height; y++)
 	{
@@ -143,6 +150,8 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 				Ni[(y*num_particles_width + x)]++;
 				DistanceConstraintIndexData2.push_back(i32vec2(x+1, y));
 				Ni[(y*num_particles_width + x + 1)]++;
+
+				RestDistanceData.push_back(distance(X[y*num_particles_width + x], X[y*num_particles_width + x + 1]));
 			}
 				
 			if (y + 1 < num_particles_height) {
@@ -150,6 +159,8 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 				Ni[(y*num_particles_width + x)]++;
 				DistanceConstraintIndexData2.push_back(i32vec2(x, y+1));
 				Ni[((y+1)*num_particles_width + x)]++;
+
+				RestDistanceData.push_back(distance(X[y*num_particles_width + x], X[(y+1)*num_particles_width + x]));
 			}
 			//Shear Springs
 			if (y + 1 < num_particles_height && x + 1 < num_particles_width) {
@@ -158,10 +169,14 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 				DistanceConstraintIndexData2.push_back(i32vec2(x+1, y + 1));
 				Ni[((y+1)*num_particles_width + x+1)]++;
 
+				RestDistanceData.push_back(distance(X[y*num_particles_width + x], X[(y + 1)*num_particles_width + x+1]));
+
 				DistanceConstraintIndexData1.push_back(i32vec2(x+1, y));
 				Ni[((y)*num_particles_width + x + 1)]++;
 				DistanceConstraintIndexData2.push_back(i32vec2(x, y + 1));
 				Ni[((y+1)*num_particles_width + x)]++;
+
+				RestDistanceData.push_back(distance(X[y*num_particles_width + x+1], X[(y + 1)*num_particles_width + x]));
 			}
 		}
 	}
@@ -175,9 +190,15 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	IntegrationShader->use();
 	IntegrationShader->setFloat("DEFAULT_DAMPING", DEFAULT_DAMPING);
 	IntegrationShader->setFloat("mass", 1.0f);
-	IntegrationShader->setVec3("gravity", glm::vec3(0.0f, -0.0098f, 0.0f));
+	IntegrationShader->setVec3("gravity", glm::vec3(0.0f, -0.98f, 0.0f));
 	IntegrationShader->setFloat("dt", 1.0f / 50.0f);
 	IntegrationShader->setInt("width", (num_particles_width));
+
+	DistanceConstraintCompute->use();
+	DistanceConstraintCompute->setFloat("restDistance", distance(X[0],X[1]));
+	DistanceConstraintCompute->setFloat("wi",1);
+	float k_prime = 1.0f - pow((1.0f - kStretch), 1.0f / Constraint::solver_iterations);
+	DistanceConstraintCompute->setFloat("k_prime", k_prime);
 
 	const int size = num_particles_width * num_particles_height * 4 * sizeof(float);
 	glGenVertexArrays(1, &vaoID);
@@ -264,6 +285,15 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, num_particles_width, num_particles_height, 0,
 		GL_RED_INTEGER, GL_INT, &Ni[0]);
+
+	glGenTextures(1, &RestDistanceTexID);
+	glBindTexture(GL_TEXTURE_2D, RestDistanceTexID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, RestDistanceData.size(), 1, 0,
+		GL_RED, GL_FLOAT, &RestDistanceData[0]);
 	//glCheckError();
 }
 

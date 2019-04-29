@@ -190,8 +190,11 @@ private:
 	//‘º ¯œ‡πÿ
 	GLuint DistanceTexID1;
 	GLuint DistanceTexID2;
+	GLuint RestDistanceTexID;
 	std::vector<i32vec2>DistanceConstraintIndexData1;
 	std::vector<i32vec2>DistanceConstraintIndexData2;
+	std::vector<float>RestDistanceData;
+	float kStretch = 0.25f;
 	std::vector<int>Ni;
 	GLuint DistanceDeltaTexID;
 	GLuint NiTexID;

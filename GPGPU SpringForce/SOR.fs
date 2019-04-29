@@ -13,15 +13,14 @@ void main(void)
 	ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
 
 	vec4 PosDelta1 = imageLoad(input_PosDelta1, pos);
-	//累加所有约束对粒子位置的偏移
+	//累加所有约束对粒子位置的偏移，不同种的约束不会冲突
 	vec4 originPos = imageLoad(output_PosData, pos);
 	vec4 totalDelta = PosDelta1;
 	//totalDelta = totalDelta + PosDelta2;
 
 	//Successive Over-Relaxation
-	//int ni = int(imageLoad(input_ni, pos));
-	int ni = 1;
-	totalDelta = totalDelta / ni;//ni是影响该粒子的约束数目
+	int ni = int(imageLoad(input_ni, pos));
+	//totalDelta = totalDelta / ni;//ni是影响该粒子的约束数目
 	//输出到粒子数目宽高的纹理中
 	imageStore(output_PosData, pos, originPos + totalDelta);
 }

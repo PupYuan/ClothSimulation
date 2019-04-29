@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
 	unsigned unNoData = 4 * unSize;        //total number of Data
 	pfInput = new float[unNoData];
 	float *pfOutput = new float[unNoData];
-	for (i = 0; i < unNoData; i++) pfInput[i] = i * 0.001f;
+	for (i = 0; i < unNoData; i++) pfInput[i] = 0;
 	for (i = 0; i < 500; i++) {
 		v[i] = i;
 	}
@@ -120,10 +120,10 @@ int main(int argc, char **argv) {
 	/*char c_convolution[] = "convolution.cs";
 	textureParameters.shader_source = reader.textFileRead(c_convolution);
 	initGLSL(GL_COMPUTE_SHADER);*/
-	performCompute(inputTexID, intermediateTexID);
+	//performCompute(inputTexID, intermediateTexID);
 
-	performCompute(intermediateTexID, outputTexID);
-	//performCompute(inputTexID, outputTexID);
+	//performCompute(intermediateTexID, outputTexID);
+	performCompute(inputTexID, outputTexID);
 
 	// get GPU results
 	transferFromTexture(pfOutput);
@@ -235,7 +235,6 @@ void performCompute(const GLuint inputTexID, const GLuint outputTexID) {
 	glBindImageTexture(0, inputTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 	glBindImageTexture(1, outputTexID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 	glDispatchCompute(1, 1, 1);
-
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 	glFinish();
