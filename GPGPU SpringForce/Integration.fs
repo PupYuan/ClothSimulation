@@ -6,7 +6,7 @@ uniform float mass;					//point's mass
 uniform float dt;						//timeStep
 uniform int width;			//size of position texture
 uniform vec3  gravity;				//gravitational force
-uniform float DEFAULT_DAMPING;	//default velocity damping
+uniform float global_dampening;	//default velocity damping
 
 layout (rgba32f, binding = 0) uniform image2D input_Pos;
 layout (rgba32f, binding = 1) uniform image2D input_LastPos;
@@ -22,14 +22,13 @@ void main(void)
 	vec3 LastPos = imageLoad(input_LastPos,pos).xyz;
 
 	vec3 vel	= (CurPos - LastPos) / dt;	// calc. velocity according to verlet integration
-
+	
 	float mymass = mass; 
 	//末端节点固定
 	if ((pos.x==0&&pos.y==0) || (pos.x==width-1&&pos.y==0))
 		 mymass = 0.0;
 
-    vec3 force = gravity*mymass + vel*DEFAULT_DAMPING;
-	//vec3 force = gravity*mymass;
+    vec3 force = gravity*mymass;
 
 	vec3 acc;
 	if(mymass == 0) 		
@@ -40,10 +39,13 @@ void main(void)
 	if(CurPos.y<-10)
 	   CurPos.y=-10;
 
+	vel = vel * global_dampening;
+	vel = vel + acc*dt;
 	// verlet integration
 	vec3 tmp = CurPos;
-	CurPos = CurPos * 2.0 - LastPos + acc * dt * dt;
+	CurPos = CurPos + vel * dt;
 	LastPos = tmp;
+
 	//输出
     imageStore(output_Pos, pos.xy, vec4(CurPos,1.0));
 	imageStore(output_LastPos, pos.xy, vec4(LastPos,1.0));

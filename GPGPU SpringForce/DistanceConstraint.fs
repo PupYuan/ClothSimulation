@@ -36,8 +36,8 @@ void main(void)
 	vec4 deltaP1 = (-wi) / (wi + wi) * (distanceP1P2)*(Pos1 - Pos2) / (distance(Pos1, Pos2))*k_prime;
 	vec4 deltaP2 = (wi) / (wi + wi) * (distanceP1P2)*(Pos1 - Pos2) / (distance(Pos1, Pos2))*k_prime;
 
-	ivec4 deltaP1Int = ivec4(deltaP1*1000);
-	ivec4 deltaP2Int = ivec4(deltaP2*1000);
+	ivec4 deltaP1Int = ivec4(deltaP1*10000);
+	ivec4 deltaP2Int = ivec4(deltaP2*10000);
 	atomicAdd(particleData[index1.x][index1.y].x, deltaP1Int.x);
 	atomicAdd(particleData[index1.x][index1.y].y, deltaP1Int.y);
 	atomicAdd(particleData[index1.x][index1.y].z, deltaP1Int.z);
@@ -49,8 +49,8 @@ void main(void)
 	atomicAdd(particleData[index2.x][index2.y].w, deltaP2Int.w);
 	//particleData里面的数据全部存储完成后再进行累加
 	barrier();
-	vec4 data1 = particleData[index1.x][index1.y]/1000.0f;
-	vec4 data2 = particleData[index2.x][index2.y]/1000.0f;
+	vec4 data1 = particleData[index1.x][index1.y]/10000.0f;
+	vec4 data2 = particleData[index2.x][index2.y]/10000.0f;
 	//这里会出现并行问题，两个约束同时运行，共同影响同一个粒子（x,y），此时在另一个工作组中，imageStore到output_PosDeltaData的同一个位置
 	//相同种类的约束会出现冲突
 	imageStore(output_PosDeltaData, index1.xy, data1);

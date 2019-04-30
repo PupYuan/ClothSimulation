@@ -191,9 +191,9 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 
 	glCheckError();
 	IntegrationShader->use();
-	IntegrationShader->setFloat("DEFAULT_DAMPING", DEFAULT_DAMPING);
+	IntegrationShader->setFloat("global_dampening", global_dampening);
 	IntegrationShader->setFloat("mass", 1.0f);
-	IntegrationShader->setVec3("gravity", glm::vec3(0.0f, -0.098f, 0.0f));
+	IntegrationShader->setVec3("gravity", glm::vec3(0.0f, -0.98f, 0.0f));
 	IntegrationShader->setFloat("dt", 1.0f / 50.0f);
 	IntegrationShader->setInt("width", (num_particles_width));
 
