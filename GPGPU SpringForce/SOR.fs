@@ -39,7 +39,7 @@ void main(void)
 	imageStore(Normal, ivec2(pos.x+1,pos.y), normal + imageLoad(Normal, ivec2(pos.x+1,pos.y)));
 	imageStore(Normal, ivec2(pos.x,pos.y), normal + imageLoad(Normal, ivec2(pos.x,pos.y)));
 	imageStore(Normal, ivec2(pos.x,pos.y+1), normal + imageLoad(Normal, ivec2(pos.x,pos.y+1)));
-
+	barrier();
      //第二块三角形的法线
 	p1 = imageLoad(output_PosData, ivec2(pos.x+1,pos.y+1));
 	p2 = imageLoad(output_PosData, ivec2(pos.x+1,pos.y));

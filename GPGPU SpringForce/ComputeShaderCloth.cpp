@@ -56,12 +56,12 @@ void ComputeShaderCloth::timeStep(float dt)
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, vboID);
 	glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RGBA, GL_FLOAT, 0);
 
-	//将法线数据读出来
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID[0]);
-	//将framebuffer中的颜色附件读取进
-	glReadBuffer(GL_COLOR_ATTACHMENT2);
-	glBindBuffer(GL_PIXEL_PACK_BUFFER, vboID2);
-	glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RGBA, GL_FLOAT, 0);
+	////将法线数据读出来
+	//glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID[0]);
+	////将framebuffer中的颜色附件读取进
+	//glReadBuffer(GL_COLOR_ATTACHMENT2);
+	//glBindBuffer(GL_PIXEL_PACK_BUFFER, vboID2);
+	//glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RGBA, GL_FLOAT, 0);
 
 	glCheckError();
 	//重置状态
@@ -340,41 +340,41 @@ void ComputeShaderCloth::render()
 	renderShader->setFloat("material.shininess", 16.0f);
 	renderShader->setVec3("material.specular", vec3(0.2f, 0.2f, 0.2f));
 
-	////刷新纹理数据
-	//for (int i=0;i<Normal.size();i++)
-	//{
-	//	Normal[i] = vec3(0, 0, 0);
-	//}
-	////create smooth per particle normals by adding up all the (hard) triangle normals that each particle is part of
-	//for (int x = 0; x < num_particles_width - 1; x++)
-	//{
-	//	for (int y = 0; y < num_particles_height - 1; y++)
-	//	{
-	//		//更新第一块三角形的法线
-	//		vec4 p1 = X[y*num_particles_width + x + 1];
-	//		vec4 p2 = X[y*num_particles_width + x];
-	//		vec4 p3 = X[(y+1)*num_particles_width + x];
-	//		vec3 v1 = p2 - p1;
-	//		vec3 v2 = p3 - p1;
-	//		vec3 normal = cross(v1, v2);
-	//		Normal[y*num_particles_width + x + 1] += normal;
-	//		Normal[y*num_particles_width + x] += normal;
-	//		Normal[(y + 1)*num_particles_width + x + 1] += normal;
-	//		//更新第二块三角形的法线
-	//		p1 = X[(y+1)*num_particles_width + x + 1];
-	//		p2 = X[y*num_particles_width + x+1];
-	//		p3 = X[(y + 1)*num_particles_width + x];
-	//		v1 = p2 - p1;
-	//		v2 = p3 - p1;
-	//		normal = cross(v1, v2);
-	//		Normal[(y+1)*num_particles_width + x + 1] += normal;
-	//		Normal[y*num_particles_width + x+1] += normal;
-	//		Normal[(y + 1)*num_particles_width + x] += normal;
-	//	}
-	//}
+	//刷新纹理数据
+	for (int i=0;i<Normal.size();i++)
+	{
+		Normal[i] = vec4(0);
+	}
+	//create smooth per particle normals by adding up all the (hard) triangle normals that each particle is part of
+	for (int x = 0; x < num_particles_width - 1; x++)
+	{
+		for (int y = 0; y < num_particles_height - 1; y++)
+		{
+			//更新第一块三角形的法线
+			vec4 p1 = X[y*num_particles_width + x + 1];
+			vec4 p2 = X[y*num_particles_width + x];
+			vec4 p3 = X[(y+1)*num_particles_width + x];
+			vec3 v1 = p2 - p1;
+			vec3 v2 = p3 - p1;
+			vec3 normal = cross(v1, v2);
+			Normal[y*num_particles_width + x + 1] += vec4(normal,0);
+			Normal[y*num_particles_width + x] += vec4(normal,0);
+			Normal[(y + 1)*num_particles_width + x + 1] += vec4(normal,0);
+			//更新第二块三角形的法线
+			p1 = X[(y+1)*num_particles_width + x + 1];
+			p2 = X[y*num_particles_width + x+1];
+			p3 = X[(y + 1)*num_particles_width + x];
+			v1 = p2 - p1;
+			v2 = p3 - p1;
+			normal = cross(v1, v2);
+			Normal[(y+1)*num_particles_width + x + 1] += vec4(normal,0);
+			Normal[y*num_particles_width + x+1] += vec4(normal,0);
+			Normal[(y + 1)*num_particles_width + x] += vec4(normal,0);
+		}
+	}
 	glBindVertexArray(vaoID);
 	glBindBuffer(GL_ARRAY_BUFFER, vboID2);
-	//glBufferSubData(GL_ARRAY_BUFFER, 0, num_particles_width * num_particles_height * 3 * sizeof(float), &Normal[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, num_particles_width * num_particles_height * 4 * sizeof(float), &Normal[0]);
 	glDrawElements(GL_TRIANGLES, 6 * (num_particles_height - 1)*(num_particles_width - 1), GL_UNSIGNED_INT, 0);
 	CHECK_GL_ERRORS
 }
