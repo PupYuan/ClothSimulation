@@ -163,7 +163,7 @@ private:
 	const size_t total_points = (num_particles_width)*(num_particles_height);
 	std::vector<glm::vec4> X;
 	std::vector<glm::vec4> X_last;
-	std::vector<glm::vec3> Normal;
+	std::vector<glm::vec4> Normal;
 	std::vector<glm::vec2> TexCoord;
 	std::vector<glm::vec4> Null_X;
 
@@ -199,4 +199,5 @@ private:
 	std::vector<int>Ni;
 	GLuint DistanceDeltaTexID;
 	GLuint NiTexID;
+	GLuint NormalTexID;
 };
