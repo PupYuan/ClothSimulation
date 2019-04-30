@@ -1,6 +1,6 @@
 ﻿#version 430 core
 
-layout(local_size_x = 1482, local_size_y = 1, local_size_z = 1) in;//先固定为1024个，后面扩展成动态的
+layout(local_size_x = 1482, local_size_y = 1, local_size_z = 1) in;//先固定为1482个约束，后面扩展成动态的
 
 uniform float restDistance;	//假定所有粒子之间的距离保持一致，若不一致则需要用一张纹理存储
 uniform float wi;//粒子质量倒数，假定所有粒子质量保持一致，若不一致则需要用一张纹理存储
@@ -29,7 +29,6 @@ void main(void)
 	//同步数据
 	barrier();
 	//约束对这两个粒子起作用
-	//float d = restDistance;
 	float d = float(imageLoad(input_restDistance, pos));
 	float distanceP1P2  = distance(Pos1,Pos2) - d;
 

@@ -7,7 +7,7 @@ public:
 	virtual void satisfyConstraint(float dt);
 	float k;
 	float k_prime;
-	static const size_t solver_iterations = 2; //number of solver iterations per step. PBD 
+	static const size_t solver_iterations = 4; //number of solver iterations per step. PBD 
 };
 
 class DistanceConstraint :public Constraint 

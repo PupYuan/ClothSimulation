@@ -51,9 +51,10 @@ void ComputeShaderCloth::timeStep(float dt)
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID[readID]);
 	//将framebuffer中的颜色附件读取进
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
+	glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RGBA, GL_FLOAT, &X[0].x);//需要读两次
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, vboID);
 	glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RGBA, GL_FLOAT, 0);
-
+	glCheckError();
 	CHECK_GL_ERRORS
 	//重置状态
 	glReadBuffer(GL_NONE);
@@ -193,7 +194,7 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	IntegrationShader->use();
 	IntegrationShader->setFloat("global_dampening", global_dampening);
 	IntegrationShader->setFloat("mass", 1.0f);
-	IntegrationShader->setVec3("gravity", glm::vec3(0.0f, -0.98f, 0.0f));
+	IntegrationShader->setVec3("gravity", glm::vec3(0.0f, -0.098f, 0.0f));
 	IntegrationShader->setFloat("dt", 1.0f / 50.0f);
 	IntegrationShader->setInt("width", (num_particles_width));
 
@@ -325,7 +326,41 @@ void ComputeShaderCloth::render()
 	renderShader->setFloat("material.shininess", 16.0f);
 	renderShader->setVec3("material.specular", vec3(0.2f, 0.2f, 0.2f));
 
+	//刷新纹理数据
+	for (int i=0;i<Normal.size();i++)
+	{
+		Normal[i] = vec3(0, 0, 0);
+	}
+	//create smooth per particle normals by adding up all the (hard) triangle normals that each particle is part of
+	for (int x = 0; x < num_particles_width - 1; x++)
+	{
+		for (int y = 0; y < num_particles_height - 1; y++)
+		{
+			//更新第一块三角形的法线
+			vec4 p1 = X[y*num_particles_width + x + 1];
+			vec4 p2 = X[y*num_particles_width + x];
+			vec4 p3 = X[(y+1)*num_particles_width + x];
+			vec3 v1 = p2 - p1;
+			vec3 v2 = p3 - p1;
+			vec3 normal = cross(v1, v2);
+			Normal[y*num_particles_width + x + 1] += normal;
+			Normal[y*num_particles_width + x] += normal;
+			Normal[(y + 1)*num_particles_width + x + 1] += normal;
+			//更新第二块三角形的法线
+			p1 = X[(y+1)*num_particles_width + x + 1];
+			p2 = X[y*num_particles_width + x+1];
+			p3 = X[(y + 1)*num_particles_width + x];
+			v1 = p2 - p1;
+			v2 = p3 - p1;
+			normal = cross(v1, v2);
+			Normal[(y+1)*num_particles_width + x + 1] += normal;
+			Normal[y*num_particles_width + x+1] += normal;
+			Normal[(y + 1)*num_particles_width + x] += normal;
+		}
+	}
 	glBindVertexArray(vaoID);
+	glBindBuffer(GL_ARRAY_BUFFER, vboID2);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, num_particles_width * num_particles_height * 3 * sizeof(float), &Normal[0]);
 	glDrawElements(GL_TRIANGLES, 6 * (num_particles_height - 1)*(num_particles_width - 1), GL_UNSIGNED_INT, 0);
 	CHECK_GL_ERRORS
 }
