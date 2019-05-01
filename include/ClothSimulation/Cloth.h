@@ -176,8 +176,6 @@ private:
 	GLenum mrt[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 	float* _data[2];
 	unsigned int vaoID;
-	//每次渲染的时候做几次物理迭代
-	const int NUM_ITER = 4;
 
 	Shader *computeShader;
 	Shader *renderShader;//渲染用的Shader
@@ -186,7 +184,7 @@ private:
 	Shader* IntegrationShader;
 	//Scene
 	SceneManager * scene;
-	const float global_dampening = 0.98f;
+	const float global_dampening = 0.9f;
 	
 	//约束相关
 	GLuint DistanceTexID1;
@@ -195,7 +193,7 @@ private:
 	std::vector<i32vec2>DistanceConstraintIndexData1;
 	std::vector<i32vec2>DistanceConstraintIndexData2;
 	std::vector<float>RestDistanceData;
-	float kStretch = 0.25f;
+	float kStretch = 0.5f;
 	std::vector<int>Ni;
 	GLuint DistanceDeltaTexID;
 	GLuint NiTexID;

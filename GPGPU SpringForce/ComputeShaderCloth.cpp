@@ -33,6 +33,9 @@ void ComputeShaderCloth::timeStep(float dt)
 		glFinish();
 
 		SuccessiveOverRelaxationCompute->use();
+		//获得球的位置
+		glUniform3fv(glGetUniformLocation(SuccessiveOverRelaxationCompute->ID, "sphere_pos"), 2 ,&scene->spherePos[0][0]);
+		glUniform1fv(glGetUniformLocation(SuccessiveOverRelaxationCompute->ID, "radius"), 2, &scene->radius[0]);
 		glFinish();
 		glBindImageTexture(0, DistanceDeltaTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 		glBindImageTexture(1, attachID[2* writeID], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
@@ -205,7 +208,7 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	IntegrationShader->use();
 	IntegrationShader->setFloat("global_dampening", global_dampening);
 	IntegrationShader->setFloat("mass", 1.0f);
-	IntegrationShader->setVec3("gravity", glm::vec3(0.0f, -0.098f, 0.0f));
+	IntegrationShader->setVec3("gravity", glm::vec3(0.0f, -0.98f, 0.0f));
 	IntegrationShader->setFloat("dt", 1.0f / 50.0f);
 	IntegrationShader->setInt("width", (num_particles_width));
 
@@ -217,6 +220,7 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 
 	SuccessiveOverRelaxationCompute->use();
 	SuccessiveOverRelaxationCompute->setInt("width", (num_particles_width));
+	SuccessiveOverRelaxationCompute->setFloat("w", 1.0f);
 
 	const int size = num_particles_width * num_particles_height * 4 * sizeof(float);
 	glGenVertexArrays(1, &vaoID);

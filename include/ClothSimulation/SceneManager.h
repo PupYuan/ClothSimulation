@@ -22,6 +22,8 @@ public:
 	GPUCloth* gpuCloth;*/
 	vector<PositionBasedUnit*>simulateList;
 	vector<Renderable*>renderableList;
+	vector<vec3>spherePos;
+	vector<float>radius;
 	// lighting
 	Light light;
 

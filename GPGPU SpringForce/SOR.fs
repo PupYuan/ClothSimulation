@@ -8,6 +8,12 @@ layout(r32i, binding = 2) uniform iimage2D input_ni;//每个粒子受到的约束数目
 layout(rgba32f, binding = 3) uniform image2D Normal;//粒子数目宽高的输出图像
 uniform int width;			//size of position texture
 
+// 传递碰撞球体的球心位置
+uniform vec3 sphere_pos[2];
+// 传递碰撞球体的半径数据
+uniform float radius[2];
+uniform float w;//global user-parameter control the rate
+
 void main(void)
 {
 	//该computeShader的并行数量为约束的数量
@@ -21,7 +27,7 @@ void main(void)
 
 	//Successive Over-Relaxation
 	float ni = float(imageLoad(input_ni, pos));
-	totalDelta = totalDelta / ni;//ni是影响该粒子的约束数目
+	totalDelta = w*totalDelta / ni;//ni是影响该粒子的约束数目
 	if ((pos.x==0&&pos.y==0) || (pos.x==width-1&&pos.y==0))
 		 totalDelta = vec4(0);
 
@@ -52,6 +58,15 @@ void main(void)
 	imageStore(Normal, ivec2(pos.x,pos.y+1), normal + imageLoad(Normal, ivec2(pos.x,pos.y+1)));
 
 	barrier();
+	//在这里进行碰撞判断和响应
+	vec4 finalPos = originPos + totalDelta;
+	for(int i=0;i<2;i++){
+	    vec3 v = finalPos.xyz - sphere_pos[i];
+		if(length(v) < radius[i]){
+			vec3 moveOffset  = normalize(v) * (radius[i] - length(v));
+			finalPos  = finalPos + vec4(moveOffset,0);
+		}
+	}
 	//输出到粒子数目宽高的纹理中
-	imageStore(output_PosData, pos, originPos + totalDelta);
+	imageStore(output_PosData, pos, finalPos);
 }

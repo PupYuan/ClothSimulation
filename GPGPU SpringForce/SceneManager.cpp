@@ -23,17 +23,21 @@ void SceneManager::SceneInit() {
 	CreateCloth();
 
 	Renderable* renderable = new ShpereRenderable(this);
-	renderable->scale = vec3(0.5,0.5,0.5);
+	renderable->scale = vec3(1.0,1.0,1.0);
 	renderableList.push_back(renderable);
 
 	Renderable* renderable1 = new ShpereRenderable(this);
-	renderable1->scale = vec3(0.5, 0.5, 0.5);
+	renderable1->scale = vec3(1.0, 1.0, 1.0);
 	renderableList.push_back(renderable1);
 
 	//ball_pos = vec3(0.0f, cos(ball_time / 50.0) *2.0f, 1.0f);
-	renderable->ball_collider = new SphereCollider(vec3(0.0f, cos(ball_time / 50.0) *2.0f, 1.0f), 0.8f);
-	renderable1->ball_collider = new SphereCollider(vec3(0.0f, cos(ball_time / 50.0) *2.0f, 5.0f), 0.8f);
+	renderable->ball_collider = new SphereCollider(vec3(0.0f, -4.0f, 2.0f + cos(ball_time / 50.0) *3.0f), 1.2f);
+	renderable1->ball_collider = new SphereCollider(vec3(0.0f, -4.0f, 2.0f + cos(ball_time / 50.0) *3.0f), 1.2f);
 
+	spherePos.push_back(vec3(0.0f, -4.0f, 2.0f + cos(ball_time / 50.0) *3.0f));
+	spherePos.push_back(vec3(0.0f, -4.0f, 2.0f + cos(ball_time / 50.0) *3.0f));
+	radius.push_back(1.2f);
+	radius.push_back(1.2f);
 	diffuseMap = loadTexture("../Resource/Textures/ClothTextures.png");
 
 }
