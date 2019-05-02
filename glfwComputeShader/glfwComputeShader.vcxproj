@@ -124,6 +124,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="convolution.cs" />
+    <None Include="convolution1.cs" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\CReader.h" />

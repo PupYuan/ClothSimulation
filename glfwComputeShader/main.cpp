@@ -31,6 +31,7 @@ void transferToTexture(float *data, GLuint texID);
 GLuint outputTexID;
 GLuint intermediateTexID;
 GLuint inputTexID;
+GLuint intTexID;
 
 // GLSL 变量
 GLuint glslProgram;
@@ -54,6 +55,7 @@ struct structTextureParameters {
 } textureParameters;
 
 float *pfInput;            //输入数据
+int *intOutput;
 unsigned unWidth = (unsigned)WIDTH;
 unsigned unHeight = (unsigned)HEIGHT;
 unsigned unSize = unWidth * unHeight;
@@ -69,8 +71,8 @@ int main(int argc, char **argv) {
 	// glfw: initialize and configure
 	// ------------------------------
 	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4.4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4.4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
@@ -101,7 +103,9 @@ int main(int argc, char **argv) {
 	unsigned unNoData = 4 * unSize;        //total number of Data
 	pfInput = new float[unNoData];
 	float *pfOutput = new float[unNoData];
-	for (i = 0; i < unNoData; i++) pfInput[i] = -0.555;
+	intOutput = new int[unSize];
+	for (i = 0; i < unNoData; i++) pfInput[i] = 0;
+	for (i = 0; i < unSize; i++) intOutput[i] = 0;
 	for (i = 0; i < 500; i++) {
 		v[i] = i;
 	}
@@ -112,24 +116,26 @@ int main(int argc, char **argv) {
 	textureParameters.texFormat = GL_RGBA;
 	CReader reader;
 
-	computeShader = new Shader("convolution.cs");
+	computeShader = new Shader("convolution1.cs");
 	// 初始化FBO
 	initFBO(unWidth, unHeight);
 	createTextures();
 
-	/*char c_convolution[] = "convolution.cs";
-	textureParameters.shader_source = reader.textFileRead(c_convolution);
-	initGLSL(GL_COMPUTE_SHADER);*/
-	//performCompute(inputTexID, intermediateTexID);
-
-	//performCompute(intermediateTexID, outputTexID);
 	performCompute(inputTexID, outputTexID);
 
 	// get GPU results
 	transferFromTexture(pfOutput);
 
+	GLuint* buffer = new GLuint[16 * 16];
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, intTexID);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_INT, buffer);
+	glReadBuffer(GL_COLOR_ATTACHMENT3);
+	glReadPixels(0, 0, unWidth, unHeight, GL_RED_INTEGER, GL_INT, intOutput);
+
 	for (int i = 0; i < unNoData; i++) {
-		cout << "input:" << pfInput[i] << " output:" << pfOutput[i] << endl;
+		//cout << "input:" << pfInput[i] << " output:" << pfOutput[i] << endl;
+		cout << "input:" << pfInput[i] << " output:" << intOutput[i/4] << endl;
 	}
 
 	// clean up
@@ -187,13 +193,28 @@ void createTextures() {
 	glGenTextures(1, &outputTexID);
 	glGenTextures(1, &intermediateTexID);
 	glGenTextures(1, &inputTexID);
+	glGenTextures(1, &intTexID);
+	
 	// set up textures
 	setupTexture(outputTexID);
 	setupTexture(intermediateTexID);
 	setupTexture(inputTexID);
+
+	glBindTexture(textureParameters.texTarget, intTexID);
+	//glTexStorage2D(GL_TEXTURE_2D, 8, GL_R32UI, 16, 16);
+	// turn off filtering and wrap modes
+	glTexParameteri(textureParameters.texTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(textureParameters.texTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(textureParameters.texTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(textureParameters.texTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	// define texture with floating point format
+	glTexImage2D(textureParameters.texTarget, 0, GL_R32I, unWidth, unHeight, 0,
+		GL_RED_INTEGER, GL_INT, intOutput);
+
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureParameters.texTarget, inputTexID, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, textureParameters.texTarget, intermediateTexID, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, textureParameters.texTarget, outputTexID, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, textureParameters.texTarget, intTexID, 0);
 	transferToTexture(pfInput, inputTexID);
 	// set texenv mode
 	//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
@@ -234,6 +255,7 @@ void performCompute(const GLuint inputTexID, const GLuint outputTexID) {
 
 	glBindImageTexture(0, inputTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 	glBindImageTexture(1, outputTexID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	glBindImageTexture(2, intTexID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
 	glDispatchCompute(1, 1, 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 

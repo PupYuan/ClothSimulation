@@ -29,6 +29,9 @@
     <None Include="convolution.cs">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="convolution1.cs">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\CReader.h">
