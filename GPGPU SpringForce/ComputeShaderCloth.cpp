@@ -103,6 +103,22 @@ void setupTexture(const GLuint texID, float *data,int width,int height) {
 
 }
 
+/**
+ * Sets up a floating point texture with the NEAREST filtering.
+ */
+void setupIntTexture(const GLuint texID, int *data, int width, int height) {
+	// make active and bind
+	glBindTexture(GL_TEXTURE_2D, texID);
+	// turn off filtering and wrap modes
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, width, height, 0,
+		GL_RED_INTEGER, GL_INT, data);
+
+}
+
 ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_particles_width, int num_particles_height) : num_particles_width(num_particles_width), num_particles_height(num_particles_height)
 {
 	width = _width;
@@ -301,41 +317,17 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 		GL_RG_INTEGER, GL_INT, &DistanceConstraintIndexData2[0].x);
 	//存储XYZ三个方向的位置偏差，设为int是为了支持原子操作
 	glGenTextures(1, &DeltaTexXID);
-	glBindTexture(GL_TEXTURE_2D, DeltaTexXID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, num_particles_width, num_particles_height, 0,
-		GL_RED_INTEGER, GL_INT, &Null_X[0]);
+	setupIntTexture(DeltaTexXID, &Null_X[0], num_particles_width, num_particles_height);
 
 	glGenTextures(1, &DeltaTexYID);
-	glBindTexture(GL_TEXTURE_2D, DeltaTexYID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, num_particles_width, num_particles_height, 0,
-		GL_RED_INTEGER, GL_INT, &Null_X[0]);
+	setupIntTexture(DeltaTexYID, &Null_X[0], num_particles_width, num_particles_height);
 
 	glGenTextures(1, &DeltaTexZID);
-	glBindTexture(GL_TEXTURE_2D, DeltaTexZID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, num_particles_width, num_particles_height, 0,
-		GL_RED_INTEGER, GL_INT, &Null_X[0]);
+	setupIntTexture(DeltaTexZID, &Null_X[0], num_particles_width, num_particles_height);
 
 
 	glGenTextures(1, &NiTexID);
-	glBindTexture(GL_TEXTURE_2D, NiTexID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, num_particles_width, num_particles_height, 0,
-		GL_RED_INTEGER, GL_INT, &Ni[0]);
+	setupIntTexture(NiTexID, &Ni[0], num_particles_width, num_particles_height);
 
 	glGenTextures(1, &RestDistanceTexID);
 	glBindTexture(GL_TEXTURE_2D, RestDistanceTexID);
