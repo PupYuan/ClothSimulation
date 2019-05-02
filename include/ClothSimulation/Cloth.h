@@ -165,7 +165,7 @@ private:
 	std::vector<glm::vec4> X_last;
 	std::vector<glm::vec4> Normal;
 	std::vector<glm::vec2> TexCoord;
-	std::vector<glm::vec4> Null_X;
+	std::vector<int> Null_X;
 
 	GLuint fboID[2];
 	GLuint attachID[4];
@@ -195,7 +195,9 @@ private:
 	std::vector<float>RestDistanceData;
 	float kStretch = 0.5f;
 	std::vector<int>Ni;
-	GLuint DistanceDeltaTexID;
+	GLuint DeltaTexXID;
+	GLuint DeltaTexYID;
+	GLuint DeltaTexZID;
 	GLuint NiTexID;
 	GLuint NormalTexID;
 };

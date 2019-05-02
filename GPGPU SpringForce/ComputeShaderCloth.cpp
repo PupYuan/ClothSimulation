@@ -17,7 +17,7 @@ void ComputeShaderCloth::timeStep(float dt)
 	int tmp = readID;
 	readID = writeID;
 	writeID = tmp;
-
+	glCheckError();
 	for (int i = 0; i < Constraint::solver_iterations; i++) {
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		DistanceConstraintCompute->use();
@@ -25,33 +25,38 @@ void ComputeShaderCloth::timeStep(float dt)
 		glBindImageTexture(0, attachID[2*readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 		glBindImageTexture(1, DistanceTexID1, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
 		glBindImageTexture(2, DistanceTexID2, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
-		glBindImageTexture(3, DistanceDeltaTexID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-		glBindImageTexture(4, RestDistanceTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32F);
-		//glDispatchCompute(DistanceConstraintIndexData1.size(), 1, 1);
-		glDispatchCompute(1, 1, 1);
+		glBindImageTexture(3, DeltaTexXID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+		glBindImageTexture(4, DeltaTexYID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+		glBindImageTexture(5, DeltaTexZID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+		glBindImageTexture(6, RestDistanceTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32F);
+		glDispatchCompute(DistanceConstraintIndexData1.size(), 1, 1);
+		//glDispatchCompute(1, 1, 1);
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		glFinish();
-
+		glCheckError();
 		SuccessiveOverRelaxationCompute->use();
 		//获得球的位置
 		glUniform3fv(glGetUniformLocation(SuccessiveOverRelaxationCompute->ID, "sphere_pos"), 2 ,&scene->spherePos[0][0]);
 		glUniform1fv(glGetUniformLocation(SuccessiveOverRelaxationCompute->ID, "radius"), 2, &scene->radius[0]);
 		glFinish();
-		glBindImageTexture(0, DistanceDeltaTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-		glBindImageTexture(1, attachID[2* writeID], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
-		glBindImageTexture(2, NiTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32I);
-		glBindImageTexture(3, NormalTexID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+		glBindImageTexture(0, DeltaTexXID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+		glBindImageTexture(1, DeltaTexYID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+		glBindImageTexture(2, DeltaTexZID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+		glBindImageTexture(3, attachID[2* writeID], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+		glBindImageTexture(4, NiTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32I);
+		glBindImageTexture(5, NormalTexID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 		glDispatchCompute(num_particles_width, num_particles_height, 1);
 		glFinish();
-
-		//清空DistanceDeltaTexID缓存里面的数据
-		glClearTexImage(DistanceDeltaTexID, 0, GL_RGBA, GL_FLOAT, &Null_X[0].x);
+		//清空DeltaTexXID缓存里面的数据
+		glClearTexImage(DeltaTexXID, 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
+		glClearTexImage(DeltaTexYID, 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
+		glClearTexImage(DeltaTexZID, 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
 		//swap read/write pathways
 		int tmp = readID;
 		readID = writeID;
 		writeID = tmp;
 	}
-
+	glCheckError();
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID[readID]);
 	//将framebuffer中的颜色附件读取进
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
@@ -109,7 +114,7 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	TexCoord.resize(total_points);
 	Ni.resize(total_points,0);
 
-	Null_X.resize(total_points,vec4(0,0,0,0));
+	Null_X.resize(total_points,0);
 	// creating particles in a grid of particles from (0,0,0) to (width,-height,0)
 	for (int y = 0; y < num_particles_height; y++)
 	{
@@ -294,9 +299,34 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32I, DistanceConstraintIndexData2.size(), 1, 0,
 		GL_RG_INTEGER, GL_INT, &DistanceConstraintIndexData2[0].x);
-	//存储DistanceConstraint约束的输出结果，其纹理宽高为粒子数目宽高
-	glGenTextures(1, &DistanceDeltaTexID);
-	setupTexture(DistanceDeltaTexID, &Null_X[0].x, num_particles_width, num_particles_height);//attachID里面存放顶点数据
+	//存储XYZ三个方向的位置偏差，设为int是为了支持原子操作
+	glGenTextures(1, &DeltaTexXID);
+	glBindTexture(GL_TEXTURE_2D, DeltaTexXID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, num_particles_width, num_particles_height, 0,
+		GL_RED_INTEGER, GL_INT, &Null_X[0]);
+
+	glGenTextures(1, &DeltaTexYID);
+	glBindTexture(GL_TEXTURE_2D, DeltaTexYID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, num_particles_width, num_particles_height, 0,
+		GL_RED_INTEGER, GL_INT, &Null_X[0]);
+
+	glGenTextures(1, &DeltaTexZID);
+	glBindTexture(GL_TEXTURE_2D, DeltaTexZID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, num_particles_width, num_particles_height, 0,
+		GL_RED_INTEGER, GL_INT, &Null_X[0]);
+
 
 	glGenTextures(1, &NiTexID);
 	glBindTexture(GL_TEXTURE_2D, NiTexID);
