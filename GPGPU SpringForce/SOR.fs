@@ -8,7 +8,7 @@ layout(r32i, binding = 2) uniform iimage2D PosDeltaDataZ;
 
 layout(rgba32f, binding = 3) uniform image2D output_PosData;//粒子数目宽高的输出图像
 layout(r32i, binding = 4) uniform iimage2D input_ni;//每个粒子受到的约束数目
-layout(rgba32f, binding = 5) uniform image2D Normal;//粒子数目宽高的输出图像
+
 uniform int width;			//size of position texture
 
 // 传递碰撞球体的球心位置
@@ -35,34 +35,7 @@ void main(void)
 	if ((pos.x==0&&pos.y==0) || (pos.x==width-1&&pos.y==0))
 		 totalDelta = vec4(0);
 
-	//法线的计算
-	vec4 normal = vec4(0);
-	imageStore(Normal, pos, normal);//清空一遍
-
-	//第一块三角形的法线
-	vec4 p1 = imageLoad(output_PosData, ivec2(pos.x+1,pos.y));
-	vec4 p2 = imageLoad(output_PosData, ivec2(pos.x,pos.y));
-	vec4 p3 = imageLoad(output_PosData, ivec2(pos.x,pos.y+1));
-	vec4 v1 = p2-p1;
-	vec4 v2 = p3-p1;
-	normal = vec4(cross(v1.xyz,p2.xyz),1);
-	imageStore(Normal, ivec2(pos.x+1,pos.y), normal + imageLoad(Normal, ivec2(pos.x+1,pos.y)));
-	imageStore(Normal, ivec2(pos.x,pos.y), normal + imageLoad(Normal, ivec2(pos.x,pos.y)));
-	imageStore(Normal, ivec2(pos.x,pos.y+1), normal + imageLoad(Normal, ivec2(pos.x,pos.y+1)));
-	barrier();
-     //第二块三角形的法线
-	p1 = imageLoad(output_PosData, ivec2(pos.x+1,pos.y+1));
-	p2 = imageLoad(output_PosData, ivec2(pos.x+1,pos.y));
-	p3 = imageLoad(output_PosData, ivec2(pos.x,pos.y+1));
-	v1 = p2-p1;
-	v2 = p3-p1;
-	normal = vec4(cross(v1.xyz,p2.xyz),1);
-	imageStore(Normal, ivec2(pos.x+1,pos.y+1),normal + imageLoad(Normal, ivec2(pos.x+1,pos.y+1)));
-	imageStore(Normal, ivec2(pos.x+1,pos.y),normal + imageLoad(Normal, ivec2(pos.x+1,pos.y)));
-	imageStore(Normal, ivec2(pos.x,pos.y+1), normal + imageLoad(Normal, ivec2(pos.x,pos.y+1)));
-
-	barrier();
-	//在这里进行碰撞判断和响应
+    //在这里进行碰撞判断和响应
 	vec4 finalPos = originPos + totalDelta;
 	for(int i=0;i<2;i++){
 	    vec3 v = finalPos.xyz - sphere_pos[i];

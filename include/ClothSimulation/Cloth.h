@@ -182,6 +182,7 @@ private:
 	Shader *DistanceConstraintCompute;
 	Shader *SuccessiveOverRelaxationCompute;
 	Shader* IntegrationShader;
+	Shader* NormalCalcShader;
 	//Scene
 	SceneManager * scene;
 	const float global_dampening = 0.9f;
@@ -195,9 +196,13 @@ private:
 	std::vector<float>RestDistanceData;
 	float kStretch = 0.5f;
 	std::vector<int>Ni;
+	std::vector<int>NormalX;
+	std::vector<int>NormalY;
+	std::vector<int>NormalZ;
 	GLuint DeltaTexXID;
 	GLuint DeltaTexYID;
 	GLuint DeltaTexZID;
 	GLuint NiTexID;
-	GLuint NormalTexID;
+	GLuint NormalTexID[3];
+	GLuint NormalVboID[3];
 };

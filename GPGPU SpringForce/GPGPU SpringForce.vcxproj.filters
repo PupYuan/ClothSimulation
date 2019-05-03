@@ -125,5 +125,8 @@
     <None Include="Integration.fs">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="NormalCalculate.fs">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
 </Project>

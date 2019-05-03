@@ -44,13 +44,28 @@ void ComputeShaderCloth::timeStep(float dt)
 		glBindImageTexture(2, DeltaTexZID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
 		glBindImageTexture(3, attachID[2* writeID], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 		glBindImageTexture(4, NiTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32I);
-		glBindImageTexture(5, NormalTexID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+		//glBindImageTexture(5, NormalTexID[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+		//glBindImageTexture(6, NormalTexID[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+		//glBindImageTexture(7, NormalTexID[2], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+		glDispatchCompute(num_particles_width, num_particles_height, 1);
+		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		glFinish();
+
+		NormalCalcShader->use();
+		for (int i = 0; i < 3; i++)
+			glClearTexImage(NormalTexID[i], 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
+		glFinish();
+		glBindImageTexture(0, attachID[2 * writeID], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+		glBindImageTexture(1, NormalTexID[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+		glBindImageTexture(2, NormalTexID[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+		glBindImageTexture(3, NormalTexID[2], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
 		glDispatchCompute(num_particles_width, num_particles_height, 1);
 		glFinish();
 		//清空DeltaTexXID缓存里面的数据
 		glClearTexImage(DeltaTexXID, 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
 		glClearTexImage(DeltaTexYID, 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
 		glClearTexImage(DeltaTexZID, 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
+		
 		//swap read/write pathways
 		int tmp = readID;
 		readID = writeID;
@@ -60,17 +75,26 @@ void ComputeShaderCloth::timeStep(float dt)
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID[readID]);
 	//将framebuffer中的颜色附件读取进
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
-	//glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RGBA, GL_FLOAT, &X[0].x);//需要读两次
+	glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RGBA, GL_FLOAT, &X[0].x);//需要读两次
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, vboID);
 	glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RGBA, GL_FLOAT, 0);
+
 
 	////将法线数据读出来
 	//glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID[0]);
 	////将framebuffer中的颜色附件读取进
 	//glReadBuffer(GL_COLOR_ATTACHMENT2);
-	//glBindBuffer(GL_PIXEL_PACK_BUFFER, vboID2);
-	//glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RGBA, GL_FLOAT, 0);
+	//glBindBuffer(GL_PIXEL_PACK_BUFFER, NormalVboID[0]);
+	//glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RED_INTEGER, GL_INT, 0);
 
+	//glReadBuffer(GL_COLOR_ATTACHMENT3);
+	//glBindBuffer(GL_PIXEL_PACK_BUFFER, NormalVboID[1]);
+	//glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RED_INTEGER, GL_INT, 0);
+
+	//glReadBuffer(GL_COLOR_ATTACHMENT4);
+	//glBindBuffer(GL_PIXEL_PACK_BUFFER, NormalVboID[2]);
+	//glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RED_INTEGER, GL_INT, 0);
+	//glFinish();
 	glCheckError();
 	//重置状态
 	glReadBuffer(GL_NONE);
@@ -129,7 +153,9 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	Normal.resize(total_points);
 	TexCoord.resize(total_points);
 	Ni.resize(total_points,0);
-
+	NormalX.resize(total_points, 0);
+	NormalY.resize(total_points, 0);
+	NormalZ.resize(total_points, 0);
 	Null_X.resize(total_points,0);
 	// creating particles in a grid of particles from (0,0,0) to (width,-height,0)
 	for (int y = 0; y < num_particles_height; y++)
@@ -224,6 +250,7 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	DistanceConstraintCompute = ResourcesManager::loadComputeShader("DistanceConstraint", "DistanceConstraint.fs");
 	SuccessiveOverRelaxationCompute = ResourcesManager::loadComputeShader("SOR", "SOR.fs");
 	IntegrationShader = ResourcesManager::loadComputeShader("IntegrationShader", "Integration.fs");
+	NormalCalcShader = ResourcesManager::loadComputeShader("NormalCalcShader", "NormalCalculate.fs");
 
 	glCheckError();
 	IntegrationShader->use();
@@ -257,17 +284,30 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(0);
 	//顶点法线属性
-	glGenBuffers(1, &vboID2);
-	glBindBuffer(GL_ARRAY_BUFFER, vboID2);
-	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 4 * sizeof(float), &Normal[0], GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, NULL);
+	glGenBuffers(1, &NormalVboID[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[0]);
+	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalX[0], GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(1, 1, GL_INT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(1);
+
+	glGenBuffers(1, &NormalVboID[1]);
+	glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[1]);
+	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalY[0], GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(2, 1, GL_INT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(2);
+
+	glGenBuffers(1, &NormalVboID[2]);
+	glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[2]);
+	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalZ[0], GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(3, 2, GL_INT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(3);
+
 	//顶点纹理属性
 	glGenBuffers(1, &vboID3);
 	glBindBuffer(GL_ARRAY_BUFFER, vboID3);
 	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 2 * sizeof(float), &TexCoord[0], GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(4);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -285,14 +325,7 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 			glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, mrt[i], GL_TEXTURE_2D, attachID[i + 2 * j], 0);
 		}
 	}
-	GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-	if (status == GL_FRAMEBUFFER_COMPLETE) {
-		printf("FBO setup succeeded.");
-	}
-	else {
-		printf("Problem with FBO setup.");
-	}
-	glCheckError();
+	
 
 	glGenTextures(1, &DistanceTexID1);
 	glGenTextures(1, &DistanceTexID2);
@@ -339,9 +372,21 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 		GL_RED, GL_FLOAT, &RestDistanceData[0]);
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[0]);
-	glGenTextures(1, &NormalTexID);
-	setupTexture(NormalTexID, &Normal[0].x, num_particles_width, num_particles_height);//attachID里面存放顶点数据
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, NormalTexID, 0);
+	glGenTextures(3, NormalTexID);
+	for (int i = 0; i < 3; i++) {
+		setupIntTexture(NormalTexID[i], &Null_X[0], num_particles_width, num_particles_height);//attachID里面存放顶点数据
+	}
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, NormalTexID[0], 0);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, NormalTexID[1], 0);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, NormalTexID[2], 0);
+	GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+	if (status == GL_FRAMEBUFFER_COMPLETE) {
+		printf("FBO setup succeeded.");
+	}
+	else {
+		printf("Problem with FBO setup.");
+	}
+	glCheckError();
 }
 
 void ComputeShaderCloth::render()
@@ -369,7 +414,10 @@ void ComputeShaderCloth::render()
 	//刷新纹理数据
 	for (int i=0;i<Normal.size();i++)
 	{
-		Normal[i] = vec4(0);
+		//Normal[i] = vec4(0);
+		NormalX[i] = 0;
+		NormalY[i] = 0;
+		NormalZ[i] = 0;
 	}
 	//create smooth per particle normals by adding up all the (hard) triangle normals that each particle is part of
 	for (int x = 0; x < num_particles_width - 1; x++)
@@ -383,9 +431,22 @@ void ComputeShaderCloth::render()
 			vec3 v1 = p2 - p1;
 			vec3 v2 = p3 - p1;
 			vec3 normal = cross(v1, v2);
-			Normal[y*num_particles_width + x + 1] += vec4(normal,0);
-			Normal[y*num_particles_width + x] += vec4(normal,0);
-			Normal[(y + 1)*num_particles_width + x + 1] += vec4(normal,0);
+
+			NormalX[y*num_particles_width + x + 1] += normal.x*100000.0f;
+			NormalY[y*num_particles_width + x + 1] += normal.y*100000.0f;
+			NormalZ[y*num_particles_width + x + 1] += normal.z*100000.0f;
+
+			NormalX[y*num_particles_width + x] += normal.x*100000.0f;
+			NormalY[y*num_particles_width + x] += normal.y*100000.0f;
+			NormalZ[y*num_particles_width + x] += normal.z*100000.0f;
+
+			NormalX[(y + 1)*num_particles_width + x + 1] += normal.x*100000.0f;
+			NormalY[(y + 1)*num_particles_width + x + 1] += normal.y*100000.0f;
+			NormalZ[(y + 1)*num_particles_width + x + 1] += normal.z*100000.0f;
+
+			//Normal[y*num_particles_width + x + 1] += vec4(normal,0);
+			//Normal[y*num_particles_width + x] += vec4(normal,0);
+			//Normal[(y + 1)*num_particles_width + x + 1] += vec4(normal,0);
 			//更新第二块三角形的法线
 			p1 = X[(y+1)*num_particles_width + x + 1];
 			p2 = X[y*num_particles_width + x+1];
@@ -393,14 +454,32 @@ void ComputeShaderCloth::render()
 			v1 = p2 - p1;
 			v2 = p3 - p1;
 			normal = cross(v1, v2);
-			Normal[(y+1)*num_particles_width + x + 1] += vec4(normal,0);
+
+			NormalX[(y + 1)*num_particles_width + x + 1] += normal.x*100000.0f;
+			NormalY[(y + 1)*num_particles_width + x + 1] += normal.y*100000.0f;
+			NormalZ[(y + 1)*num_particles_width + x + 1] += normal.z*100000.0f;
+
+			NormalX[y*num_particles_width + x + 1] += normal.x*100000.0f;
+			NormalY[y*num_particles_width + x + 1] += normal.y*100000.0f;
+			NormalZ[y*num_particles_width + x + 1] += normal.z*100000.0f;
+
+			NormalX[(y+1)*num_particles_width + x] += normal.x*100000.0f;
+			NormalY[(y + 1)*num_particles_width + x] += normal.y*100000.0f;
+			NormalZ[(y + 1)*num_particles_width + x] += normal.z*100000.0f;
+			/*Normal[(y+1)*num_particles_width + x + 1] += vec4(normal,0);
 			Normal[y*num_particles_width + x+1] += vec4(normal,0);
-			Normal[(y + 1)*num_particles_width + x] += vec4(normal,0);
+			Normal[(y + 1)*num_particles_width + x] += vec4(normal,0);*/
 		}
 	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindVertexArray(vaoID);
-	glBindBuffer(GL_ARRAY_BUFFER, vboID2);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, num_particles_width * num_particles_height * 4 * sizeof(float), &Normal[0]);
+
+	glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalX[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[1]);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalY[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[2]);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalZ[0]);
+
 	glDrawElements(GL_TRIANGLES, 6 * (num_particles_height - 1)*(num_particles_width - 1), GL_UNSIGNED_INT, 0);
-	CHECK_GL_ERRORS
 }

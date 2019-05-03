@@ -151,6 +151,7 @@
     <None Include="..\Resource\Shader\Simple.fs" />
     <None Include="..\Resource\Shader\Simple.vs" />
     <None Include="DistanceConstraint.fs" />
+    <None Include="NormalCalculate.fs" />
     <None Include="packages.config" />
     <None Include="Integration.fs" />
     <None Include="render.fs" />
