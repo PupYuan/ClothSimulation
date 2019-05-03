@@ -19,7 +19,6 @@ void main(void)
 	vec4 p1 = imageLoad(output_PosData, ivec2(pos.x+1,pos.y));
 	vec4 p2 = imageLoad(output_PosData, ivec2(pos.x,pos.y));
 	vec4 p3 = imageLoad(output_PosData, ivec2(pos.x,pos.y+1));
-	barrier();
 	vec4 v1 = p2-p1;
 	vec4 v2 = p3-p1;
 	normal = cross(v1.xyz,v2.xyz);
@@ -38,7 +37,6 @@ void main(void)
 	p1 = imageLoad(output_PosData, ivec2(pos.x+1,pos.y+1));
 	p2 = imageLoad(output_PosData, ivec2(pos.x+1,pos.y));
 	p3 = imageLoad(output_PosData, ivec2(pos.x,pos.y+1));
-	barrier();
 	v1 = p2-p1;
 	v2 = p3-p1;
 	normal = cross(v1.xyz,v2.xyz);

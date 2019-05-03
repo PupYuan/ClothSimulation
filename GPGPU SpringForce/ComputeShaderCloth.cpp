@@ -74,16 +74,14 @@ void ComputeShaderCloth::timeStep(float dt)
 		writeID = tmp;
 	}
 	NormalCalcShader->use();
-	/*for (int i = 0; i < 3; i++)
-		glClearTexImage(NormalTexID[i], 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);*/
+	for (int i = 0; i < 3; i++)
+		glClearTexImage(NormalTexID[i], 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
 	glFinish();
-	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	glBindImageTexture(0, attachID[2 * readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 	glBindImageTexture(1, NormalTexID[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
 	glBindImageTexture(2, NormalTexID[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
 	glBindImageTexture(3, NormalTexID[2], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-	glDispatchCompute(num_particles_width, num_particles_height, 1);
-	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+	glDispatchCompute(num_particles_width-1, num_particles_height-1, 1);
 	glFinish();
 
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, vboID);
