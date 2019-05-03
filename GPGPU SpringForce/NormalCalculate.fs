@@ -13,7 +13,7 @@ void main(void)
 	ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
 
 	//法线的计算
-	vec4 normal = vec4(0);
+	vec3 normal = vec3(0);
 
 	//第一块三角形的法线
 	vec4 p1 = imageLoad(output_PosData, ivec2(pos.x+1,pos.y));
@@ -22,7 +22,7 @@ void main(void)
 	barrier();
 	vec4 v1 = p2-p1;
 	vec4 v2 = p3-p1;
-	normal = vec4(cross(v1.xyz,p2.xyz),1);
+	normal = cross(v1.xyz,v2.xyz);
 	imageAtomicAdd(NormalX,ivec2(pos.x+1,pos.y),int(normal.x*1000.0f));
 	imageAtomicAdd(NormalY,ivec2(pos.x+1,pos.y),int(normal.y*1000.0f));
 	imageAtomicAdd(NormalZ,ivec2(pos.x+1,pos.y),int(normal.z*1000.0f));
@@ -41,7 +41,7 @@ void main(void)
 	barrier();
 	v1 = p2-p1;
 	v2 = p3-p1;
-	normal = vec4(cross(v1.xyz,p2.xyz),1);
+	normal = cross(v1.xyz,v2.xyz);
 	imageAtomicAdd(NormalX,ivec2(pos.x+1,pos.y+1),int(normal.x*1000.0f));
 	imageAtomicAdd(NormalY,ivec2(pos.x+1,pos.y+1),int(normal.y*1000.0f));
 	imageAtomicAdd(NormalZ,ivec2(pos.x+1,pos.y+1),int(normal.z*1000.0f));

@@ -74,23 +74,18 @@ void ComputeShaderCloth::timeStep(float dt)
 		writeID = tmp;
 	}
 	NormalCalcShader->use();
+	/*for (int i = 0; i < 3; i++)
+		glClearTexImage(NormalTexID[i], 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);*/
 	glFinish();
-	for (int i = 0; i < 3; i++)
-		glClearTexImage(NormalTexID[i], 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	glBindImageTexture(0, attachID[2 * readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 	glBindImageTexture(1, NormalTexID[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
 	glBindImageTexture(2, NormalTexID[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
 	glBindImageTexture(3, NormalTexID[2], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
 	glDispatchCompute(num_particles_width, num_particles_height, 1);
-	//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-	//glFinish();
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+	glFinish();
 
-
-	//glCheckError();
-	//glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID[readID]);
-	//将framebuffer中的颜色附件读取进
-	//glReadBuffer(GL_COLOR_ATTACHMENT0);
-	//glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RGBA, GL_FLOAT, &X[0].x);//需要读两次
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, vboID);
 	glBindTexture(GL_TEXTURE_2D, attachID[2 * readID]);
 	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, 0);
@@ -98,12 +93,12 @@ void ComputeShaderCloth::timeStep(float dt)
 	readNormal();
 	
 	//重置状态
-	glReadBuffer(GL_NONE);
-	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+	//glReadBuffer(GL_NONE);
+	//glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glReadBuffer(GL_BACK);
-	glDrawBuffer(GL_BACK);
+	//glReadBuffer(GL_BACK);
+	//glDrawBuffer(GL_BACK);
 
 	glViewport(0, 0, scene->SCR_WIDTH, scene->SCR_HEIGHT);
 	glEnable(GL_DEPTH_TEST);
@@ -287,19 +282,19 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	//顶点法线属性
 	glGenBuffers(1, &NormalVboID[0]);
 	glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[0]);
-	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalX[0], GL_DYNAMIC_COPY);
+	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 1 * sizeof(int), 0, GL_DYNAMIC_COPY);
 	glVertexAttribPointer(1, 1, GL_INT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(1);
 
 	glGenBuffers(1, &NormalVboID[1]);
 	glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[1]);
-	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalY[0], GL_DYNAMIC_COPY);
+	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 1 * sizeof(int), 0, GL_DYNAMIC_COPY);
 	glVertexAttribPointer(2, 1, GL_INT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(2);
 
 	glGenBuffers(1, &NormalVboID[2]);
 	glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[2]);
-	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalZ[0], GL_DYNAMIC_COPY);
+	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 1 * sizeof(int), 0, GL_DYNAMIC_COPY);
 	glVertexAttribPointer(3, 1, GL_INT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(3);
 
