@@ -147,7 +147,9 @@ public:
 	void SetScene(SceneManager* _scene) {
 		scene = _scene;
 	}
+	void calcNormal();
 	virtual void render();
+	void readNormal();
 private:
 	int vertice_data_length = 8;
 	std::vector<float>vertices;

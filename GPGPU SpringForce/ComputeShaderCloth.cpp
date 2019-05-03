@@ -2,6 +2,19 @@
 #include <ClothSimulation\SceneManager.h>
 #include <ClothSimulation\util.h>
 
+void ComputeShaderCloth::readNormal() {
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, NormalVboID[0]);
+	glBindTexture(GL_TEXTURE_2D, NormalTexID[0]);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_INT, 0);
+
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, NormalVboID[1]);
+	glBindTexture(GL_TEXTURE_2D, NormalTexID[1]);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_INT, 0);
+
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, NormalVboID[2]);
+	glBindTexture(GL_TEXTURE_2D, NormalTexID[2]);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_INT, 0);
+}
 void ComputeShaderCloth::timeStep(float dt)
 {
 	CHECK_GL_ERRORS
@@ -17,9 +30,7 @@ void ComputeShaderCloth::timeStep(float dt)
 	int tmp = readID;
 	readID = writeID;
 	writeID = tmp;
-	glCheckError();
 	for (int i = 0; i < Constraint::solver_iterations; i++) {
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		DistanceConstraintCompute->use();
 		glFinish();
 		glBindImageTexture(0, attachID[2*readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
@@ -34,6 +45,7 @@ void ComputeShaderCloth::timeStep(float dt)
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		glFinish();
 		glCheckError();
+
 		SuccessiveOverRelaxationCompute->use();
 		//获得球的位置
 		glUniform3fv(glGetUniformLocation(SuccessiveOverRelaxationCompute->ID, "sphere_pos"), 2 ,&scene->spherePos[0][0]);
@@ -48,19 +60,9 @@ void ComputeShaderCloth::timeStep(float dt)
 		//glBindImageTexture(6, NormalTexID[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
 		//glBindImageTexture(7, NormalTexID[2], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
 		glDispatchCompute(num_particles_width, num_particles_height, 1);
-		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-		glFinish();
+		/*glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		glFinish();*/
 
-		NormalCalcShader->use();
-		for (int i = 0; i < 3; i++)
-			glClearTexImage(NormalTexID[i], 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
-		glFinish();
-		glBindImageTexture(0, attachID[2 * writeID], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
-		glBindImageTexture(1, NormalTexID[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-		glBindImageTexture(2, NormalTexID[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-		glBindImageTexture(3, NormalTexID[2], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-		glDispatchCompute(num_particles_width, num_particles_height, 1);
-		glFinish();
 		//清空DeltaTexXID缓存里面的数据
 		glClearTexImage(DeltaTexXID, 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
 		glClearTexImage(DeltaTexYID, 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
@@ -71,31 +73,30 @@ void ComputeShaderCloth::timeStep(float dt)
 		readID = writeID;
 		writeID = tmp;
 	}
-	glCheckError();
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID[readID]);
-	//将framebuffer中的颜色附件读取进
-	glReadBuffer(GL_COLOR_ATTACHMENT0);
-	glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RGBA, GL_FLOAT, &X[0].x);//需要读两次
-	glBindBuffer(GL_PIXEL_PACK_BUFFER, vboID);
-	glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RGBA, GL_FLOAT, 0);
-
-
-	////将法线数据读出来
-	//glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID[0]);
-	////将framebuffer中的颜色附件读取进
-	//glReadBuffer(GL_COLOR_ATTACHMENT2);
-	//glBindBuffer(GL_PIXEL_PACK_BUFFER, NormalVboID[0]);
-	//glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RED_INTEGER, GL_INT, 0);
-
-	//glReadBuffer(GL_COLOR_ATTACHMENT3);
-	//glBindBuffer(GL_PIXEL_PACK_BUFFER, NormalVboID[1]);
-	//glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RED_INTEGER, GL_INT, 0);
-
-	//glReadBuffer(GL_COLOR_ATTACHMENT4);
-	//glBindBuffer(GL_PIXEL_PACK_BUFFER, NormalVboID[2]);
-	//glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RED_INTEGER, GL_INT, 0);
+	NormalCalcShader->use();
+	glFinish();
+	for (int i = 0; i < 3; i++)
+		glClearTexImage(NormalTexID[i], 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
+	glBindImageTexture(0, attachID[2 * readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+	glBindImageTexture(1, NormalTexID[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+	glBindImageTexture(2, NormalTexID[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+	glBindImageTexture(3, NormalTexID[2], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+	glDispatchCompute(num_particles_width, num_particles_height, 1);
+	//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	//glFinish();
-	glCheckError();
+
+
+	//glCheckError();
+	//glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID[readID]);
+	//将framebuffer中的颜色附件读取进
+	//glReadBuffer(GL_COLOR_ATTACHMENT0);
+	//glReadPixels(0, 0, num_particles_width, num_particles_height, GL_RGBA, GL_FLOAT, &X[0].x);//需要读两次
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, vboID);
+	glBindTexture(GL_TEXTURE_2D, attachID[2 * readID]);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, 0);
+
+	readNormal();
+	
 	//重置状态
 	glReadBuffer(GL_NONE);
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
@@ -280,26 +281,26 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	//顶点位置属性
 	glGenBuffers(1, &vboID);
 	glBindBuffer(GL_ARRAY_BUFFER, vboID);
-	glBufferData(GL_ARRAY_BUFFER, size, 0, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, size, 0, GL_DYNAMIC_COPY);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(0);
 	//顶点法线属性
 	glGenBuffers(1, &NormalVboID[0]);
 	glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[0]);
-	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalX[0], GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalX[0], GL_DYNAMIC_COPY);
 	glVertexAttribPointer(1, 1, GL_INT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(1);
 
 	glGenBuffers(1, &NormalVboID[1]);
 	glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[1]);
-	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalY[0], GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalY[0], GL_DYNAMIC_COPY);
 	glVertexAttribPointer(2, 1, GL_INT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(2);
 
 	glGenBuffers(1, &NormalVboID[2]);
 	glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[2]);
-	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalZ[0], GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(3, 2, GL_INT, GL_FALSE, 0, NULL);
+	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalZ[0], GL_DYNAMIC_COPY);
+	glVertexAttribPointer(3, 1, GL_INT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(3);
 
 	//顶点纹理属性
@@ -389,6 +390,62 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	glCheckError();
 }
 
+void ComputeShaderCloth::calcNormal() {
+	//刷新纹理数据
+	for (int i=0;i<Normal.size();i++)
+	{
+		//Normal[i] = vec4(0);
+		NormalX[i] = 0;
+		NormalY[i] = 0;
+		NormalZ[i] = 0;
+	}
+	//create smooth per particle normals by adding up all the (hard) triangle normals that each particle is part of
+	for (int x = 0; x < num_particles_width - 1; x++)
+	{
+		for (int y = 0; y < num_particles_height - 1; y++)
+		{
+			//更新第一块三角形的法线
+			vec4 p1 = X[y*num_particles_width + x + 1];
+			vec4 p2 = X[y*num_particles_width + x];
+			vec4 p3 = X[(y+1)*num_particles_width + x];
+			vec3 v1 = p2 - p1;
+			vec3 v2 = p3 - p1;
+			vec3 normal = cross(v1, v2);
+
+			NormalX[y*num_particles_width + x + 1] += normal.x*1000.0f;
+			NormalY[y*num_particles_width + x + 1] += normal.y*1000.0f;
+			NormalZ[y*num_particles_width + x + 1] += normal.z*1000.0f;
+
+			NormalX[y*num_particles_width + x] += normal.x*1000.0f;
+			NormalY[y*num_particles_width + x] += normal.y*1000.0f;
+			NormalZ[y*num_particles_width + x] += normal.z*1000.0f;
+
+			NormalX[(y + 1)*num_particles_width + x + 1] += normal.x*1000.0f;
+			NormalY[(y + 1)*num_particles_width + x + 1] += normal.y*1000.0f;
+			NormalZ[(y + 1)*num_particles_width + x + 1] += normal.z*1000.0f;
+
+			//更新第二块三角形的法线
+			p1 = X[(y+1)*num_particles_width + x + 1];
+			p2 = X[y*num_particles_width + x+1];
+			p3 = X[(y + 1)*num_particles_width + x];
+			v1 = p2 - p1;
+			v2 = p3 - p1;
+			normal = cross(v1, v2);
+
+			NormalX[(y + 1)*num_particles_width + x + 1] += normal.x*1000.0f;
+			NormalY[(y + 1)*num_particles_width + x + 1] += normal.y*1000.0f;
+			NormalZ[(y + 1)*num_particles_width + x + 1] += normal.z*1000.0f;
+
+			NormalX[y*num_particles_width + x + 1] += normal.x*1000.0f;
+			NormalY[y*num_particles_width + x + 1] += normal.y*1000.0f;
+			NormalZ[y*num_particles_width + x + 1] += normal.z*1000.0f;
+
+			NormalX[(y+1)*num_particles_width + x] += normal.x*1000.0f;
+			NormalY[(y + 1)*num_particles_width + x] += normal.y*1000.0f;
+			NormalZ[(y + 1)*num_particles_width + x] += normal.z*1000.0f;
+		}
+	}
+}
 void ComputeShaderCloth::render()
 {
 	renderShader->use();
@@ -411,75 +468,16 @@ void ComputeShaderCloth::render()
 	renderShader->setFloat("material.shininess", 16.0f);
 	renderShader->setVec3("material.specular", vec3(0.2f, 0.2f, 0.2f));
 
-	//刷新纹理数据
-	for (int i=0;i<Normal.size();i++)
-	{
-		//Normal[i] = vec4(0);
-		NormalX[i] = 0;
-		NormalY[i] = 0;
-		NormalZ[i] = 0;
-	}
-	//create smooth per particle normals by adding up all the (hard) triangle normals that each particle is part of
-	for (int x = 0; x < num_particles_width - 1; x++)
-	{
-		for (int y = 0; y < num_particles_height - 1; y++)
-		{
-			//更新第一块三角形的法线
-			vec4 p1 = X[y*num_particles_width + x + 1];
-			vec4 p2 = X[y*num_particles_width + x];
-			vec4 p3 = X[(y+1)*num_particles_width + x];
-			vec3 v1 = p2 - p1;
-			vec3 v2 = p3 - p1;
-			vec3 normal = cross(v1, v2);
-
-			NormalX[y*num_particles_width + x + 1] += normal.x*100000.0f;
-			NormalY[y*num_particles_width + x + 1] += normal.y*100000.0f;
-			NormalZ[y*num_particles_width + x + 1] += normal.z*100000.0f;
-
-			NormalX[y*num_particles_width + x] += normal.x*100000.0f;
-			NormalY[y*num_particles_width + x] += normal.y*100000.0f;
-			NormalZ[y*num_particles_width + x] += normal.z*100000.0f;
-
-			NormalX[(y + 1)*num_particles_width + x + 1] += normal.x*100000.0f;
-			NormalY[(y + 1)*num_particles_width + x + 1] += normal.y*100000.0f;
-			NormalZ[(y + 1)*num_particles_width + x + 1] += normal.z*100000.0f;
-
-			//Normal[y*num_particles_width + x + 1] += vec4(normal,0);
-			//Normal[y*num_particles_width + x] += vec4(normal,0);
-			//Normal[(y + 1)*num_particles_width + x + 1] += vec4(normal,0);
-			//更新第二块三角形的法线
-			p1 = X[(y+1)*num_particles_width + x + 1];
-			p2 = X[y*num_particles_width + x+1];
-			p3 = X[(y + 1)*num_particles_width + x];
-			v1 = p2 - p1;
-			v2 = p3 - p1;
-			normal = cross(v1, v2);
-
-			NormalX[(y + 1)*num_particles_width + x + 1] += normal.x*100000.0f;
-			NormalY[(y + 1)*num_particles_width + x + 1] += normal.y*100000.0f;
-			NormalZ[(y + 1)*num_particles_width + x + 1] += normal.z*100000.0f;
-
-			NormalX[y*num_particles_width + x + 1] += normal.x*100000.0f;
-			NormalY[y*num_particles_width + x + 1] += normal.y*100000.0f;
-			NormalZ[y*num_particles_width + x + 1] += normal.z*100000.0f;
-
-			NormalX[(y+1)*num_particles_width + x] += normal.x*100000.0f;
-			NormalY[(y + 1)*num_particles_width + x] += normal.y*100000.0f;
-			NormalZ[(y + 1)*num_particles_width + x] += normal.z*100000.0f;
-			/*Normal[(y+1)*num_particles_width + x + 1] += vec4(normal,0);
-			Normal[y*num_particles_width + x+1] += vec4(normal,0);
-			Normal[(y + 1)*num_particles_width + x] += vec4(normal,0);*/
-		}
-	}
+	//calcNormal();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindVertexArray(vaoID);
 
-	glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[0]);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalX[0]);
-	glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[1]);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalY[0]);
-	glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[2]);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalZ[0]);
+	//glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[0]);
+	//glBufferSubData(GL_ARRAY_BUFFER, 0, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalX[0]);
+	//glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[1]);
+	//glBufferSubData(GL_ARRAY_BUFFER, 0, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalY[0]);
+	//glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[2]);
+	//glBufferSubData(GL_ARRAY_BUFFER, 0, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalZ[0]);
 
 	glDrawElements(GL_TRIANGLES, 6 * (num_particles_height - 1)*(num_particles_width - 1), GL_UNSIGNED_INT, 0);
 }

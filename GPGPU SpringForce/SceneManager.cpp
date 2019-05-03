@@ -13,7 +13,7 @@ void SceneManager::CreateCloth()
 	//gpuCloth->SetScene(this);
 	//simulateList.push_back(gpuCloth);
 
-	ComputeShaderCloth * cCloth = new ComputeShaderCloth(4, 4, 30, 30);
+	ComputeShaderCloth * cCloth = new ComputeShaderCloth(4, 4, 50, 50);
 	cCloth->SetScene(this);
 	simulateList.push_back(cCloth);
 }

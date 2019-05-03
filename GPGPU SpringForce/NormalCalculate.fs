@@ -19,36 +19,38 @@ void main(void)
 	vec4 p1 = imageLoad(output_PosData, ivec2(pos.x+1,pos.y));
 	vec4 p2 = imageLoad(output_PosData, ivec2(pos.x,pos.y));
 	vec4 p3 = imageLoad(output_PosData, ivec2(pos.x,pos.y+1));
+	barrier();
 	vec4 v1 = p2-p1;
 	vec4 v2 = p3-p1;
 	normal = vec4(cross(v1.xyz,p2.xyz),1);
-	imageAtomicAdd(NormalX,ivec2(pos.x+1,pos.y),int(normal.x*100000.0f));
-	imageAtomicAdd(NormalY,ivec2(pos.x+1,pos.y),int(normal.y*100000.0f));
-	imageAtomicAdd(NormalZ,ivec2(pos.x+1,pos.y),int(normal.z*100000.0f));
+	imageAtomicAdd(NormalX,ivec2(pos.x+1,pos.y),int(normal.x*1000.0f));
+	imageAtomicAdd(NormalY,ivec2(pos.x+1,pos.y),int(normal.y*1000.0f));
+	imageAtomicAdd(NormalZ,ivec2(pos.x+1,pos.y),int(normal.z*1000.0f));
 
-	imageAtomicAdd(NormalX,ivec2(pos.x,pos.y),int(normal.x*100000.0f));
-	imageAtomicAdd(NormalY,ivec2(pos.x,pos.y),int(normal.y*100000.0f));
-	imageAtomicAdd(NormalZ,ivec2(pos.x,pos.y),int(normal.z*100000.0f));
+	imageAtomicAdd(NormalX,ivec2(pos.x,pos.y),int(normal.x*1000.0f));
+	imageAtomicAdd(NormalY,ivec2(pos.x,pos.y),int(normal.y*1000.0f));
+	imageAtomicAdd(NormalZ,ivec2(pos.x,pos.y),int(normal.z*1000.0f));
 
-	imageAtomicAdd(NormalX,ivec2(pos.x,pos.y+1),int(normal.x*100000.0f));
-	imageAtomicAdd(NormalY,ivec2(pos.x,pos.y+1),int(normal.y*100000.0f));
-	imageAtomicAdd(NormalZ,ivec2(pos.x,pos.y+1),int(normal.z*100000.0f));
+	imageAtomicAdd(NormalX,ivec2(pos.x,pos.y+1),int(normal.x*1000.0f));
+	imageAtomicAdd(NormalY,ivec2(pos.x,pos.y+1),int(normal.y*1000.0f));
+	imageAtomicAdd(NormalZ,ivec2(pos.x,pos.y+1),int(normal.z*1000.0f));
      //第二块三角形的法线
 	p1 = imageLoad(output_PosData, ivec2(pos.x+1,pos.y+1));
 	p2 = imageLoad(output_PosData, ivec2(pos.x+1,pos.y));
 	p3 = imageLoad(output_PosData, ivec2(pos.x,pos.y+1));
+	barrier();
 	v1 = p2-p1;
 	v2 = p3-p1;
 	normal = vec4(cross(v1.xyz,p2.xyz),1);
-	imageAtomicAdd(NormalX,ivec2(pos.x+1,pos.y+1),int(normal.x*100000.0f));
-	imageAtomicAdd(NormalY,ivec2(pos.x+1,pos.y+1),int(normal.y*100000.0f));
-	imageAtomicAdd(NormalZ,ivec2(pos.x+1,pos.y+1),int(normal.z*100000.0f));
+	imageAtomicAdd(NormalX,ivec2(pos.x+1,pos.y+1),int(normal.x*1000.0f));
+	imageAtomicAdd(NormalY,ivec2(pos.x+1,pos.y+1),int(normal.y*1000.0f));
+	imageAtomicAdd(NormalZ,ivec2(pos.x+1,pos.y+1),int(normal.z*1000.0f));
 
-	imageAtomicAdd(NormalX,ivec2(pos.x+1,pos.y),int(normal.x*100000.0f));
-	imageAtomicAdd(NormalY,ivec2(pos.x+1,pos.y),int(normal.y*100000.0f));
-	imageAtomicAdd(NormalZ,ivec2(pos.x+1,pos.y),int(normal.z*100000.0f));
+	imageAtomicAdd(NormalX,ivec2(pos.x+1,pos.y),int(normal.x*1000.0f));
+	imageAtomicAdd(NormalY,ivec2(pos.x+1,pos.y),int(normal.y*1000.0f));
+	imageAtomicAdd(NormalZ,ivec2(pos.x+1,pos.y),int(normal.z*1000.0f));
 
-	imageAtomicAdd(NormalX,ivec2(pos.x,pos.y+1),int(normal.x*100000.0f));
-	imageAtomicAdd(NormalY,ivec2(pos.x,pos.y+1),int(normal.y*100000.0f));
-	imageAtomicAdd(NormalZ,ivec2(pos.x,pos.y+1),int(normal.z*100000.0f));
+	imageAtomicAdd(NormalX,ivec2(pos.x,pos.y+1),int(normal.x*1000.0f));
+	imageAtomicAdd(NormalY,ivec2(pos.x,pos.y+1),int(normal.y*1000.0f));
+	imageAtomicAdd(NormalZ,ivec2(pos.x,pos.y+1),int(normal.z*1000.0f));
 }
