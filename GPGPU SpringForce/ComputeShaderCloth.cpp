@@ -162,24 +162,11 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 			X_last[(y*num_particles_width + x)] = vec4(pos, 1);
 			Normal[(y*num_particles_width + x)] = vec4(0, 0, 0, 1);
 			//纹理坐标，一块纹理覆盖一块布料
-			//x
-			//vec2 temp(0, 0);
-			//float texture_val_x;
-			//if (x % 2 == 0)
-			//	texture_val_x = 0.0f;//左
-			//else
-			//	texture_val_x = 1.0f;//右边
-			//temp.x = texture_val_x;
-			////y
-			//float texture_val_y;
-			//if (y % 2 == 0)
-			//	texture_val_y = 1.0f;//上
-			//else
-			//	texture_val_y = 0.0f;//左上
-			//temp.y = texture_val_y;
 			vec2 temp;
-			temp.x = x / (num_particles_width-1.0f);
-			temp.y = y / (num_particles_width-1.0f);
+			/*temp.x = x / (num_particles_width-1.0f);
+			temp.y = y / (num_particles_width-1.0f);*/
+			temp.x = x / (texDensityX);
+			temp.y = y / (texDensityY);
 			TexCoord[(y*num_particles_width + x)] = temp;
 		}
 	}
@@ -249,7 +236,7 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	glCheckError();
 	IntegrationShader->use();
 	IntegrationShader->setFloat("global_dampening", global_dampening);
-	IntegrationShader->setFloat("mass", 1.0f);
+	IntegrationShader->setFloat("mass", 0.1f);
 	IntegrationShader->setVec3("gravity", glm::vec3(0.0f, -0.98f, 0.0f));
 	IntegrationShader->setFloat("dt", 1.0f / 50.0f);
 	IntegrationShader->setInt("width", (num_particles_width));

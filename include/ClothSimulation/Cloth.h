@@ -187,7 +187,7 @@ private:
 	Shader* NormalCalcShader;
 	//Scene
 	SceneManager * scene;
-	const float global_dampening = 0.9f;
+	const float global_dampening = 0.8f;
 	
 	//约束相关
 	GLuint DistanceTexID1;
@@ -196,7 +196,7 @@ private:
 	std::vector<i32vec2>DistanceConstraintIndexData1;
 	std::vector<i32vec2>DistanceConstraintIndexData2;
 	std::vector<float>RestDistanceData;
-	float kStretch = 0.5f;
+	float kStretch = 0.85f;
 	std::vector<int>Ni;
 	std::vector<int>NormalX;
 	std::vector<int>NormalY;
@@ -207,4 +207,8 @@ private:
 	GLuint NiTexID;
 	GLuint NormalTexID[3];
 	GLuint NormalVboID[3];
+
+	//纹理密度
+	float texDensityX = 30.0f;
+	float texDensityY = 30.0f;
 };

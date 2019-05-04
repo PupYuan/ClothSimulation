@@ -1,7 +1,6 @@
 #pragma once
 #include <GLFW/glfw3.h>
 #include "SceneManager.h"
-//#include <ClothSimulation\util.h>
 
 GLFWwindow * window;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -12,15 +11,6 @@ void processInput(GLFWwindow *window);
 float lastX = SceneManager::SCR_WIDTH / 2.0f;
 float lastY = SceneManager::SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
-
-float timeStep = 1.0f / 60.0f;
-//Simulation
-glm::vec3 gravity = glm::vec3(0.0f, -0.981f, 0.0f);
-double accumulator = timeStep;
-//统计帧率用的信息
-LARGE_INTEGER frequency;        // ticks per second
-LARGE_INTEGER t1, t2;           // ticks
-double frameTimeQP = 0;
 
 
 //统计帧率用的信息
