@@ -186,11 +186,13 @@ private:
 	Shader *SuccessiveOverRelaxationCompute;
 	Shader* IntegrationShader;
 	Shader* NormalCalcShader;
+	Shader* BendingConstraintCompute;
 	//Scene
 	SceneManager * scene;
-	const float global_dampening = 0.98f;
+	const float global_dampening = 0.90f;
 	
 	//约束相关
+	//Distance Constraint
 	GLuint DistanceTexID1;
 	GLuint DistanceTexID2;
 	GLuint RestDistanceTexID;
@@ -198,17 +200,29 @@ private:
 	std::vector<i32vec2>DistanceConstraintIndexData2;
 	std::vector<float>RestDistanceData;
 	float kStretch = 0.25f;
-	std::vector<int>Ni;
-	std::vector<int>NormalX;
-	std::vector<int>NormalY;
-	std::vector<int>NormalZ;
+	//Bending Constraint
+	GLuint BendingTexID1;
+	GLuint BendingTexID2;
+	GLuint BendingTexID3;
+	std::vector<i32vec2>BendingConstraintIndexData1;
+	std::vector<i32vec2>BendingConstraintIndexData2;
+	std::vector<i32vec2>BendingConstraintIndexData3;
+	float kBend = 0.5f;
+	GLuint RestDistanceTexID2;
+	std::vector<float>RestDistanceData2;
+	//公共的属性
 	GLuint DeltaTexXID;
 	GLuint DeltaTexYID;
 	GLuint DeltaTexZID;
-	GLuint NiTexID;
+	//求解纹理
 	GLuint NormalTexID[3];
 	GLuint NormalVboID[3];
-
+	std::vector<int>NormalX;
+	std::vector<int>NormalY;
+	std::vector<int>NormalZ;
+	//SOR求解
+	GLuint NiTexID;//SOR求解时除去的因子
+	std::vector<int>Ni;
 	//纹理密度
 	float texDensityX = 10.0f;
 	float texDensityY = 10.0f;

@@ -12,12 +12,12 @@ void SceneManager::Simulation(float dt) {
 		*shperePos_iter = CurPos;
 	}
 
-	for (auto iter2 = simulateList.begin(); iter2 != simulateList.end(); iter2++) {
+	/*for (auto iter2 = simulateList.begin(); iter2 != simulateList.end(); iter2++) {
 		(*iter2)->timeStep(dt);
 		for (auto iter = renderableList.begin(); iter != renderableList.end(); iter++) {
 			(*iter)->ball_collider->ClothCollisionSimulate(*iter2);
 		}
-	}
+	}*/
 	
 }
 
@@ -36,9 +36,16 @@ void SceneManager::StepPhysics() {
 	//StepPhycis调用频率和渲染一致，若渲染过慢，则两次渲染帧之间可能有多次物理模拟
 	//若渲染很快，则可能accumulator
 	while (accumulator >= timeStep) {
-		Simulation(timeStep);
+		//Simulation(timeStep);
 		accumulator -= timeStep;
 	}
 
 	//Simulation(timeStep);
+	//布料太慢，参数不好调，暂时这样
+	for (auto iter2 = simulateList.begin(); iter2 != simulateList.end(); iter2++) {
+		(*iter2)->timeStep(timeStep);
+		for (auto iter = renderableList.begin(); iter != renderableList.end(); iter++) {
+			(*iter)->ball_collider->ClothCollisionSimulate(*iter2);
+		}
+	}
 }

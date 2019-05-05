@@ -45,6 +45,21 @@ void ComputeShaderCloth::timeStep(float dt)
 		glFinish();
 		glCheckError();
 
+		/*BendingConstraintCompute->use();
+		glFinish();
+		glBindImageTexture(0, attachID[2 * readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+		glBindImageTexture(1, BendingTexID1, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
+		glBindImageTexture(2, BendingTexID2, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
+		glBindImageTexture(3, BendingTexID3, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
+		glBindImageTexture(4, DeltaTexXID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+		glBindImageTexture(5, DeltaTexYID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+		glBindImageTexture(6, DeltaTexZID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+		glBindImageTexture(7, RestDistanceTexID2, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32F);
+		glDispatchCompute(BendingConstraintIndexData1.size(), 1, 1);
+		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		glFinish();
+		glCheckError();*/
+
 		SuccessiveOverRelaxationCompute->use();
 		//获得球的位置
 		glUniform3fv(glGetUniformLocation(SuccessiveOverRelaxationCompute->ID, "sphere_pos"), 2 ,&scene->spherePos[0][0]);
@@ -61,7 +76,7 @@ void ComputeShaderCloth::timeStep(float dt)
 		glClearTexImage(DeltaTexXID, 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
 		glClearTexImage(DeltaTexYID, 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
 		glClearTexImage(DeltaTexZID, 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
-		
+		glFinish();
 		//swap read/write pathways
 		int tmp = readID;
 		readID = writeID;
@@ -128,6 +143,22 @@ void setupIntTexture(const GLuint texID, int *data, int width, int height) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, width, height, 0,
 		GL_RED_INTEGER, GL_INT, data);
+
+}
+
+/**
+ * Sets up a floating point texture with the NEAREST filtering.
+ */
+void setupInt2Texture(const GLuint texID, int *data, int width, int height) {
+	// make active and bind
+	glBindTexture(GL_TEXTURE_2D, texID);
+	// turn off filtering and wrap modes
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32I, width, height, 0,
+		GL_RG_INTEGER, GL_INT, data);
 
 }
 
@@ -220,29 +251,79 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 			}
 		}
 	}
+	////BendingConstraint
+	////add vertical constraints
+	//for (int i = 0; i < num_particles_width; i++) {
+	//	for (int j = 0; j < num_particles_height - 2; j++) {
+	//		BendingConstraintIndexData1.push_back(i32vec2(i, j));
+	//		Ni[((j)*num_particles_width + i)]++;
 
-	renderShader = ResourcesManager::loadShader("GPU_renderShader", "render.vs", "render.fs");
-	DistanceConstraintCompute = ResourcesManager::loadComputeShader("DistanceConstraint", "DistanceConstraint.fs");
-	SuccessiveOverRelaxationCompute = ResourcesManager::loadComputeShader("SOR", "SOR.fs");
-	IntegrationShader = ResourcesManager::loadComputeShader("IntegrationShader", "Integration.fs");
-	NormalCalcShader = ResourcesManager::loadComputeShader("NormalCalcShader", "NormalCalculate.fs");
+	//		BendingConstraintIndexData2.push_back(i32vec2(i, j+1));
+	//		Ni[((j+1)*num_particles_width + i)]++;
+
+	//		BendingConstraintIndexData3.push_back(i32vec2(i, j+2));
+	//		Ni[((j+2)*num_particles_width + i)]++;
+
+	//		vec3 pos1 = X[(j)*num_particles_width + i];
+	//		vec3 pos2 = X[(j+1)*num_particles_width + i];
+	//	    vec3 pos3 = X[(j + 2)*num_particles_width + i];
+	//		glm::vec3 center = 0.3333f * (pos1 + pos2 + pos3);
+	//		RestDistanceData2.push_back(glm::length(pos3 - center));
+	//	}
+	//}
+	////add horizontal constraints
+	//for (int i = 0; i < num_particles_width - 2; i++) {
+	//	for (int j = 0; j < num_particles_height; j++) {
+	//		BendingConstraintIndexData1.push_back(i32vec2(i, j));
+	//		Ni[((j)*num_particles_width + i)]++;
+
+	//		BendingConstraintIndexData2.push_back(i32vec2(i+1, j));
+	//		Ni[((j)*num_particles_width + i+1)]++;
+
+	//		BendingConstraintIndexData3.push_back(i32vec2(i+2, j));
+	//		Ni[((j)*num_particles_width + i+2)]++;
+
+	//		vec3 pos1 = X[(j)*num_particles_width + i];
+	//		vec3 pos2 = X[(j)*num_particles_width + i+1];
+	//		vec3 pos3 = X[(j)*num_particles_width + i+2];
+	//		glm::vec3 center = 0.3333f * (pos1 + pos2 + pos3);
+	//		RestDistanceData2.push_back(glm::length(pos3 - center));
+	//	}
+	//}
+
+
+	renderShader = ResourcesManager::loadShader("GPU_renderShader", "./ComputeShader/render.vs", "./ComputeShader/render.fs");
+	DistanceConstraintCompute = ResourcesManager::loadComputeShader("DistanceConstraint", "./ComputeShader/DistanceConstraint.fs");
+	SuccessiveOverRelaxationCompute = ResourcesManager::loadComputeShader("SOR", "./ComputeShader/SOR.fs");
+	IntegrationShader = ResourcesManager::loadComputeShader("IntegrationShader", "./ComputeShader/Integration.fs");
+	NormalCalcShader = ResourcesManager::loadComputeShader("NormalCalcShader", "./ComputeShader/NormalCalculate.fs");
+	BendingConstraintCompute = ResourcesManager::loadComputeShader("BendingConstraint", "./ComputeShader/BendingConstraint.fs");
 
 	glCheckError();
+	//Integration
 	IntegrationShader->use();
 	IntegrationShader->setFloat("global_dampening", global_dampening);
-	IntegrationShader->setFloat("mass", 1.0f/total_points);
+	IntegrationShader->setFloat("mass", 1.0f);
 	IntegrationShader->setVec3("gravity", gravity);
 	IntegrationShader->setFloat("dt", 1.0f / 50.0f);
 	IntegrationShader->setInt("width", (num_particles_width));
-
+	//DistanceConstraint
 	DistanceConstraintCompute->use();
-	DistanceConstraintCompute->setFloat("wi", total_points);
+	DistanceConstraintCompute->setFloat("wi", 1.0f);
 	float k_prime = 1.0f - pow((1.0f - kStretch), 1.0f / Constraint::solver_iterations);
 	DistanceConstraintCompute->setFloat("k_prime", k_prime);
-
+	//SOR
 	SuccessiveOverRelaxationCompute->use();
 	SuccessiveOverRelaxationCompute->setInt("width", (num_particles_width));
 	SuccessiveOverRelaxationCompute->setFloat("w", 1.0f);
+
+	//BendingConstraint
+	BendingConstraintCompute->use();
+	BendingConstraintCompute->setFloat("wi", 1.0f);
+	k_prime = 1.0f - pow((1.0f - kBend), 1.0f / Constraint::solver_iterations);
+	BendingConstraintCompute->setFloat("k_prime", k_prime);
+	BendingConstraintCompute->setFloat("global_dampening", global_dampening);
+
 
 	const int size = num_particles_width * num_particles_height * 4 * sizeof(float);
 	glGenVertexArrays(1, &vaoID);
@@ -301,27 +382,32 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	}
 	
 
-	glGenTextures(1, &DistanceTexID1);
-	glGenTextures(1, &DistanceTexID2);
 	
-	//DistanceConstraint纹理存储在默认帧缓冲中?
+	
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glBindTexture(GL_TEXTURE_2D, DistanceTexID1);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32I, DistanceConstraintIndexData1.size(), 1, 0,
-		GL_RG_INTEGER, GL_INT, &DistanceConstraintIndexData1[0].x);
-	glCheckError();
+	//DistanceConstraint纹理存储在默认帧缓冲中?
+	glGenTextures(1, &DistanceTexID1);
+	setupInt2Texture(DistanceTexID1, &DistanceConstraintIndexData1[0].x, DistanceConstraintIndexData1.size(), 1);
 
-	glBindTexture(GL_TEXTURE_2D, DistanceTexID2);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32I, DistanceConstraintIndexData2.size(), 1, 0,
-		GL_RG_INTEGER, GL_INT, &DistanceConstraintIndexData2[0].x);
+	glGenTextures(1, &DistanceTexID2);
+	setupInt2Texture(DistanceTexID2, &DistanceConstraintIndexData2[0].x, DistanceConstraintIndexData2.size(), 1);
+
+	////BendingConstraint
+	//glGenTextures(1, &BendingTexID1);
+	//setupInt2Texture(BendingTexID1, &BendingConstraintIndexData1[0].x, BendingConstraintIndexData1.size(), 1);
+	//glGenTextures(1, &BendingTexID2);
+	//setupInt2Texture(BendingTexID2, &BendingConstraintIndexData2[0].x, BendingConstraintIndexData2.size(), 1);
+	//glGenTextures(1, &BendingTexID3);
+	//setupInt2Texture(BendingTexID3, &BendingConstraintIndexData3[0].x, BendingConstraintIndexData3.size(), 1);
+
+	//glGenTextures(1, &RestDistanceTexID2);
+	//glBindTexture(GL_TEXTURE_2D, RestDistanceTexID2);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, RestDistanceData2.size(), 1, 0,
+	//	GL_RED, GL_FLOAT, &RestDistanceData2[0]);
 	//存储XYZ三个方向的位置偏差，设为int是为了支持原子操作
 	glGenTextures(1, &DeltaTexXID);
 	setupIntTexture(DeltaTexXID, &Null_X[0], num_particles_width, num_particles_height);

@@ -97,35 +97,32 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="verlet.vs">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="verlet.fs">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="..\Resource\Shader\Simple.fs">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="..\Resource\Shader\Simple.vs">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="render.vs">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="render.fs">
-      <Filter>资源文件</Filter>
-    </None>
     <None Include="packages.config" />
-    <None Include="DistanceConstraint.fs">
+    <None Include="ComputeShader\DistanceConstraint.fs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="SOR.fs">
+    <None Include="ComputeShader\Integration.fs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="Integration.fs">
+    <None Include="ComputeShader\NormalCalculate.fs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="NormalCalculate.fs">
+    <None Include="ComputeShader\render.fs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="ComputeShader\render.vs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="ComputeShader\SOR.fs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="ComputeShader\verlet.fs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="ComputeShader\verlet.vs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="ComputeShader\BendingConstraint.fs">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>
