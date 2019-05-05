@@ -41,7 +41,6 @@ void ComputeShaderCloth::timeStep(float dt)
 		glBindImageTexture(5, DeltaTexZID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
 		glBindImageTexture(6, RestDistanceTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32F);
 		glDispatchCompute(DistanceConstraintIndexData1.size(), 1, 1);
-		//glDispatchCompute(1, 1, 1);
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		glFinish();
 		glCheckError();
@@ -56,12 +55,7 @@ void ComputeShaderCloth::timeStep(float dt)
 		glBindImageTexture(2, DeltaTexZID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
 		glBindImageTexture(3, attachID[2* writeID], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 		glBindImageTexture(4, NiTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32I);
-		//glBindImageTexture(5, NormalTexID[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-		//glBindImageTexture(6, NormalTexID[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-		//glBindImageTexture(7, NormalTexID[2], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
 		glDispatchCompute(num_particles_width, num_particles_height, 1);
-		/*glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-		glFinish();*/
 
 		//清空DeltaTexXID缓存里面的数据
 		glClearTexImage(DeltaTexXID, 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
@@ -156,7 +150,7 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	{
 		for (int x = 0; x < num_particles_width; x++)
 		{
-			vec3 pos = glm::vec3(((float(x) / (num_particles_width - 1)) * 2 - 1)* width / 2, 1.0, ((float(y) / (num_particles_height - 1))* height));
+			vec3 pos = glm::vec3(((float(x) / (num_particles_width - 1)) * 2 - 1)* width / 2, 0, ((float(y) / (num_particles_height - 1))* height));
 
 			X[(y*num_particles_width + x)] = vec4(pos, 1);
 			X_last[(y*num_particles_width + x)] = vec4(pos, 1);
@@ -236,14 +230,13 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	glCheckError();
 	IntegrationShader->use();
 	IntegrationShader->setFloat("global_dampening", global_dampening);
-	IntegrationShader->setFloat("mass", 0.1f);
-	IntegrationShader->setVec3("gravity", glm::vec3(0.0f, -0.98f, 0.0f));
+	IntegrationShader->setFloat("mass", 1.0f/total_points);
+	IntegrationShader->setVec3("gravity", gravity);
 	IntegrationShader->setFloat("dt", 1.0f / 50.0f);
 	IntegrationShader->setInt("width", (num_particles_width));
 
 	DistanceConstraintCompute->use();
-	DistanceConstraintCompute->setFloat("restDistance", distance(X[0],X[1]));
-	DistanceConstraintCompute->setFloat("wi",1);
+	DistanceConstraintCompute->setFloat("wi", total_points);
 	float k_prime = 1.0f - pow((1.0f - kStretch), 1.0f / Constraint::solver_iterations);
 	DistanceConstraintCompute->setFloat("k_prime", k_prime);
 

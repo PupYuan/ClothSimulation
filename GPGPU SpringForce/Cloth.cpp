@@ -78,23 +78,23 @@ Cloth::Cloth(float _width, float _height, int num_particles_width, int num_parti
 	// making the upper left most three and right most three particles unmovable
 	for (int i = 0; i < 2; i++)
 	{
-		getParticle(0 + i, 0)->offsetPos(vec3(0.5, 0.0, 0.0));
+		//getParticle(0 + i, 0)->offsetPos(vec3(0.5, 0.0, 0.0));
 		getParticle(0 + i, 0)->makeUnmovable();
 
-		getParticle(num_particles_width - 1 - i, 0)->offsetPos(vec3(-0.5, 0.0, 0.0));
+		//getParticle(num_particles_width - 1 - i, 0)->offsetPos(vec3(-0.5, 0.0, 0.0));
 		getParticle(num_particles_width - 1 - i, 0)->makeUnmovable();
 
-		getParticle(0 + i, num_particles_height - 1)->offsetPos(vec3(0.5, 0.0, 0.0));
-		getParticle(0 + i, num_particles_height - 1)->makeUnmovable();
+		//getParticle(0 + i, num_particles_height - 1)->offsetPos(vec3(0.5, 0.0, 0.0));
+		//getParticle(0 + i, num_particles_height - 1)->makeUnmovable();
 
-		getParticle(num_particles_width - 1 - i, num_particles_height - 1)->offsetPos(vec3(-0.5, 0.0, 0.0));
-		getParticle(num_particles_width - 1 - i, num_particles_height - 1)->makeUnmovable();
+		//getParticle(num_particles_width - 1 - i, num_particles_height - 1)->offsetPos(vec3(-0.5, 0.0, 0.0));
+		//getParticle(num_particles_width - 1 - i, num_particles_height - 1)->makeUnmovable();
 
-		getParticle(0 + i, num_particles_height / 2 - 1)->offsetPos(vec3(0.5, 0.0, 0.0));
+		/*getParticle(0 + i, num_particles_height / 2 - 1)->offsetPos(vec3(0.5, 0.0, 0.0));
 		getParticle(0 + i, num_particles_height / 2 - 1)->makeUnmovable();
 
 		getParticle(num_particles_width - 1 - i, num_particles_height / 2 - 1)->offsetPos(vec3(-0.5, 0.0, 0.0));
-		getParticle(num_particles_width - 1 - i, num_particles_height / 2 - 1)->makeUnmovable();
+		getParticle(num_particles_width - 1 - i, num_particles_height / 2 - 1)->makeUnmovable();*/
 	}
 	//初始化gl缓存对象
 	glGenVertexArrays(1, &VAO);
@@ -169,7 +169,7 @@ void Cloth::addForce(const vec3 direction)
 //物理模拟
 void Cloth::timeStep(float dt) {
 	//每次步进都会加重力
-	addForce(SceneManager::gravity);
+	addForce(gravity);
 	glm::vec3 Xcm = glm::vec3(0);
 	glm::vec3 Vcm = glm::vec3(0);
 	float sumM = 0;
@@ -213,7 +213,7 @@ void Cloth::timeStep(float dt) {
 		glm::vec3 delVi = Vcm + glm::cross(w, Ri[i]) - particle->getVelocity();
 		glm::vec3 V = particle->getVelocity();
 		V += kDamp * delVi;
-		particle->setVelocity(V);
+		//particle->setVelocity(V);
 		(*particle).timeStep(dt);
 	}
 	for (size_t si = 0; si < Constraint::solver_iterations; ++si) {

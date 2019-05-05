@@ -22,6 +22,7 @@ public:
 	virtual std::vector<Particle>& getParticles() {
 		return particles;
 	}
+	glm::vec3 gravity = glm::vec3(0.0f, -0.00981f, 0.0f);
 };
 enum Mode { CPU, GPU };
 class Cloth:public PositionBasedUnit
@@ -187,7 +188,7 @@ private:
 	Shader* NormalCalcShader;
 	//Scene
 	SceneManager * scene;
-	const float global_dampening = 0.8f;
+	const float global_dampening = 0.98f;
 	
 	//约束相关
 	GLuint DistanceTexID1;
@@ -196,7 +197,7 @@ private:
 	std::vector<i32vec2>DistanceConstraintIndexData1;
 	std::vector<i32vec2>DistanceConstraintIndexData2;
 	std::vector<float>RestDistanceData;
-	float kStretch = 0.85f;
+	float kStretch = 0.25f;
 	std::vector<int>Ni;
 	std::vector<int>NormalX;
 	std::vector<int>NormalY;
@@ -209,6 +210,6 @@ private:
 	GLuint NormalVboID[3];
 
 	//纹理密度
-	float texDensityX = 30.0f;
-	float texDensityY = 30.0f;
+	float texDensityX = 10.0f;
+	float texDensityY = 10.0f;
 };

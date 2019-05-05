@@ -7,6 +7,7 @@ void SceneManager::Simulation(float dt) {
 	for (auto iter = renderableList.begin(); iter != renderableList.end(); iter++, shperePos_iter++){
 		vec3 CurPos = (*iter)->ball_collider->getCenter();
 		CurPos.z = 2.0f + cos(ball_time / 50.0) *3.0f;
+		//CurPos.y = 2.0f + cos(ball_time / 50.0) *3.0f;
 		(*iter)->ball_collider->setPos(CurPos);
 		*shperePos_iter = CurPos;
 	}
@@ -38,4 +39,6 @@ void SceneManager::StepPhysics() {
 		Simulation(timeStep);
 		accumulator -= timeStep;
 	}
+
+	//Simulation(timeStep);
 }

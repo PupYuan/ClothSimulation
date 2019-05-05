@@ -28,7 +28,7 @@ void main(void)
 	if ((pos.x==0&&pos.y==0) || (pos.x==width-1&&pos.y==0))
 		 mymass = 0.0;
 
-    vec3 force = gravity*mymass;
+    vec3 force = gravity;
 
 	vec3 acc;
 	if(mymass == 0) 		

@@ -2,7 +2,6 @@
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;//先固定为1482个约束，后面扩展成动态的
 
-uniform float restDistance;	//假定所有粒子之间的距离保持一致，若不一致则需要用一张纹理存储
 uniform float wi;//粒子质量倒数，假定所有粒子质量保持一致，若不一致则需要用一张纹理存储
 uniform float k_prime;
 
