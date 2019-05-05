@@ -28,6 +28,8 @@ enum Mode { CPU, GPU };
 class Cloth:public PositionBasedUnit
 {
 private:
+	float kBend = 0.5f;
+	float kStretch = 0.95f;
 	int vertice_data_length = 8;
 	size_t total_points;
 	int width;
@@ -129,7 +131,7 @@ private:
 	float delta_time = 0;
 
 	//每次渲染的时候做几次物理迭代
-	const int NUM_ITER = 4;
+	const int NUM_ITER = 2;
 
 	Shader *verletShader;
 	Shader *renderShader;//渲染用的Shader
@@ -152,6 +154,8 @@ public:
 	virtual void render();
 	void readNormal();
 private:
+	//每次物理步进的时候约束的迭代次数
+	const int NUM_ITER = 2;
 	int vertice_data_length = 8;
 	std::vector<float>vertices;
 	std::vector<unsigned int>indices;
@@ -189,7 +193,7 @@ private:
 	Shader* BendingConstraintCompute;
 	//Scene
 	SceneManager * scene;
-	const float global_dampening = 0.90f;
+	const float global_dampening = 0.7f;
 	
 	//约束相关
 	//Distance Constraint
@@ -199,7 +203,7 @@ private:
 	std::vector<i32vec2>DistanceConstraintIndexData1;
 	std::vector<i32vec2>DistanceConstraintIndexData2;
 	std::vector<float>RestDistanceData;
-	float kStretch = 0.25f;
+	float kStretch = 0.9f;
 	//Bending Constraint
 	GLuint BendingTexID1;
 	GLuint BendingTexID2;
@@ -223,6 +227,7 @@ private:
 	//SOR求解
 	GLuint NiTexID;//SOR求解时除去的因子
 	std::vector<int>Ni;
+	float SuccessiveW = 1.5f;
 	//纹理密度
 	float texDensityX = 10.0f;
 	float texDensityY = 10.0f;

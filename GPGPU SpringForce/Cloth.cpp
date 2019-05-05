@@ -1,7 +1,6 @@
 #include <ClothSimulation\Cloth.h>
 #include <ClothSimulation\SceneManager.h>
-float kBend = 0.5f;
-float kStretch = 0.25f;
+
 
 /* This is a important constructor for the entire system of particles and constraints*/
 Cloth::Cloth(float _width, float _height, int num_particles_width, int num_particles_height) : num_particles_width(num_particles_width), num_particles_height(num_particles_height)
@@ -19,6 +18,7 @@ Cloth::Cloth(float _width, float _height, int num_particles_width, int num_parti
 		for (int x = 0; x < num_particles_width; x++)
 		{
 			vec3 pos = glm::vec3(((float(x) / (num_particles_width - 1)) * 2 - 1)* width / 2, 0, ((float(y) / (num_particles_height - 1))* height));
+			//粒子的初始质量被声明为了1/(粒子总数），和opencloth的效果基本一致
 			particles[y*num_particles_width + x] = Particle(pos, 1.0f / (num_particles_width * num_particles_height)); // insert particle in column x at y'th row
 			Particle *particle = &particles[y*num_particles_width + x];
 
@@ -137,20 +137,20 @@ Cloth::Cloth(float _width, float _height, int num_particles_width, int num_parti
 			}
 		}
 	}
-	//add vertical constraints
-	for (int i = 0; i < num_particles_width; i++) {
-		for (int j = 0; j < num_particles_height - 2; j++) {
-			BendingConstraint2* constraint = new BendingConstraint2(getParticle(i, j), getParticle(i, j + 1), getParticle(i, j + 2), kBend);
-			Constraints.push_back(constraint);
-		}
-	}
-	//add horizontal constraints
-	for (int i = 0; i < num_particles_width - 2; i++) {
-		for (int j = 0; j < num_particles_height; j++) {
-			BendingConstraint2* constraint = new BendingConstraint2(getParticle(i, j), getParticle(i + 1, j), getParticle(i + 2, j), kBend);
-			Constraints.push_back(constraint);
-		}
-	}
+	////add vertical constraints
+	//for (int i = 0; i < num_particles_width; i++) {
+	//	for (int j = 0; j < num_particles_height - 2; j++) {
+	//		BendingConstraint2* constraint = new BendingConstraint2(getParticle(i, j), getParticle(i, j + 1), getParticle(i, j + 2), kBend);
+	//		Constraints.push_back(constraint);
+	//	}
+	//}
+	////add horizontal constraints
+	//for (int i = 0; i < num_particles_width - 2; i++) {
+	//	for (int j = 0; j < num_particles_height; j++) {
+	//		BendingConstraint2* constraint = new BendingConstraint2(getParticle(i, j), getParticle(i + 1, j), getParticle(i + 2, j), kBend);
+	//		Constraints.push_back(constraint);
+	//	}
+	//}
 }
 
 inline glm::vec3 GetVerletVelocity(glm::vec3 x_i, glm::vec3 xi_last, float dt) {
@@ -213,7 +213,7 @@ void Cloth::timeStep(float dt) {
 		glm::vec3 delVi = Vcm + glm::cross(w, Ri[i]) - particle->getVelocity();
 		glm::vec3 V = particle->getVelocity();
 		V += kDamp * delVi;
-		//particle->setVelocity(V);
+		particle->setVelocity(V);
 		(*particle).timeStep(dt);
 	}
 	for (size_t si = 0; si < Constraint::solver_iterations; ++si) {

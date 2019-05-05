@@ -30,7 +30,7 @@ void ComputeShaderCloth::timeStep(float dt)
 	int tmp = readID;
 	readID = writeID;
 	writeID = tmp;
-	for (int i = 0; i < Constraint::solver_iterations; i++) {
+	for (int i = 0; i < NUM_ITER; i++) {
 		DistanceConstraintCompute->use();
 		glFinish();
 		glBindImageTexture(0, attachID[2*readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
@@ -303,24 +303,24 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	//Integration
 	IntegrationShader->use();
 	IntegrationShader->setFloat("global_dampening", global_dampening);
-	IntegrationShader->setFloat("mass", 1.0f);
+	IntegrationShader->setFloat("mass", 1.0f/total_points);
 	IntegrationShader->setVec3("gravity", gravity);
 	IntegrationShader->setFloat("dt", 1.0f / 50.0f);
 	IntegrationShader->setInt("width", (num_particles_width));
 	//DistanceConstraint
 	DistanceConstraintCompute->use();
-	DistanceConstraintCompute->setFloat("wi", 1.0f);
-	float k_prime = 1.0f - pow((1.0f - kStretch), 1.0f / Constraint::solver_iterations);
+	DistanceConstraintCompute->setFloat("wi", total_points);
+	float k_prime = 1.0f - pow((1.0f - kStretch), 1.0f / NUM_ITER);
 	DistanceConstraintCompute->setFloat("k_prime", k_prime);
 	//SOR
 	SuccessiveOverRelaxationCompute->use();
 	SuccessiveOverRelaxationCompute->setInt("width", (num_particles_width));
-	SuccessiveOverRelaxationCompute->setFloat("w", 1.0f);
+	SuccessiveOverRelaxationCompute->setFloat("w", SuccessiveW);
 
 	//BendingConstraint
 	BendingConstraintCompute->use();
-	BendingConstraintCompute->setFloat("wi", 1.0f);
-	k_prime = 1.0f - pow((1.0f - kBend), 1.0f / Constraint::solver_iterations);
+	BendingConstraintCompute->setFloat("wi", total_points);
+	k_prime = 1.0f - pow((1.0f - kBend), 1.0f / NUM_ITER);
 	BendingConstraintCompute->setFloat("k_prime", k_prime);
 	BendingConstraintCompute->setFloat("global_dampening", global_dampening);
 
