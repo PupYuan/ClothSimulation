@@ -45,7 +45,7 @@ void ComputeShaderCloth::timeStep(float dt)
 		glFinish();
 		glCheckError();
 
-		/*BendingConstraintCompute->use();
+		BendingConstraintCompute->use();
 		glFinish();
 		glBindImageTexture(0, attachID[2 * readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 		glBindImageTexture(1, BendingTexID1, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
@@ -58,7 +58,7 @@ void ComputeShaderCloth::timeStep(float dt)
 		glDispatchCompute(BendingConstraintIndexData1.size(), 1, 1);
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		glFinish();
-		glCheckError();*/
+		glCheckError();
 
 		SuccessiveOverRelaxationCompute->use();
 		//获得球的位置
@@ -251,45 +251,45 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 			}
 		}
 	}
-	////BendingConstraint
-	////add vertical constraints
-	//for (int i = 0; i < num_particles_width; i++) {
-	//	for (int j = 0; j < num_particles_height - 2; j++) {
-	//		BendingConstraintIndexData1.push_back(i32vec2(i, j));
-	//		Ni[((j)*num_particles_width + i)]++;
+	//BendingConstraint
+	//add vertical constraints
+	for (int i = 0; i < num_particles_width; i++) {
+		for (int j = 0; j < num_particles_height - 2; j++) {
+			BendingConstraintIndexData1.push_back(i32vec2(i, j));
+			Ni[((j)*num_particles_width + i)]++;
 
-	//		BendingConstraintIndexData2.push_back(i32vec2(i, j+1));
-	//		Ni[((j+1)*num_particles_width + i)]++;
+			BendingConstraintIndexData2.push_back(i32vec2(i, j+1));
+			Ni[((j+1)*num_particles_width + i)]++;
 
-	//		BendingConstraintIndexData3.push_back(i32vec2(i, j+2));
-	//		Ni[((j+2)*num_particles_width + i)]++;
+			BendingConstraintIndexData3.push_back(i32vec2(i, j+2));
+			Ni[((j+2)*num_particles_width + i)]++;
 
-	//		vec3 pos1 = X[(j)*num_particles_width + i];
-	//		vec3 pos2 = X[(j+1)*num_particles_width + i];
-	//	    vec3 pos3 = X[(j + 2)*num_particles_width + i];
-	//		glm::vec3 center = 0.3333f * (pos1 + pos2 + pos3);
-	//		RestDistanceData2.push_back(glm::length(pos3 - center));
-	//	}
-	//}
-	////add horizontal constraints
-	//for (int i = 0; i < num_particles_width - 2; i++) {
-	//	for (int j = 0; j < num_particles_height; j++) {
-	//		BendingConstraintIndexData1.push_back(i32vec2(i, j));
-	//		Ni[((j)*num_particles_width + i)]++;
+			vec3 pos1 = X[(j)*num_particles_width + i];
+			vec3 pos2 = X[(j+1)*num_particles_width + i];
+		    vec3 pos3 = X[(j + 2)*num_particles_width + i];
+			glm::vec3 center = 0.3333f * (pos1 + pos2 + pos3);
+			RestDistanceData2.push_back(glm::length(pos3 - center));
+		}
+	}
+	//add horizontal constraints
+	for (int i = 0; i < num_particles_width - 2; i++) {
+		for (int j = 0; j < num_particles_height; j++) {
+			BendingConstraintIndexData1.push_back(i32vec2(i, j));
+			Ni[((j)*num_particles_width + i)]++;
 
-	//		BendingConstraintIndexData2.push_back(i32vec2(i+1, j));
-	//		Ni[((j)*num_particles_width + i+1)]++;
+			BendingConstraintIndexData2.push_back(i32vec2(i+1, j));
+			Ni[((j)*num_particles_width + i+1)]++;
 
-	//		BendingConstraintIndexData3.push_back(i32vec2(i+2, j));
-	//		Ni[((j)*num_particles_width + i+2)]++;
+			BendingConstraintIndexData3.push_back(i32vec2(i+2, j));
+			Ni[((j)*num_particles_width + i+2)]++;
 
-	//		vec3 pos1 = X[(j)*num_particles_width + i];
-	//		vec3 pos2 = X[(j)*num_particles_width + i+1];
-	//		vec3 pos3 = X[(j)*num_particles_width + i+2];
-	//		glm::vec3 center = 0.3333f * (pos1 + pos2 + pos3);
-	//		RestDistanceData2.push_back(glm::length(pos3 - center));
-	//	}
-	//}
+			vec3 pos1 = X[(j)*num_particles_width + i];
+			vec3 pos2 = X[(j)*num_particles_width + i+1];
+			vec3 pos3 = X[(j)*num_particles_width + i+2];
+			glm::vec3 center = 0.3333f * (pos1 + pos2 + pos3);
+			RestDistanceData2.push_back(glm::length(pos3 - center));
+		}
+	}
 
 
 	renderShader = ResourcesManager::loadShader("GPU_renderShader", "./ComputeShader/render.vs", "./ComputeShader/render.fs");
@@ -392,22 +392,23 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	glGenTextures(1, &DistanceTexID2);
 	setupInt2Texture(DistanceTexID2, &DistanceConstraintIndexData2[0].x, DistanceConstraintIndexData2.size(), 1);
 
-	////BendingConstraint
-	//glGenTextures(1, &BendingTexID1);
-	//setupInt2Texture(BendingTexID1, &BendingConstraintIndexData1[0].x, BendingConstraintIndexData1.size(), 1);
-	//glGenTextures(1, &BendingTexID2);
-	//setupInt2Texture(BendingTexID2, &BendingConstraintIndexData2[0].x, BendingConstraintIndexData2.size(), 1);
-	//glGenTextures(1, &BendingTexID3);
-	//setupInt2Texture(BendingTexID3, &BendingConstraintIndexData3[0].x, BendingConstraintIndexData3.size(), 1);
+	//BendingConstraint
+	glGenTextures(1, &BendingTexID1);
+	setupInt2Texture(BendingTexID1, &BendingConstraintIndexData1[0].x, BendingConstraintIndexData1.size(), 1);
+	glGenTextures(1, &BendingTexID2);
+	setupInt2Texture(BendingTexID2, &BendingConstraintIndexData2[0].x, BendingConstraintIndexData2.size(), 1);
+	glGenTextures(1, &BendingTexID3);
+	setupInt2Texture(BendingTexID3, &BendingConstraintIndexData3[0].x, BendingConstraintIndexData3.size(), 1);
 
-	//glGenTextures(1, &RestDistanceTexID2);
-	//glBindTexture(GL_TEXTURE_2D, RestDistanceTexID2);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, RestDistanceData2.size(), 1, 0,
-	//	GL_RED, GL_FLOAT, &RestDistanceData2[0]);
+	glGenTextures(1, &RestDistanceTexID2);
+	glBindTexture(GL_TEXTURE_2D, RestDistanceTexID2);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, RestDistanceData2.size(), 1, 0,
+		GL_RED, GL_FLOAT, &RestDistanceData2[0]);
+
 	//存储XYZ三个方向的位置偏差，设为int是为了支持原子操作
 	glGenTextures(1, &DeltaTexXID);
 	setupIntTexture(DeltaTexXID, &Null_X[0], num_particles_width, num_particles_height);

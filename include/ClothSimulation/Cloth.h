@@ -211,7 +211,7 @@ private:
 	std::vector<i32vec2>BendingConstraintIndexData1;
 	std::vector<i32vec2>BendingConstraintIndexData2;
 	std::vector<i32vec2>BendingConstraintIndexData3;
-	float kBend = 0.5f;
+	float kBend = 1.0f;
 	GLuint RestDistanceTexID2;
 	std::vector<float>RestDistanceData2;
 	//公共的属性
