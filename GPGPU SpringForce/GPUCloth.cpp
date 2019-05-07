@@ -1,5 +1,7 @@
 #include <ClothSimulation\Cloth.h>
 #include <ClothSimulation\SceneManager.h>
+#include <ClothSimulation\util.h>
+#define glCheckError() glCheckError_(__FILE__, __LINE__) 
 float	KsStruct = 50.75f, KdStruct = -0.25f;
 float	KsShear = 50.75f, KdShear = -0.25f;
 float	KsBend = 50.95f, KdBend = -0.25f;
@@ -17,7 +19,7 @@ void GPUCloth::timeStep(float dt)
 	//积分开始
 	glBeginQuery(GL_TIME_ELAPSED, t_query);
 	CHECK_GL_ERRORS
-		glViewport(0, 0, num_particles_width, num_particles_height);
+	glViewport(0, 0, num_particles_width, num_particles_height);
 	// render
 	// ------
 	// bind to framebuffer and draw scene as we normally would to color texture 
@@ -36,18 +38,39 @@ void GPUCloth::timeStep(float dt)
 		glDisable(GL_DEPTH_TEST);
 		// make sure we clear the framebuffer's content
 		glClear(GL_COLOR_BUFFER_BIT);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		verletShader->use();
 		glBindVertexArray(quadVAO);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		//glDrawArrays(GL_TRIANGLES, 0, 6);
-
 
 		//swap read/write pathways
 		int tmp = readID;
 		readID = writeID;
 		writeID = tmp;
 	}
+	NormalCalcShader->use();
+	for (int i = 0; i < 3; i++)
+		glClearTexImage(NormalTexID[i], 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
+	glFinish();
+	glBindImageTexture(0, attachID[2 * readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+	glBindImageTexture(1, NormalTexID[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+	glBindImageTexture(2, NormalTexID[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+	glBindImageTexture(3, NormalTexID[2], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+	glDispatchCompute(num_particles_width - 1, num_particles_height - 1, 1);
+	glFinish();
+	//readNormal
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, NormalVboID[0]);
+	glBindTexture(GL_TEXTURE_2D, NormalTexID[0]);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_INT, 0);
+
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, NormalVboID[1]);
+	glBindTexture(GL_TEXTURE_2D, NormalTexID[1]);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_INT, 0);
+
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, NormalVboID[2]);
+	glBindTexture(GL_TEXTURE_2D, NormalTexID[2]);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_INT, 0);
 
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID[readID]);
 	//将framebuffer中的颜色附件读取进
@@ -62,14 +85,15 @@ void GPUCloth::timeStep(float dt)
 	delta_time = elapsed_time / 1000000.0f;
 
 	CHECK_GL_ERRORS
-		//重置状态
-		glReadBuffer(GL_NONE);
+	//重置状态
+	glReadBuffer(GL_NONE);
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glReadBuffer(GL_BACK);
 	glDrawBuffer(GL_BACK);
 
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glViewport(0, 0, scene->SCR_WIDTH, scene->SCR_HEIGHT);
 	glEnable(GL_DEPTH_TEST);
 }
@@ -84,6 +108,10 @@ GPUCloth::GPUCloth(float _width, float _height, int num_particles_width, int num
 	X_last.resize(total_points);
 	Normal.resize(total_points);
 	TexCoord.resize(total_points);
+	NormalX.resize(total_points, 0);
+	NormalY.resize(total_points, 0);
+	NormalZ.resize(total_points, 0);
+	Null_X.resize(total_points, 0);
 	// creating particles in a grid of particles from (0,0,0) to (width,-height,0)
 	for (int y = 0; y < num_particles_height; y++)
 	{
@@ -95,21 +123,9 @@ GPUCloth::GPUCloth(float _width, float _height, int num_particles_width, int num
 			X_last[(y*num_particles_width + x)] = vec4(pos, 1);
 			Normal[(y*num_particles_width + x)] = vec3(0, 0, 1);
 			//纹理坐标
-			//x
-			vec2 temp(0, 0);
-			float texture_val_x;
-			if (x % 2 == 0)
-				texture_val_x = 0.0f;//左
-			else
-				texture_val_x = 1.0f;//右边
-			temp.x = texture_val_x;
-			//y
-			float texture_val_y;
-			if (y % 2 == 0)
-				texture_val_y = 1.0f;//上
-			else
-				texture_val_y = 0.0f;//左上
-			temp.y = texture_val_y;
+			vec2 temp;
+			temp.x = x / (texDensityX);
+			temp.y = y / (texDensityY);
 			TexCoord[(y*num_particles_width + x)] = temp;
 		}
 	}
@@ -127,13 +143,19 @@ GPUCloth::GPUCloth(float _width, float _height, int num_particles_width, int num
 			indices.push_back((y)*num_particles_width + x);
 		}
 	}
-	renderShader = ResourcesManager::loadShader("GPU_renderShader", "render.vs", "render.fs");
-	verletShader = ResourcesManager::loadShader("verletShader", "verlet.vs", "verlet.fs");
+
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//glPointSize(5);
+
+	renderShader = ResourcesManager::loadShader("GPU_renderShader", "./ComputeShader/render.vs", "./ComputeShader/render.fs");
+	verletShader = ResourcesManager::loadShader("verletShader", "./ComputeShader/verlet.vs", "./ComputeShader/verlet.fs");
+	NormalCalcShader = ResourcesManager::loadComputeShader("NormalCalcShader", "./ComputeShader/NormalCalculate.fs");
+	glCheckError();
 	verletShader->use();
 	verletShader->setFloat("DEFAULT_DAMPING", DEFAULT_DAMPING);
 	verletShader->setFloat("mass", 1.0f);
-	verletShader->setVec3("gravity", glm::vec3(0.0f, -9.81f, 0.0f));
-	verletShader->setFloat("dt", 1.0f / 50.0f);
+	verletShader->setVec3("gravity", gravity);
+	verletShader->setFloat("dt", 1.0f / 60.0f);
 	verletShader->setFloat("texsize_x", float(num_particles_width));
 	verletShader->setFloat("texsize_y", float(num_particles_height));
 	verletShader->setFloat("KsStruct", KsStruct);
@@ -156,21 +178,33 @@ GPUCloth::GPUCloth(float _width, float _height, int num_particles_width, int num
 	//顶点位置属性
 	glGenBuffers(1, &vboID);
 	glBindBuffer(GL_ARRAY_BUFFER, vboID);
-	glBufferData(GL_ARRAY_BUFFER, size, 0, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, size, 0, GL_DYNAMIC_COPY);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(0);
 	//顶点法线属性
-	glGenBuffers(1, &vboID2);
-	glBindBuffer(GL_ARRAY_BUFFER, vboID2);
-	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 3 * sizeof(float), &Normal[0], GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glGenBuffers(1, &NormalVboID[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[0]);
+	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 1 * sizeof(int), 0, GL_DYNAMIC_COPY);
+	glVertexAttribPointer(1, 1, GL_INT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(1);
+
+	glGenBuffers(1, &NormalVboID[1]);
+	glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[1]);
+	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 1 * sizeof(int), 0, GL_DYNAMIC_COPY);
+	glVertexAttribPointer(2, 1, GL_INT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(2);
+
+	glGenBuffers(1, &NormalVboID[2]);
+	glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[2]);
+	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 1 * sizeof(int), 0, GL_DYNAMIC_COPY);
+	glVertexAttribPointer(3, 1, GL_INT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(3);
 	//顶点纹理属性
 	glGenBuffers(1, &vboID3);
 	glBindBuffer(GL_ARRAY_BUFFER, vboID3);
 	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 2 * sizeof(float), &TexCoord[0], GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(4);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -188,7 +222,7 @@ GPUCloth::GPUCloth(float _width, float _height, int num_particles_width, int num
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-
+	glCheckError();
 	// framebuffer configuration
 	// -------------------------
 	//unsigned int framebuffer;
@@ -199,8 +233,6 @@ GPUCloth::GPUCloth(float _width, float _height, int num_particles_width, int num
 		for (int i = 0; i < 2; i++) {//两块纹理，用于verlet积分的当前位置和过去位置
 			glBindTexture(GL_TEXTURE_2D, attachID[i + 2 * j]);
 
-			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -211,6 +243,12 @@ GPUCloth::GPUCloth(float _width, float _height, int num_particles_width, int num
 			glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, mrt[i], GL_TEXTURE_2D, attachID[i + 2 * j], 0);
 		}
 	}
+
+	glGenTextures(3, NormalTexID);
+	for (int i = 0; i < 3; i++) {
+		setupIntTexture(NormalTexID[i], &Null_X[0], num_particles_width, num_particles_height);//attachID里面存放顶点数据
+	}
+
 	GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 	if (status == GL_FRAMEBUFFER_COMPLETE) {
 		printf("FBO setup succeeded.");
@@ -223,21 +261,6 @@ GPUCloth::GPUCloth(float _width, float _height, int num_particles_width, int num
 
 void GPUCloth::render()
 {
-	//CHECK_GL_ERRORS
-	////重置状态
-	//glReadBuffer(GL_NONE);
-	//glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-
-	//渲染
-	// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	//glReadBuffer(GL_BACK);
-	//glDrawBuffer(GL_BACK);
-
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	//glViewport(0, 0, scene->SCR_WIDTH, scene->SCR_HEIGHT);
-	//glEnable(GL_DEPTH_TEST);
-
 	renderShader->use();
 	renderShader->setMat4("projection", scene->projection);
 	renderShader->setMat4("view", scene->view);
@@ -258,7 +281,9 @@ void GPUCloth::render()
 	renderShader->setFloat("material.shininess", 16.0f);
 	renderShader->setVec3("material.specular", vec3(0.2f, 0.2f, 0.2f));
 
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindVertexArray(vaoID);
+	//glDrawArrays(GL_POINTS, 0, total_points);
 	glDrawElements(GL_TRIANGLES, 6 * (num_particles_height - 1)*(num_particles_width - 1), GL_UNSIGNED_INT, 0);
 	CHECK_GL_ERRORS
 }

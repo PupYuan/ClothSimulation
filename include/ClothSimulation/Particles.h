@@ -2,7 +2,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp> //for matrices
 #include <glm/gtc/type_ptr.hpp>
-const float DEFAULT_DAMPING = -0.0125f;
+
 using namespace glm;
 
 class Particle

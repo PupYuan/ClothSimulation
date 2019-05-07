@@ -1,6 +1,7 @@
 #include <ClothSimulation\Cloth.h>
 #include <ClothSimulation\SceneManager.h>
 #include <ClothSimulation\util.h>
+#define glCheckError() glCheckError_(__FILE__, __LINE__) 
 
 void ComputeShaderCloth::readNormal() {
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, NormalVboID[0]);
@@ -130,9 +131,6 @@ void setupTexture(const GLuint texID, float *data,int width,int height) {
 
 }
 
-/**
- * Sets up a floating point texture with the NEAREST filtering.
- */
 void setupIntTexture(const GLuint texID, int *data, int width, int height) {
 	// make active and bind
 	glBindTexture(GL_TEXTURE_2D, texID);
@@ -472,17 +470,17 @@ void ComputeShaderCloth::calcNormal() {
 			vec3 v2 = p3 - p1;
 			vec3 normal = cross(v1, v2);
 
-			NormalX[y*num_particles_width + x + 1] += normal.x*1000.0f;
-			NormalY[y*num_particles_width + x + 1] += normal.y*1000.0f;
-			NormalZ[y*num_particles_width + x + 1] += normal.z*1000.0f;
+			NormalX[y*num_particles_width + x + 1] += normal.x*10000.0f;
+			NormalY[y*num_particles_width + x + 1] += normal.y*10000.0f;
+			NormalZ[y*num_particles_width + x + 1] += normal.z*10000.0f;
 
-			NormalX[y*num_particles_width + x] += normal.x*1000.0f;
-			NormalY[y*num_particles_width + x] += normal.y*1000.0f;
-			NormalZ[y*num_particles_width + x] += normal.z*1000.0f;
+			NormalX[y*num_particles_width + x] += normal.x*10000.0f;
+			NormalY[y*num_particles_width + x] += normal.y*10000.0f;
+			NormalZ[y*num_particles_width + x] += normal.z*10000.0f;
 
-			NormalX[(y + 1)*num_particles_width + x + 1] += normal.x*1000.0f;
-			NormalY[(y + 1)*num_particles_width + x + 1] += normal.y*1000.0f;
-			NormalZ[(y + 1)*num_particles_width + x + 1] += normal.z*1000.0f;
+			NormalX[(y + 1)*num_particles_width + x + 1] += normal.x*10000.0f;
+			NormalY[(y + 1)*num_particles_width + x + 1] += normal.y*10000.0f;
+			NormalZ[(y + 1)*num_particles_width + x + 1] += normal.z*10000.0f;
 
 			//更新第二块三角形的法线
 			p1 = X[(y+1)*num_particles_width + x + 1];
@@ -492,17 +490,17 @@ void ComputeShaderCloth::calcNormal() {
 			v2 = p3 - p1;
 			normal = cross(v1, v2);
 
-			NormalX[(y + 1)*num_particles_width + x + 1] += normal.x*1000.0f;
-			NormalY[(y + 1)*num_particles_width + x + 1] += normal.y*1000.0f;
-			NormalZ[(y + 1)*num_particles_width + x + 1] += normal.z*1000.0f;
+			NormalX[(y + 1)*num_particles_width + x + 1] += normal.x*10000.0f;
+			NormalY[(y + 1)*num_particles_width + x + 1] += normal.y*10000.0f;
+			NormalZ[(y + 1)*num_particles_width + x + 1] += normal.z*10000.0f;
 
-			NormalX[y*num_particles_width + x + 1] += normal.x*1000.0f;
-			NormalY[y*num_particles_width + x + 1] += normal.y*1000.0f;
-			NormalZ[y*num_particles_width + x + 1] += normal.z*1000.0f;
+			NormalX[y*num_particles_width + x + 1] += normal.x*10000.0f;
+			NormalY[y*num_particles_width + x + 1] += normal.y*10000.0f;
+			NormalZ[y*num_particles_width + x + 1] += normal.z*10000.0f;
 
-			NormalX[(y+1)*num_particles_width + x] += normal.x*1000.0f;
-			NormalY[(y + 1)*num_particles_width + x] += normal.y*1000.0f;
-			NormalZ[(y + 1)*num_particles_width + x] += normal.z*1000.0f;
+			NormalX[(y+1)*num_particles_width + x] += normal.x*10000.0f;
+			NormalY[(y + 1)*num_particles_width + x] += normal.y*10000.0f;
+			NormalZ[(y + 1)*num_particles_width + x] += normal.z*10000.0f;
 		}
 	}
 }

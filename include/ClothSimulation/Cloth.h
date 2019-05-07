@@ -11,7 +11,9 @@
 #include <GLFW/glfw3.h>
 #include "Spring.h"
 #include "Constraint.h"
+
 class SceneManager;
+void setupIntTexture(const GLuint texID, int *data, int width, int height);
 #define CHECK_GL_ERRORS assert(glGetError()==GL_NO_ERROR);
 //pbd模拟的基本单元，包括布料、沙粒、发束
 class PositionBasedUnit {
@@ -23,6 +25,17 @@ public:
 		return particles;
 	}
 	glm::vec3 gravity = glm::vec3(0.0f, -0.00981f, 0.0f);
+	//求解纹理
+	GLuint NormalTexID[3];
+	GLuint NormalVboID[3];
+	std::vector<int>NormalX;
+	std::vector<int>NormalY;
+	std::vector<int>NormalZ;
+	Shader* NormalCalcShader;
+	std::vector<int> Null_X;
+	//纹理密度
+	float texDensityX = 10.0f;
+	float texDensityY = 10.0f;
 };
 enum Mode { CPU, GPU };
 class Cloth:public PositionBasedUnit
@@ -98,6 +111,7 @@ public:
 	}
 	virtual void render();
 private:
+	const float DEFAULT_DAMPING = -0.0125f;
 	int vertice_data_length = 8;
 	//在内存中一份顶点数据
 	std::vector<float>vertices;
@@ -131,7 +145,7 @@ private:
 	float delta_time = 0;
 
 	//每次渲染的时候做几次物理迭代
-	const int NUM_ITER = 2;
+	const int NUM_ITER = 1;
 
 	Shader *verletShader;
 	Shader *renderShader;//渲染用的Shader
@@ -140,7 +154,6 @@ private:
 	SceneManager * scene;
 	//render for GPGPU
 	unsigned int quadVAO, quadVBO;
-	const float global_dampening = 0.98f; //DevO: 24.07.2011  //global velocity dampening !!!
 };
 
 class ComputeShaderCloth :public PositionBasedUnit {
@@ -172,7 +185,7 @@ private:
 	std::vector<glm::vec4> X_last;
 	std::vector<glm::vec4> Normal;
 	std::vector<glm::vec2> TexCoord;
-	std::vector<int> Null_X;
+	//std::vector<int> Null_X;
 
 	GLuint fboID[2];
 	GLuint attachID[4];
@@ -189,7 +202,7 @@ private:
 	Shader *DistanceConstraintCompute;
 	Shader *SuccessiveOverRelaxationCompute;
 	Shader* IntegrationShader;
-	Shader* NormalCalcShader;
+	//Shader* NormalCalcShader;
 	Shader* BendingConstraintCompute;
 	//Scene
 	SceneManager * scene;
@@ -211,7 +224,7 @@ private:
 	std::vector<i32vec2>BendingConstraintIndexData1;
 	std::vector<i32vec2>BendingConstraintIndexData2;
 	std::vector<i32vec2>BendingConstraintIndexData3;
-	float kBend = 1.0f;
+	float kBend = 0.9f;
 	GLuint RestDistanceTexID2;
 	std::vector<float>RestDistanceData2;
 	//公共的属性
@@ -219,16 +232,14 @@ private:
 	GLuint DeltaTexYID;
 	GLuint DeltaTexZID;
 	//求解纹理
-	GLuint NormalTexID[3];
-	GLuint NormalVboID[3];
-	std::vector<int>NormalX;
-	std::vector<int>NormalY;
-	std::vector<int>NormalZ;
+	//GLuint NormalTexID[3];
+	//GLuint NormalVboID[3];
+	//std::vector<int>NormalX;
+	//std::vector<int>NormalY;
+	//std::vector<int>NormalZ;
 	//SOR求解
 	GLuint NiTexID;//SOR求解时除去的因子
 	std::vector<int>Ni;
 	float SuccessiveW = 1.5f;
-	//纹理密度
-	float texDensityX = 10.0f;
-	float texDensityY = 10.0f;
+	
 };
