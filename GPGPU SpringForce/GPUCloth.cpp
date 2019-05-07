@@ -41,6 +41,8 @@ void GPUCloth::timeStep(float dt)
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		verletShader->use();
+		glUniform3fv(glGetUniformLocation(verletShader->ID, "sphere_pos"), 2, &scene->spherePos[0][0]);
+		glUniform1fv(glGetUniformLocation(verletShader->ID, "radius"), 2, &scene->radius[0]);
 		glBindVertexArray(quadVAO);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 

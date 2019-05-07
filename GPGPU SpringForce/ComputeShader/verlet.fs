@@ -16,6 +16,11 @@ uniform vec2  inv_cloth_size;		//size of a single patch in world space
 uniform vec2  step;					//delta texture size
 uniform vec3  gravity;				//gravitational force
 
+// 传递碰撞球体的球心位置
+uniform vec3 sphere_pos[2];
+// 传递碰撞球体的半径数据
+uniform float radius[2];
+
 vec2 getNextNeighbor(int n, out float ks, out float kd) { 
    //structural springs (adjacent neighbors)
    //        o
@@ -126,6 +131,16 @@ void main() {
 	vec3 tmp = x_i;
 	x_i = x_i * 2.0 - x_last + acc * dt * dt;
 	x_last = tmp;
+
+	//在这里进行碰撞判断和响应
+	for(int i=0;i<2;i++){
+	    vec3 v = x_i.xyz - sphere_pos[i];
+		if(length(v) < radius[i]){
+			vec3 moveOffset  = normalize(v) * (radius[i] - length(v));
+			x_i  = x_i + moveOffset;
+		}
+	}
+
 	// fragment outputs
 	CurrentPos = vec4(x_i,1.0);
 	LastPos = vec4(x_last,0.0);
