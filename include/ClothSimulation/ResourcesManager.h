@@ -11,5 +11,8 @@ public:
 	static Shader* loadShader(string shaderName, const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr);
 	static Shader* loadComputeShader(string shaderName, const char* Path);
 	static Shader* getShader(string shaderName);
+	static string shaderLocation;
 };
+
+
 

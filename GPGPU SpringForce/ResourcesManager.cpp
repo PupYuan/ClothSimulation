@@ -1,5 +1,7 @@
 #include <ClothSimulation\ResourcesManager.h>
 
+string ResourcesManager::shaderLocation = "../Resource/Shader/";
+
 Shader* ResourcesManager::loadShader(string shaderName, const char* vertexPath, const char* fragmentPath, const char* geometryPath) {
 	Shader *shader = new Shader(vertexPath, fragmentPath, geometryPath);
 	shaderList[shaderName] = *shader;

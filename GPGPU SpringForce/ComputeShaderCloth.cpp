@@ -290,12 +290,12 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	}
 
 
-	renderShader = ResourcesManager::loadShader("GPU_renderShader", "./ComputeShader/render.vs", "./ComputeShader/render.fs");
-	DistanceConstraintCompute = ResourcesManager::loadComputeShader("DistanceConstraint", "./ComputeShader/DistanceConstraint.fs");
-	SuccessiveOverRelaxationCompute = ResourcesManager::loadComputeShader("SOR", "./ComputeShader/SOR.fs");
-	IntegrationShader = ResourcesManager::loadComputeShader("IntegrationShader", "./ComputeShader/Integration.fs");
-	NormalCalcShader = ResourcesManager::loadComputeShader("NormalCalcShader", "./ComputeShader/NormalCalculate.fs");
-	BendingConstraintCompute = ResourcesManager::loadComputeShader("BendingConstraint", "./ComputeShader/BendingConstraint.fs");
+	renderShader = ResourcesManager::loadShader("GPU_renderShader", "render.vs",  "render.fs");
+	DistanceConstraintCompute = ResourcesManager::loadComputeShader("DistanceConstraint",  "DistanceConstraint.fs");
+	SuccessiveOverRelaxationCompute = ResourcesManager::loadComputeShader("SOR",  "SOR.fs");
+	IntegrationShader = ResourcesManager::loadComputeShader("IntegrationShader",  "Integration.fs");
+	NormalCalcShader = ResourcesManager::loadComputeShader("NormalCalcShader",  "NormalCalculate.fs");
+	BendingConstraintCompute = ResourcesManager::loadComputeShader("BendingConstraint",  "BendingConstraint.fs");
 
 	glCheckError();
 	//Integration

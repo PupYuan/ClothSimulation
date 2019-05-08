@@ -36,6 +36,7 @@ public:
 	//Œ∆¿Ì√‹∂»
 	float texDensityX = 10.0f;
 	float texDensityY = 10.0f;
+	
 };
 enum Mode { CPU, GPU };
 class Cloth:public PositionBasedUnit

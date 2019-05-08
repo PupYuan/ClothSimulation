@@ -74,7 +74,7 @@ Cloth::Cloth(float _width, float _height, int num_particles_width, int num_parti
 		}
 	}
 
-	renderShader = ResourcesManager::loadShader("ClothShader", "../Resource/Shader/Simple.vs", "../Resource/Shader/Simple.fs");
+	renderShader = ResourcesManager::loadShader("ClothShader", "Simple.vs", "Simple.fs");
 	// making the upper left most three and right most three particles unmovable
 	for (int i = 0; i < 2; i++)
 	{

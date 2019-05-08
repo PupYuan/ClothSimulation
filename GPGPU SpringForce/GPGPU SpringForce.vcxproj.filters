@@ -101,31 +101,31 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="ComputeShader\DistanceConstraint.fs">
+    <None Include="..\Resource\Shader\BendingConstraint.fs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="ComputeShader\Integration.fs">
+    <None Include="..\Resource\Shader\DistanceConstraint.fs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="ComputeShader\NormalCalculate.fs">
+    <None Include="..\Resource\Shader\Integration.fs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="ComputeShader\render.fs">
+    <None Include="..\Resource\Shader\NormalCalculate.fs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="ComputeShader\render.vs">
+    <None Include="..\Resource\Shader\render.fs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="ComputeShader\SOR.fs">
+    <None Include="..\Resource\Shader\render.vs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="ComputeShader\verlet.fs">
+    <None Include="..\Resource\Shader\SOR.fs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="ComputeShader\verlet.vs">
+    <None Include="..\Resource\Shader\verlet.fs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="ComputeShader\BendingConstraint.fs">
+    <None Include="..\Resource\Shader\verlet.vs">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>
