@@ -2,14 +2,14 @@
 
 string ResourcesManager::shaderLocation = "../Resource/Shader/";
 
-Shader* ResourcesManager::loadShader(string shaderName, const char* vertexPath, const char* fragmentPath, const char* geometryPath) {
-	Shader *shader = new Shader(vertexPath, fragmentPath, geometryPath);
+Shader* ResourcesManager::loadShader(string shaderName, string vertexPath, string fragmentPath, string geometryPath) {
+	Shader *shader = new Shader((shaderLocation+vertexPath).c_str(), (shaderLocation+fragmentPath).c_str(), geometryPath.empty()?nullptr:(shaderLocation+geometryPath).c_str());
 	shaderList[shaderName] = *shader;
 	return &shaderList[shaderName];
 }
 
-Shader* ResourcesManager::loadComputeShader(string shaderName, const char* Path) {
-	Shader *shader = new Shader(Path);
+Shader* ResourcesManager::loadComputeShader(string shaderName, string Path) {
+	Shader *shader = new Shader((shaderLocation+Path).c_str());
 	shaderList[shaderName] = *shader;
 	return &shaderList[shaderName];
 }

@@ -21,7 +21,7 @@ class ShpereRenderable:public Renderable {
 public:
 	ShpereRenderable(SceneManager* _scene) {
 		scene = _scene;
-		shader = ResourcesManager::loadShader("lightingMaps", "../Resource/Shader/lightingMaps.vs", "../Resource/Shader/lightingMaps.fs");
+		shader = ResourcesManager::loadShader("lightingMaps", "lightingMaps.vs", "lightingMaps.fs");
 
 		model = new Model("../Resource/Model/Sphere-Bot_Basic/Armature_001-(FBX 7.4 binary mit Animation).FBX");
 	}

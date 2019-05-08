@@ -149,9 +149,9 @@ GPUCloth::GPUCloth(float _width, float _height, int num_particles_width, int num
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	//glPointSize(5);
 
-	renderShader = ResourcesManager::loadShader("GPU_renderShader", (ResourcesManager::shaderLocation+"render.vs").c_str(), (ResourcesManager::shaderLocation + "render.fs").c_str());
-	verletShader = ResourcesManager::loadShader("verletShader", (ResourcesManager::shaderLocation + "verlet.vs").c_str(), (ResourcesManager::shaderLocation + "verlet.fs").c_str());
-	NormalCalcShader = ResourcesManager::loadComputeShader("NormalCalculate", (ResourcesManager::shaderLocation + "NormalCalculate.fs").c_str());
+	renderShader = ResourcesManager::loadShader("GPU_renderShader", "render.vs", "render.fs");
+	verletShader = ResourcesManager::loadShader("verletShader", "verlet.vs", "verlet.fs");
+	NormalCalcShader = ResourcesManager::loadComputeShader("NormalCalculate", "NormalCalculate.fs");
 	glCheckError();
 	verletShader->use();
 	verletShader->setFloat("DEFAULT_DAMPING", DEFAULT_DAMPING);
