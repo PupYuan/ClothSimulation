@@ -74,8 +74,9 @@ void SceneManager::SceneInit() {
 	renderable1->scale = vec3(1.0, 1.0, 1.0);
 	renderableList.push_back(renderable1);
 
-	/*Renderable* plane = new Plane(this);
-	renderableList.push_back(plane);*/
+	Renderable* plane = new Plane(this);
+	plane->pos = vec3(0, -4.0f, 0);
+	renderableList.push_back(plane);
 
 	//ball_pos = vec3(0.0f, cos(ball_time / 50.0) *2.0f, 1.0f);
 	renderable->ball_collider = new SphereCollider(vec3(0.0f, -4.0f, 2.0f + cos(ball_time / 50.0) *3.0f), 1.2f);
@@ -121,7 +122,9 @@ void SceneManager::RenderScene() {
 	
 
 	for (auto iter = renderableList.begin(); iter != renderableList.end(); iter++) {
-		(*iter)->pos = (*iter)->ball_collider->getCenter();
+		if ((*iter)->ball_collider) {
+			(*iter)->pos = (*iter)->ball_collider->getCenter();
+		}
 		(*iter)->render();
 	}
 	for (auto iter = simulateList.begin(); iter != simulateList.end(); iter++) {

@@ -95,7 +95,7 @@ Plane::Plane(SceneManager* _scene) {
 	glBindVertexArray(0);
 
 	// Load textures
-	woodTexture = loadTexture("../resource/textures/wood.png");
+	woodTexture = loadTexture("../resource/textures/marble.jpg");
 	shader->use();
 	shader->setInt("material.diffuse", 0);
 	shader->setInt("material.specular", 1);

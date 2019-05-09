@@ -11,7 +11,7 @@ public:
 	glm::vec3 lightPos = vec3(1.2f, 1.0f, 2.0f);
 	glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f); // decrease the influence
-	glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); // low influence
+	glm::vec3 ambientColor = diffuseColor * glm::vec3(0.4f); // low influence
 };
 
 class SceneManager {
