@@ -52,7 +52,7 @@ void RenderSystem::Render(SceneManager* _scene)
 	//‰÷»æœµÕ≥
 	// render
 	// ------
-	glClearColor(0.2f, 0.2f, 0.4f, 0.5f);
+	glClearColor(0.8f, 0.8f, 0.8f, 0.5f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//‰÷»æ—≠ª∑

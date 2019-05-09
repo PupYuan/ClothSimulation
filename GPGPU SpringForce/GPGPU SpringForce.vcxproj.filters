@@ -128,5 +128,17 @@
     <None Include="..\Resource\Shader\verlet.vs">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="..\Resource\Shader\skybox.fs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Resource\Shader\skybox.vs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Resource\Shader\lightingMaps.fs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Resource\Shader\lightingMaps.vs">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
 </Project>

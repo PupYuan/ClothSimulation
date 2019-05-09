@@ -12,6 +12,7 @@ public:
 	static Shader* loadComputeShader(string shaderName, string Path);
 	static Shader* getShader(string shaderName);
 	static string shaderLocation;
+	static unsigned int loadCubemap(vector<std::string> faces);
 };
 
 

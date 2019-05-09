@@ -13,7 +13,7 @@ protected:
 public:
 	glm::vec3 pos = vec3(0,0,0);
 	glm::vec3 scale = vec3(1,1,1);
-	void render();
+	virtual void render();
 	SphereCollider* ball_collider;
 };
 
@@ -25,4 +25,14 @@ public:
 
 		model = new Model("../Resource/Model/Sphere-Bot_Basic/Armature_001-(FBX 7.4 binary mit Animation).FBX");
 	}
+};
+
+class Plane :public Renderable {
+public:
+	
+	GLuint planeVAO;
+	GLuint woodTexture;
+	
+	Plane(SceneManager * _scene);
+	virtual void render();
 };
