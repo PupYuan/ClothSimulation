@@ -63,24 +63,37 @@ void SceneManager::CreateCloth()
 }
 
 void SceneManager::SceneInit() {
-
+	Renderable::DepthInit();
 	CreateCloth();
 
-	Renderable* renderable = new ShpereRenderable(this);
-	renderable->scale = vec3(1.0,1.0,1.0);
-	renderableList.push_back(renderable);
+	//Renderable* renderable = new ShpereRenderable(this);
+	//renderable->scale = vec3(1.0,1.0,1.0);
+	//renderableList.push_back(renderable);
 
-	Renderable* renderable1 = new ShpereRenderable(this);
-	renderable1->scale = vec3(1.0, 1.0, 1.0);
-	renderableList.push_back(renderable1);
+	//Renderable* renderable1 = new ShpereRenderable(this);
+	//renderable1->scale = vec3(1.0, 1.0, 1.0);
+	//renderableList.push_back(renderable1);
 
 	Renderable* plane = new Plane(this);
-	plane->pos = vec3(0, -4.0f, 0);
+	//plane->pos = vec3(0, -7.0f, 0);
 	renderableList.push_back(plane);
 
+	Renderable* cube = new Cube(this);
+	cube->pos = vec3(0.0f, 1.5f, 0.0);
+	renderableList.push_back(cube);
+
+	Renderable* cube1 = new Cube(this);
+	cube1->pos = vec3(2.0f, 0.0f, 1.0);
+	renderableList.push_back(cube1);
+
+	Renderable* debugQuad = new Quad(this);
+	renderableList.push_back(debugQuad);
+
 	//ball_pos = vec3(0.0f, cos(ball_time / 50.0) *2.0f, 1.0f);
-	renderable->ball_collider = new SphereCollider(vec3(0.0f, -4.0f, 2.0f + cos(ball_time / 50.0) *3.0f), 1.2f);
-	renderable1->ball_collider = new SphereCollider(vec3(0.0f, -4.0f, 2.0f + cos(ball_time / 50.0) *3.0f), 1.2f);
+	//renderable->ball_collider = new SphereCollider(vec3(0.0f, -4.0f, 2.0f + cos(ball_time / 50.0) *3.0f), 1.2f);
+	//renderable1->ball_collider = new SphereCollider(vec3(0.0f, -4.0f, 2.0f + cos(ball_time / 50.0) *3.0f), 1.2f);
+	/*renderable->ball_collider = new SphereCollider(vec3(0.0f, 1.5f, 0), 1.2f);
+	renderable1->ball_collider = new SphereCollider(vec3(0.0f, 1.5f, 0), 1.2f);*/
 
 	spherePos.push_back(vec3(0.0f, -4.0f, 2.0f + cos(ball_time / 50.0) *3.0f));
 	spherePos.push_back(vec3(0.0f, -4.0f, 2.0f + cos(ball_time / 50.0) *3.0f));
@@ -119,18 +132,13 @@ void SceneManager::RenderSkyBox() {
 	glDepthFunc(GL_LESS); // set depth function back to default
 }
 void SceneManager::RenderScene() {
-	
-
 	for (auto iter = renderableList.begin(); iter != renderableList.end(); iter++) {
 		if ((*iter)->ball_collider) {
 			(*iter)->pos = (*iter)->ball_collider->getCenter();
 		}
-		(*iter)->render();
+		(*iter)->draw();
 	}
-	for (auto iter = simulateList.begin(); iter != simulateList.end(); iter++) {
+	/*for (auto iter = simulateList.begin(); iter != simulateList.end(); iter++) {
 		(*iter)->render();
-	}
-
-	
-	
+	}*/
 }

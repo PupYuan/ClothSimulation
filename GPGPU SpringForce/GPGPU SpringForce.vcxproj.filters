@@ -140,5 +140,17 @@
     <None Include="..\Resource\Shader\lightingMaps.vs">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="..\Resource\Shader\simpleDepthShader.fs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Resource\Shader\simpleDepthShader.vs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Resource\Shader\debug_quad.fs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Resource\Shader\debug_quad.vs">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
 </Project>

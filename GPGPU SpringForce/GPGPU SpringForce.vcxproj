@@ -151,6 +151,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Resource\Shader\BendingConstraint.fs" />
+    <None Include="..\Resource\Shader\debug_quad.fs" />
+    <None Include="..\Resource\Shader\debug_quad.vs" />
     <None Include="..\Resource\Shader\DistanceConstraint.fs" />
     <None Include="..\Resource\Shader\Integration.fs" />
     <None Include="..\Resource\Shader\lightingMaps.fs" />
@@ -158,6 +160,8 @@
     <None Include="..\Resource\Shader\NormalCalculate.fs" />
     <None Include="..\Resource\Shader\render.fs" />
     <None Include="..\Resource\Shader\render.vs" />
+    <None Include="..\Resource\Shader\simpleDepthShader.fs" />
+    <None Include="..\Resource\Shader\simpleDepthShader.vs" />
     <None Include="..\Resource\Shader\skybox.fs" />
     <None Include="..\Resource\Shader\skybox.vs" />
     <None Include="..\Resource\Shader\SOR.fs" />
