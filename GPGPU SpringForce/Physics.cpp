@@ -4,18 +4,19 @@
 void SceneManager::Simulation(float dt) {
 	ball_time++;
 	auto shperePos_iter = spherePos.begin();
-	for (auto iter = renderableList.begin(); iter != renderableList.end(); iter++){
-		if ((*iter)->collider) {
-			if (!(*iter)->collider->kinematicStatic) {
-				vec3 CurPos = (*iter)->collider->getCenter();
-				CurPos.z = 2.0f + cos(ball_time / 50.0) *3.0f;
-				//CurPos.y = 2.0f + cos(ball_time / 50.0) *3.0f;
-				(*iter)->collider->setPos(CurPos);
-				*shperePos_iter = CurPos;
-				shperePos_iter++;
-			}
-		}
-	}
+	//²»ÒÆ¶¯
+	//for (auto iter = renderableList.begin(); iter != renderableList.end(); iter++){
+	//	if ((*iter)->collider) {
+	//		if (!(*iter)->collider->kinematicStatic) {
+	//			vec3 CurPos = (*iter)->collider->getCenter();
+	//			CurPos.z = 2.0f + cos(ball_time / 50.0) *3.0f;
+	//			//CurPos.y = 2.0f + cos(ball_time / 50.0) *3.0f;
+	//			(*iter)->collider->setPos(CurPos);
+	//			*shperePos_iter = CurPos;
+	//			shperePos_iter++;
+	//		}
+	//	}
+	//}
 	for (auto iter2 = simulateList.begin(); iter2 != simulateList.end(); iter2++) {
 		(*iter2)->timeStep(timeStep);
 		for (auto iter = renderableList.begin(); iter != renderableList.end(); iter++) {

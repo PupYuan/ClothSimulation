@@ -159,6 +159,8 @@
     <None Include="..\Resource\Shader\NormalCalculate.fs" />
     <None Include="..\Resource\Shader\render.fs" />
     <None Include="..\Resource\Shader\render.vs" />
+    <None Include="..\Resource\Shader\Simple.fs" />
+    <None Include="..\Resource\Shader\Simple.vs" />
     <None Include="..\Resource\Shader\skybox.fs" />
     <None Include="..\Resource\Shader\skybox.vs" />
     <None Include="..\Resource\Shader\SOR.fs" />

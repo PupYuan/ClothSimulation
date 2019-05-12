@@ -49,13 +49,13 @@ float skyboxVertices[] = {
 
 void SceneManager::CreateCloth()
 {
-	Cloth * cloth = new Cloth(4, 4, 20, 20);
-	cloth->SetScene(this);
-	simulateList.push_back(cloth);
+	//Cloth * cloth = new Cloth(4, 4, 130, 130);
+	//cloth->SetScene(this);
+	//simulateList.push_back(cloth);
 
-	//GPUCloth * gpuCloth = new GPUCloth(4, 4, 90, 90);
-	//gpuCloth->SetScene(this);
-	//simulateList.push_back(gpuCloth);
+	GPUCloth * gpuCloth = new GPUCloth(4, 4, 200, 200);
+	gpuCloth->SetScene(this);
+	simulateList.push_back(gpuCloth);
 
 	//ComputeShaderCloth * cCloth = new ComputeShaderCloth(4, 4, 20, 20);
 	//cCloth->SetScene(this);
@@ -67,26 +67,27 @@ void SceneManager::SceneInit() {
 	CreateCloth();
 
 	Renderable* renderable = new ShpereRenderable(this);
-	renderable->scale = vec3(1.0,1.0,1.0);
+	renderable->scale = vec3(0.8f, 0.8f, 0.8f);
 	renderableList.push_back(renderable);
 
 	Renderable* renderable1 = new ShpereRenderable(this);
-	renderable1->scale = vec3(1.0, 1.0, 1.0);
+	renderable1->scale = vec3(0.8f, 0.8f, 0.8f);
 	renderableList.push_back(renderable1);
 
 	Renderable* plane = new Plane(this);
-	plane->pos = vec3(0, -4.0f, 0);
+	plane->pos = vec3(0, -3.0f, 0);
 	renderableList.push_back(plane);
 
 	//ball_pos = vec3(0.0f, cos(ball_time / 50.0) *2.0f, 1.0f);
-	renderable->collider = new SphereCollider(vec3(0.0f, -4.0f, 2.0f + cos(ball_time / 50.0) *3.0f), 1.2f);
-	renderable1->collider = new SphereCollider(vec3(0.0f, -4.0f, 2.0f + cos(ball_time / 50.0) *3.0f), 1.2f);
-	plane->collider = new PlaneCollider(-4.0f);
+	//renderable->collider = new SphereCollider(vec3(0.0f, -3.0f, 2.0f + cos(ball_time / 50.0) *3.0f), 1.2f);
+	renderable->collider = new SphereCollider(vec3(-1.0f, -3.5f, 1.0f), 1.0f);
+	renderable1->collider = new SphereCollider(vec3(1.0f, -3.5f, 3.0f), 1.0f);
+	plane->collider = new PlaneCollider(-3.0f);
 
-	spherePos.push_back(vec3(0.0f, -4.0f, 2.0f + cos(ball_time / 50.0) *3.0f));
-	spherePos.push_back(vec3(0.0f, -4.0f, 2.0f + cos(ball_time / 50.0) *3.0f));
-	radius.push_back(1.2f);
-	radius.push_back(1.2f);
+	spherePos.push_back(vec3(-1.0f, -3.5f, 1.0f));
+	spherePos.push_back(vec3(1.0f, -3.5f, 3.0f));
+	radius.push_back(1.0f);
+	radius.push_back(1.0f);
 	diffuseMap = loadTexture("../Resource/Textures/ClothTextures.png");
 
 	//³õÊ¼»¯Ìì¿ÕºÐ

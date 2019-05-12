@@ -143,5 +143,11 @@
     <None Include="..\Resource\Shader\lightingMaps.vs">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="..\Resource\Shader\Simple.fs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Resource\Shader\Simple.vs">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -14,6 +14,7 @@
 
 class SceneManager;
 void setupIntTexture(const GLuint texID, int *data, int width, int height);
+void setupTexture(const GLuint texID, float *data, int width, int height);
 #define CHECK_GL_ERRORS assert(glGetError()==GL_NO_ERROR);
 //pbd模拟的基本单元，包括布料、沙粒、发束
 class PositionBasedUnit {
@@ -24,7 +25,8 @@ public:
 	virtual std::vector<Particle>& getParticles() {
 		return particles;
 	}
-	glm::vec3 gravity = glm::vec3(0.0f, -0.00981f, 0.0f);
+	//glm::vec3 gravity = glm::vec3(0.0f, -9.81f, 0.0f);
+	glm::vec3 gravity = glm::vec3(0.0f, -0.1962, 0.0f);//9.81/50 = 0.1962
 	//求解纹理
 	GLuint NormalTexID[3];
 	GLuint NormalVboID[3];
@@ -36,14 +38,17 @@ public:
 	//纹理密度
 	float texDensityX = 10.0f;
 	float texDensityY = 10.0f;
-	
+	//简化版的纹理
+	GLuint NormalFloatTexID;
+	GLuint NormalFloatVboID;
+	std::vector<glm::vec4> Normal;
 };
 enum Mode { CPU, GPU };
 class Cloth:public PositionBasedUnit
 {
 private:
-	float kBend = 0.5f;
-	float kStretch = 0.95f;
+	float kBend = 0.25f;
+	float kStretch = 0.5f;
 	int vertice_data_length = 8;
 	size_t total_points;
 	int width;
@@ -61,7 +66,6 @@ private:
 	std::vector<unsigned int>indices;
 	//绘制相关
 	unsigned int VBO, VAO, EBO;
-
 	Shader *renderShader;//渲染用的Shader
 
 	//Scene
@@ -127,7 +131,6 @@ private:
 	const size_t total_points = (num_particles_width)*(num_particles_height);
 	std::vector<glm::vec4> X;
 	std::vector<glm::vec4> X_last;
-	std::vector<glm::vec3> Normal;
 	std::vector<glm::vec2> TexCoord;
 
 	unsigned int vaoID;
@@ -144,8 +147,7 @@ private:
 	GLuint64 elapsed_time;
 	float delta_time = 0;
 
-	//每次渲染的时候做几次物理迭代
-	const int NUM_ITER = 1;
+	const int NUM_ITER = 100;
 
 	Shader *verletShader;
 	Shader *renderShader;//渲染用的Shader

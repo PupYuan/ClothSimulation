@@ -79,13 +79,6 @@ public:
 		*z = pos.z;
 	}
 
-	void checkGround(float _y)
-	{
-		if (pos.y < _y) {
-			pos.y = _y;
-		}
-		*y = pos.y;
-	}
 	void setPos(const vec3 p)
 	{
 		if (movable) pos = p;

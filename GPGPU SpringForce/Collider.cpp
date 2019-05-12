@@ -31,8 +31,9 @@ void PlaneCollider::ClothCollisionSimulate(PositionBasedUnit * c)
 	{
 		vec3 v = (*particle).getPos();
 		if (v.y < y) {
-			vec3 moveOffset = vec3(0,y-v.y,0);
-			particle->offsetPos(moveOffset);
+			v.y = y;
+			//particle->offsetPos(moveOffset);
+			particle->setPos(v);
 		}
 	}
 }

@@ -19,7 +19,8 @@ Cloth::Cloth(float _width, float _height, int num_particles_width, int num_parti
 		{
 			vec3 pos = glm::vec3(((float(x) / (num_particles_width - 1)) * 2 - 1)* width / 2, 0, ((float(y) / (num_particles_height - 1))* height));
 			//粒子的初始质量被声明为了1/(粒子总数），和opencloth的效果基本一致
-			particles[y*num_particles_width + x] = Particle(pos, 1.0f / (num_particles_width * num_particles_height)); // insert particle in column x at y'th row
+			//particles[y*num_particles_width + x] = Particle(pos, 1.0f / (num_particles_width * num_particles_height)); // insert particle in column x at y'th row
+			particles[y*num_particles_width + x] = Particle(pos, 1.0f); // insert particle in column x at y'th row
 			Particle *particle = &particles[y*num_particles_width + x];
 
 			//顶点位置,并且传递地址给particle
@@ -40,23 +41,15 @@ Cloth::Cloth(float _width, float _height, int num_particles_width, int num_parti
 
 			vertices[vertice_data_length * (y*num_particles_width + x) + 5] = 1.0f;
 			particle->normal_z = &vertices[vertice_data_length * (y*num_particles_width + x) + 5];
-			//纹理坐标
-			//x
-			float texture_val_x;
-			if (x % 2 == 0)
-				texture_val_x = 0.0f;//左
-			else
-				texture_val_x = 1.0f;//右边
-			vertices[vertice_data_length * (y*num_particles_width + x) + 6] = texture_val_x;
-			//y
-			float texture_val_y;
-			if (y % 2 == 0)
-				texture_val_y = 1.0f;//上
-			else
-				texture_val_y = 0.0f;//左上
-			vertices[vertice_data_length * (y*num_particles_width + x) + 7] = texture_val_y;
 
-
+			//纹理坐标，一块纹理覆盖一块布料
+			vec2 temp;
+			/*temp.x = x / (num_particles_width-1.0f);
+			temp.y = y / (num_particles_width-1.0f);*/
+			temp.x = x / (texDensityX);
+			temp.y = y / (texDensityY);
+			vertices[vertice_data_length * (y*num_particles_width + x) + 6] = temp.x;
+			vertices[vertice_data_length * (y*num_particles_width + x) + 7] = temp.y;
 		}
 	}
 	//填充索引数据到indices中
@@ -79,10 +72,10 @@ Cloth::Cloth(float _width, float _height, int num_particles_width, int num_parti
 	for (int i = 0; i < 2; i++)
 	{
 		//getParticle(0 + i, 0)->offsetPos(vec3(0.5, 0.0, 0.0));
-		getParticle(0 + i, 0)->makeUnmovable();
+		//getParticle(0 + i, 0)->makeUnmovable();
 
-		//getParticle(num_particles_width - 1 - i, 0)->offsetPos(vec3(-0.5, 0.0, 0.0));
-		getParticle(num_particles_width - 1 - i, 0)->makeUnmovable();
+		////getParticle(num_particles_width - 1 - i, 0)->offsetPos(vec3(-0.5, 0.0, 0.0));
+		//getParticle(num_particles_width - 1 - i, 0)->makeUnmovable();
 
 		//getParticle(0 + i, num_particles_height - 1)->offsetPos(vec3(0.5, 0.0, 0.0));
 		//getParticle(0 + i, num_particles_height - 1)->makeUnmovable();
@@ -137,20 +130,20 @@ Cloth::Cloth(float _width, float _height, int num_particles_width, int num_parti
 			}
 		}
 	}
-	////add vertical constraints
-	//for (int i = 0; i < num_particles_width; i++) {
-	//	for (int j = 0; j < num_particles_height - 2; j++) {
-	//		BendingConstraint2* constraint = new BendingConstraint2(getParticle(i, j), getParticle(i, j + 1), getParticle(i, j + 2), kBend);
-	//		Constraints.push_back(constraint);
-	//	}
-	//}
-	////add horizontal constraints
-	//for (int i = 0; i < num_particles_width - 2; i++) {
-	//	for (int j = 0; j < num_particles_height; j++) {
-	//		BendingConstraint2* constraint = new BendingConstraint2(getParticle(i, j), getParticle(i + 1, j), getParticle(i + 2, j), kBend);
-	//		Constraints.push_back(constraint);
-	//	}
-	//}
+	//add vertical constraints
+	for (int i = 0; i < num_particles_width; i++) {
+		for (int j = 0; j < num_particles_height - 2; j++) {
+			BendingConstraint2* constraint = new BendingConstraint2(getParticle(i, j), getParticle(i, j + 1), getParticle(i, j + 2), kBend);
+			Constraints.push_back(constraint);
+		}
+	}
+	//add horizontal constraints
+	for (int i = 0; i < num_particles_width - 2; i++) {
+		for (int j = 0; j < num_particles_height; j++) {
+			BendingConstraint2* constraint = new BendingConstraint2(getParticle(i, j), getParticle(i + 1, j), getParticle(i + 2, j), kBend);
+			Constraints.push_back(constraint);
+		}
+	}
 }
 
 inline glm::vec3 GetVerletVelocity(glm::vec3 x_i, glm::vec3 xi_last, float dt) {
@@ -281,9 +274,9 @@ void Cloth::render()
 	}
 
 	//create smooth per particle normals by adding up all the (hard) triangle normals that each particle is part of
-	for (int x = 0; x < num_particles_width - 1; x++)
+	for (int x = 0; x < num_particles_width-1 ; x++)
 	{
-		for (int y = 0; y < num_particles_height - 1; y++)
+		for (int y = 0; y < num_particles_height-1 ; y++)
 		{
 			vec3 normal = calcTriangleNormal(getParticle(x + 1, y), getParticle(x, y), getParticle(x, y + 1));
 			getParticle(x + 1, y)->addToNormal(normal);

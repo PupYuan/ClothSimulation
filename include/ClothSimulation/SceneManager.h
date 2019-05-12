@@ -47,8 +47,8 @@ public:
 	};
 	unsigned int cubemapTexture;
 	// settings
-	static const unsigned int SCR_WIDTH = 1600;
-	static const unsigned int SCR_HEIGHT = 900;
+	static const unsigned int SCR_WIDTH = 1024;
+	static const unsigned int SCR_HEIGHT = 768;
 
 	float timeStep = 1.0f / 50.0f;
 	//Simulation

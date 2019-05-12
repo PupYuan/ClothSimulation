@@ -84,10 +84,11 @@ void main() {
 	float index = iy * texsize_x + ix;
 	float ks=  0.0, kd= 0.0;
 
-	if (index==0 || index== (texsize_x - 1.0))
-		 mymass = 0.0;
+	//if (index==0 || index== (texsize_x - 1.0))
+	//	 mymass = 0.0;
  
-	vec3 force = gravity*mymass + vel*DEFAULT_DAMPING;
+	//vec3 force = gravity + vel*DEFAULT_DAMPING;
+	vec3 force = gravity;
 
 	for (int k = 0; k < 12; k++)
 	{ 	    
@@ -124,8 +125,8 @@ void main() {
 	else
 	   acc = force/mymass;
 
-	if(x_i.y<-10)
-	   x_i.y=-10;
+	if(x_i.y<-3.4)
+	   x_i.y=-3.4;
 
 	// verlet integration
 	vec3 tmp = x_i;
