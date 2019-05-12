@@ -136,6 +136,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\ClothSimulation\Cloth.h" />
+    <ClInclude Include="..\include\ClothSimulation\Collider.h" />
     <ClInclude Include="..\include\ClothSimulation\Constraint.h" />
     <ClInclude Include="..\include\ClothSimulation\Particles.h" />
     <ClInclude Include="..\include\ClothSimulation\Renderable.h" />

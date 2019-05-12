@@ -24,7 +24,7 @@ public:
 	virtual std::vector<Particle>& getParticles() {
 		return particles;
 	}
-	glm::vec3 gravity = glm::vec3(0.0f, -0.981f, 0.0f);
+	glm::vec3 gravity = glm::vec3(0.0f, -0.00981f, 0.0f);
 	//«ÛΩ‚Œ∆¿Ì
 	GLuint NormalTexID[3];
 	GLuint NormalVboID[3];
@@ -93,7 +93,6 @@ public:
 	}
 	void addForce(const vec3 direction);
 	virtual void timeStep(float dt);
-	void GroundCollision();
 	void AddSpring(Particle* a, Particle* b, float ks, float kd);
 	void AddConstraint(Particle * a, Particle * b, float k);
 	void SetScene(SceneManager* _scene) {

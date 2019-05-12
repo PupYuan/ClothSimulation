@@ -49,13 +49,13 @@ float skyboxVertices[] = {
 
 void SceneManager::CreateCloth()
 {
-	//Cloth * cloth = new Cloth(4, 4, 20, 20);
-	//cloth->SetScene(this);
-	//simulateList.push_back(cloth);
+	Cloth * cloth = new Cloth(4, 4, 20, 20);
+	cloth->SetScene(this);
+	simulateList.push_back(cloth);
 
-	GPUCloth * gpuCloth = new GPUCloth(4, 4, 20, 20);
-	gpuCloth->SetScene(this);
-	simulateList.push_back(gpuCloth);
+	//GPUCloth * gpuCloth = new GPUCloth(4, 4, 90, 90);
+	//gpuCloth->SetScene(this);
+	//simulateList.push_back(gpuCloth);
 
 	//ComputeShaderCloth * cCloth = new ComputeShaderCloth(4, 4, 20, 20);
 	//cCloth->SetScene(this);
@@ -79,8 +79,9 @@ void SceneManager::SceneInit() {
 	renderableList.push_back(plane);
 
 	//ball_pos = vec3(0.0f, cos(ball_time / 50.0) *2.0f, 1.0f);
-	renderable->ball_collider = new SphereCollider(vec3(0.0f, -4.0f, 2.0f + cos(ball_time / 50.0) *3.0f), 1.2f);
-	renderable1->ball_collider = new SphereCollider(vec3(0.0f, -4.0f, 2.0f + cos(ball_time / 50.0) *3.0f), 1.2f);
+	renderable->collider = new SphereCollider(vec3(0.0f, -4.0f, 2.0f + cos(ball_time / 50.0) *3.0f), 1.2f);
+	renderable1->collider = new SphereCollider(vec3(0.0f, -4.0f, 2.0f + cos(ball_time / 50.0) *3.0f), 1.2f);
+	plane->collider = new PlaneCollider(-4.0f);
 
 	spherePos.push_back(vec3(0.0f, -4.0f, 2.0f + cos(ball_time / 50.0) *3.0f));
 	spherePos.push_back(vec3(0.0f, -4.0f, 2.0f + cos(ball_time / 50.0) *3.0f));
@@ -122,8 +123,8 @@ void SceneManager::RenderScene() {
 	
 
 	for (auto iter = renderableList.begin(); iter != renderableList.end(); iter++) {
-		if ((*iter)->ball_collider) {
-			(*iter)->pos = (*iter)->ball_collider->getCenter();
+		if ((*iter)->collider) {
+			(*iter)->pos = (*iter)->collider->getCenter();
 		}
 		(*iter)->render();
 	}

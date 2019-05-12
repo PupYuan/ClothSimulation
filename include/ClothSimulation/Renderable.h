@@ -14,7 +14,7 @@ public:
 	glm::vec3 pos = vec3(0,0,0);
 	glm::vec3 scale = vec3(1,1,1);
 	virtual void render();
-	SphereCollider* ball_collider;
+	Collider* collider;
 };
 
 class ShpereRenderable:public Renderable {

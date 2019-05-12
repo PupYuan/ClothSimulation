@@ -223,14 +223,6 @@ void Cloth::timeStep(float dt) {
 			(*constraint)->satisfyConstraint(dt); // satisfy Spring.
 		}
 	}
-	GroundCollision();
-}
-void Cloth::GroundCollision()
-{
-	for (auto particle = particles.begin(); particle != particles.end(); particle++)
-	{
-		particle->checkGround(-10);
-	}
 }
 
 void Cloth::AddSpring(Particle* a, Particle* b, float ks, float kd) {

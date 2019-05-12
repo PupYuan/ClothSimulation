@@ -98,6 +98,9 @@
     <ClInclude Include="..\include\ClothSimulation\util.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\ClothSimulation\Collider.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

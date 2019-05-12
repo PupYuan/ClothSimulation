@@ -5,25 +5,25 @@ void SceneManager::Simulation(float dt) {
 	ball_time++;
 	auto shperePos_iter = spherePos.begin();
 	for (auto iter = renderableList.begin(); iter != renderableList.end(); iter++){
-		if ((*iter)->ball_collider) {
-			vec3 CurPos = (*iter)->ball_collider->getCenter();
-			CurPos.z = 2.0f + cos(ball_time / 50.0) *3.0f;
-			//CurPos.y = 2.0f + cos(ball_time / 50.0) *3.0f;
-			(*iter)->ball_collider->setPos(CurPos);
-			*shperePos_iter = CurPos;
-			shperePos_iter++;
+		if ((*iter)->collider) {
+			if (!(*iter)->collider->kinematicStatic) {
+				vec3 CurPos = (*iter)->collider->getCenter();
+				CurPos.z = 2.0f + cos(ball_time / 50.0) *3.0f;
+				//CurPos.y = 2.0f + cos(ball_time / 50.0) *3.0f;
+				(*iter)->collider->setPos(CurPos);
+				*shperePos_iter = CurPos;
+				shperePos_iter++;
+			}
 		}
-		
 	}
-
-	//for (auto iter2 = simulateList.begin(); iter2 != simulateList.end(); iter2++) {
-	//	(*iter2)->timeStep(dt);
-	//	for (auto iter = renderableList.begin(); iter != renderableList.end(); iter++) {
-	//		if ((*iter)->ball_collider) {
-	//			(*iter)->ball_collider->ClothCollisionSimulate(*iter2);
-	//		}
-	//	}
-	//}
+	for (auto iter2 = simulateList.begin(); iter2 != simulateList.end(); iter2++) {
+		(*iter2)->timeStep(timeStep);
+		for (auto iter = renderableList.begin(); iter != renderableList.end(); iter++) {
+			if ((*iter)->collider) {
+				(*iter)->collider->ClothCollisionSimulate(*iter2);
+			}
+		}
+	}
 	
 }
 
@@ -46,13 +46,13 @@ void SceneManager::StepPhysics() {
 		accumulator -= timeStep;
 	}
 
-	//布料太慢，参数不好调，暂时这样
-	for (auto iter2 = simulateList.begin(); iter2 != simulateList.end(); iter2++) {
-		(*iter2)->timeStep(timeStep);
-		for (auto iter = renderableList.begin(); iter != renderableList.end(); iter++) {
-			if ((*iter)->ball_collider) {
-				(*iter)->ball_collider->ClothCollisionSimulate(*iter2);
-			}
-		}
-	}
+	////布料太慢，参数不好调，暂时这样
+	//for (auto iter2 = simulateList.begin(); iter2 != simulateList.end(); iter2++) {
+	//	(*iter2)->timeStep(timeStep);
+	//	for (auto iter = renderableList.begin(); iter != renderableList.end(); iter++) {
+	//		if ((*iter)->collider) {
+	//			(*iter)->collider->ClothCollisionSimulate(*iter2);
+	//		}
+	//	}
+	//}
 }

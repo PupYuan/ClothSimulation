@@ -21,3 +21,18 @@ void Collider::ClothCollisionSimulate(PositionBasedUnit *c)
 {
 
 }
+
+void PlaneCollider::ClothCollisionSimulate(PositionBasedUnit * c)
+{
+	std::vector<Particle>* particles = &(c->getParticles());
+	std::vector<Particle>::iterator particle;
+	//判断particle是否在此碰撞体内
+	for (particle = particles->begin(); particle != particles->end(); particle++)
+	{
+		vec3 v = (*particle).getPos();
+		if (v.y < y) {
+			vec3 moveOffset = vec3(0,y-v.y,0);
+			particle->offsetPos(moveOffset);
+		}
+	}
+}
