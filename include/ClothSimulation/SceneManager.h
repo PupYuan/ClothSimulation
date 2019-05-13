@@ -69,7 +69,8 @@ public:
 	void Simulation(float dt);
 	void BeginPhysicsSimulation();
 	void StepPhysics();
-	//由场景负责创建物体，同时把场景信息传给物体
+	//这里保留了系统能同时并发的数量
+	int maxWorkGroup[3];
 private:
 	// timing
 	float deltaTime = 0;

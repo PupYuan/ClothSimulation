@@ -25,7 +25,6 @@ public:
 	virtual std::vector<Particle>& getParticles() {
 		return particles;
 	}
-	//glm::vec3 gravity = glm::vec3(0.0f, -9.81f, 0.0f);
 	glm::vec3 gravity = glm::vec3(0.0f, -0.1962, 0.0f);//9.81/50 = 0.1962
 	//求解纹理
 	GLuint NormalTexID[3];
@@ -166,10 +165,12 @@ public:
 	}
 	void calcNormal();
 	virtual void render();
-	void readNormal();
 private:
-	//每次物理步进的时候约束的迭代次数
-	const int NUM_ITER = 2;
+	//每次物理步进的迭代次数
+	const int NUM_ITER = 10;
+	//每次迭代的时候约束求解的次数
+	const size_t solver_iterations = 4;
+	glm::vec3 CGravity = glm::vec3(0.0f, -0.1962, 0.0f);
 
 	Shader *computeShader;
 	Shader *renderShader;//渲染用的Shader
@@ -180,7 +181,7 @@ private:
 	Shader* BendingConstraintCompute;
 	//Scene
 	SceneManager * scene;
-	const float global_dampening = 0.7f;
+	const float global_dampening = 0.9f;
 	
 	//约束相关
 	//Distance Constraint
@@ -190,7 +191,7 @@ private:
 	std::vector<i32vec2>DistanceConstraintIndexData1;
 	std::vector<i32vec2>DistanceConstraintIndexData2;
 	std::vector<float>RestDistanceData;
-	float kStretch = 0.9f;
+	float kStretch = 0.75f;
 	//Bending Constraint
 	GLuint BendingTexID1;
 	GLuint BendingTexID2;
@@ -198,7 +199,7 @@ private:
 	std::vector<i32vec2>BendingConstraintIndexData1;
 	std::vector<i32vec2>BendingConstraintIndexData2;
 	std::vector<i32vec2>BendingConstraintIndexData3;
-	float kBend = 0.9f;
+	float kBend = 0.25f;
 	GLuint RestDistanceTexID2;
 	std::vector<float>RestDistanceData2;
 	//公共的属性

@@ -5,77 +5,78 @@
 
 void ComputeShaderCloth::timeStep(float dt)
 {
-	CHECK_GL_ERRORS
-	IntegrationShader->use();
-	glFinish();
-	glBindImageTexture(0, attachID[2 * readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-	glBindImageTexture(1, attachID[2 * readID + 1], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-	glBindImageTexture(2, attachID[2 * writeID], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-	glBindImageTexture(3, attachID[2 * writeID + 1], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-	glDispatchCompute(num_particles_width, num_particles_height, 1);
-	glFinish();
-	//swap read/write pathways
-	int tmp = readID;
-	readID = writeID;
-	writeID = tmp;
 	for (int i = 0; i < NUM_ITER; i++) {
-		DistanceConstraintCompute->use();
-		glFinish();
-		glBindImageTexture(0, attachID[2*readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-		glBindImageTexture(1, DistanceTexID1, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
-		glBindImageTexture(2, DistanceTexID2, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
-		glBindImageTexture(3, DeltaTexXID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-		glBindImageTexture(4, DeltaTexYID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-		glBindImageTexture(5, DeltaTexZID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-		glBindImageTexture(6, RestDistanceTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32F);
-		glDispatchCompute(DistanceConstraintIndexData1.size(), 1, 1);
-		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-		glFinish();
-		glCheckError();
-
-		BendingConstraintCompute->use();
+		CHECK_GL_ERRORS
+			IntegrationShader->use();
 		glFinish();
 		glBindImageTexture(0, attachID[2 * readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-		glBindImageTexture(1, BendingTexID1, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
-		glBindImageTexture(2, BendingTexID2, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
-		glBindImageTexture(3, BendingTexID3, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
-		glBindImageTexture(4, DeltaTexXID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-		glBindImageTexture(5, DeltaTexYID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-		glBindImageTexture(6, DeltaTexZID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-		glBindImageTexture(7, RestDistanceTexID2, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32F);
-		glDispatchCompute(BendingConstraintIndexData1.size(), 1, 1);
-		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-		glFinish();
-		glCheckError();
-
-		SuccessiveOverRelaxationCompute->use();
-		//获得球的位置
-		glUniform3fv(glGetUniformLocation(SuccessiveOverRelaxationCompute->ID, "sphere_pos"), 2 ,&scene->spherePos[0][0]);
-		glUniform1fv(glGetUniformLocation(SuccessiveOverRelaxationCompute->ID, "radius"), 2, &scene->radius[0]);
-		glFinish();
-		glBindImageTexture(0, DeltaTexXID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-		glBindImageTexture(1, DeltaTexYID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-		glBindImageTexture(2, DeltaTexZID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-		glBindImageTexture(3, attachID[2* writeID], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
-		glBindImageTexture(4, NiTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32I);
+		glBindImageTexture(1, attachID[2 * readID + 1], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+		glBindImageTexture(2, attachID[2 * writeID], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+		glBindImageTexture(3, attachID[2 * writeID + 1], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 		glDispatchCompute(num_particles_width, num_particles_height, 1);
-
-		//清空DeltaTexXID缓存里面的数据
-		glClearTexImage(DeltaTexXID, 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
-		glClearTexImage(DeltaTexYID, 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
-		glClearTexImage(DeltaTexZID, 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
 		glFinish();
 		//swap read/write pathways
 		int tmp = readID;
 		readID = writeID;
 		writeID = tmp;
-	}
-	CalcNormal(attachID[2 * readID], num_particles_width, num_particles_height);
+		for (int i = 0; i < solver_iterations; i++) {
+			DistanceConstraintCompute->use();
+			glFinish();
+			glBindImageTexture(0, attachID[2 * readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+			glBindImageTexture(1, DistanceTexID1, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
+			glBindImageTexture(2, DistanceTexID2, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
+			glBindImageTexture(3, DeltaTexXID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+			glBindImageTexture(4, DeltaTexYID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+			glBindImageTexture(5, DeltaTexZID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+			glBindImageTexture(6, RestDistanceTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32F);
+			glDispatchCompute(DistanceConstraintIndexData1.size(), 1, 1);
+			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+			glFinish();
+			glCheckError();
 
-	glBindBuffer(GL_PIXEL_PACK_BUFFER, vboID);
-	glBindTexture(GL_TEXTURE_2D, attachID[2 * readID]);
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, 0);
-	
+			/*BendingConstraintCompute->use();
+			glFinish();
+			glBindImageTexture(0, attachID[2 * readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+			glBindImageTexture(1, BendingTexID1, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
+			glBindImageTexture(2, BendingTexID2, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
+			glBindImageTexture(3, BendingTexID3, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RG32I);
+			glBindImageTexture(4, DeltaTexXID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+			glBindImageTexture(5, DeltaTexYID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+			glBindImageTexture(6, DeltaTexZID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+			glBindImageTexture(7, RestDistanceTexID2, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32F);
+			glDispatchCompute(BendingConstraintIndexData1.size(), 1, 1);
+			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+			glFinish();
+			glCheckError();*/
+
+			SuccessiveOverRelaxationCompute->use();
+			//获得球的位置
+			glUniform3fv(glGetUniformLocation(SuccessiveOverRelaxationCompute->ID, "sphere_pos"), 2, &scene->spherePos[0][0]);
+			glUniform1fv(glGetUniformLocation(SuccessiveOverRelaxationCompute->ID, "radius"), 2, &scene->radius[0]);
+			glFinish();
+			glBindImageTexture(0, DeltaTexXID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+			glBindImageTexture(1, DeltaTexYID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+			glBindImageTexture(2, DeltaTexZID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+			glBindImageTexture(3, attachID[2 * writeID], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+			glBindImageTexture(4, NiTexID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32I);
+			glDispatchCompute(num_particles_width, num_particles_height, 1);
+
+			//清空DeltaTexXID缓存里面的数据
+			glClearTexImage(DeltaTexXID, 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
+			glClearTexImage(DeltaTexYID, 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
+			glClearTexImage(DeltaTexZID, 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
+			glFinish();
+			//swap read/write pathways
+			int tmp = readID;
+			readID = writeID;
+			writeID = tmp;
+		}
+		CalcNormal(attachID[2 * readID], num_particles_width, num_particles_height);
+
+		glBindBuffer(GL_PIXEL_PACK_BUFFER, vboID);
+		glBindTexture(GL_TEXTURE_2D, attachID[2 * readID]);
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, 0);
+	}
 	//重置状态
 	//glReadBuffer(GL_NONE);
 	//glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
@@ -280,14 +281,14 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int _num_par
 	//Integration
 	IntegrationShader->use();
 	IntegrationShader->setFloat("global_dampening", global_dampening);
-	IntegrationShader->setFloat("mass", 1.0f/total_points);
-	IntegrationShader->setVec3("gravity", gravity);
+	IntegrationShader->setFloat("mass", 1.0f);
+	IntegrationShader->setVec3("gravity", CGravity);
 	IntegrationShader->setFloat("dt", 1.0f / 50.0f);
 	IntegrationShader->setInt("width", (num_particles_width));
 	//DistanceConstraint
 	DistanceConstraintCompute->use();
-	DistanceConstraintCompute->setFloat("wi", total_points);
-	float k_prime = 1.0f - pow((1.0f - kStretch), 1.0f / NUM_ITER);
+	DistanceConstraintCompute->setFloat("wi", 1.0f);
+	float k_prime = 1.0f - pow((1.0f - kStretch), 1.0f / solver_iterations);
 	DistanceConstraintCompute->setFloat("k_prime", k_prime);
 	//SOR
 	SuccessiveOverRelaxationCompute->use();
@@ -296,8 +297,8 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int _num_par
 
 	//BendingConstraint
 	BendingConstraintCompute->use();
-	BendingConstraintCompute->setFloat("wi", total_points);
-	k_prime = 1.0f - pow((1.0f - kBend), 1.0f / NUM_ITER);
+	BendingConstraintCompute->setFloat("wi", 1.0f);
+	k_prime = 1.0f - pow((1.0f - kBend), 1.0f / solver_iterations);
 	BendingConstraintCompute->setFloat("k_prime", k_prime);
 	BendingConstraintCompute->setFloat("global_dampening", global_dampening);
 
