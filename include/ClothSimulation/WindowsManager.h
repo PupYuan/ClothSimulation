@@ -40,7 +40,7 @@ void CalcFPS(GLFWwindow * windows) {
 		totalFrames = 0;
 	}
 
-	sprintf_s(info, "FPS: %3.2f", fps);
+	sprintf_s(info, "FPS: %3.2f,Last Time:%3.2f", fps, newTime);
 	glfwSetWindowTitle(windows, info);
 }
 

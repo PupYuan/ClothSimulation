@@ -27,6 +27,7 @@ void main(void)
 	//在这里标准化会不会有问题
 	normal = normalize(normal);
 	imageStore(Normal, pos, vec4(normal,0));
+	imageStore(Normal, ivec2(pos.x+1,pos.y+1), vec4(normal,0));
 
 	imageAtomicAdd(NormalX,ivec2(pos.x+1,pos.y),int(normal.x*10000000.0f));
 	imageAtomicAdd(NormalY,ivec2(pos.x+1,pos.y),int(normal.y*10000000.0f));

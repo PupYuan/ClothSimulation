@@ -50,17 +50,17 @@ float skyboxVertices[] = {
 
 void SceneManager::CreateCloth()
 {
-	//Cloth * cloth = new Cloth(4, 4, 130, 130);
-	//cloth->SetScene(this);
-	//simulateList.push_back(cloth);
+	Cloth * cloth = new Cloth(4, 4, 130, 130);
+	cloth->SetScene(this);
+	simulateList.push_back(cloth);
 
-	//GPUCloth * gpuCloth = new GPUCloth(4, 4, 150, 150);
+	//GPUCloth * gpuCloth = new GPUCloth(4, 4, 90, 90);
 	//gpuCloth->SetScene(this);
 	//simulateList.push_back(gpuCloth);
-	ComputeShaderCloth * cCloth = new ComputeShaderCloth(4, 4, 90, 90);
-	
-	cCloth->SetScene(this);
-	simulateList.push_back(cCloth);
+
+	//ComputeShaderCloth * cCloth = new ComputeShaderCloth(4, 4, 90, 90);
+	//cCloth->SetScene(this);
+	//simulateList.push_back(cCloth);
 }
 
 void SceneManager::SceneInit() {

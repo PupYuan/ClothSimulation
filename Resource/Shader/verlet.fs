@@ -84,8 +84,8 @@ void main() {
 	float index = iy * texsize_x + ix;
 	float ks=  0.0, kd= 0.0;
 
-	//if (index==0 || index== (texsize_x - 1.0))
-	//	 mymass = 0.0;
+	if (index==0 || index== (texsize_x - 1.0))
+		 mymass = 0.0;
  
 	//vec3 force = gravity + vel*DEFAULT_DAMPING;
 	vec3 force = gravity;
