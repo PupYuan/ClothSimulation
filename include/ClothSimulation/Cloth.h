@@ -42,6 +42,31 @@ public:
 	GLuint NormalFloatTexID;
 	GLuint NormalFloatVboID;
 	std::vector<glm::vec4> Normal;
+	void CalcNormal(GLint attachID, int width, int height);
+	void InitVAOTex();
+	//绘制所需的数据
+	int vertice_data_length = 8;
+	std::vector<unsigned int>indices;
+	//绘制相关的buffer
+	unsigned int VBO, VAO, EBO;
+	int width;
+	int height;
+	int num_particles_width; // number of particles in "width" direction
+	int num_particles_height; // number of particles in "height" direction
+	//位置数据
+	size_t total_points;
+	std::vector<glm::vec4> X;
+	std::vector<glm::vec4> X_last;
+	std::vector<glm::vec2> TexCoord;
+
+	GLuint fboID[2];
+	GLuint attachID[4];
+	int readID = 0, writeID = 1;
+	GLuint vboID;
+	GLuint vboID3;
+	GLenum mrt[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	float* _data[2];
+	unsigned int vaoID;
 };
 enum Mode { CPU, GPU };
 class Cloth:public PositionBasedUnit
@@ -116,32 +141,6 @@ public:
 	virtual void render();
 private:
 	const float DEFAULT_DAMPING = -0.0125f;
-	int vertice_data_length = 8;
-	//在内存中一份顶点数据
-	std::vector<float>vertices;
-	std::vector<unsigned int>indices;
-	//绘制相关
-	unsigned int VBO, VAO, EBO;
-	int width;
-	int height;
-	int num_particles_width; // number of particles in "width" direction
-	int num_particles_height; // number of particles in "height" direction
-	//GPGPU相关
-	//位置数据
-	const size_t total_points = (num_particles_width)*(num_particles_height);
-	std::vector<glm::vec4> X;
-	std::vector<glm::vec4> X_last;
-	std::vector<glm::vec2> TexCoord;
-
-	unsigned int vaoID;
-	GLuint fboID[2];
-	GLuint attachID[4];
-	int readID = 0, writeID = 1;
-	GLuint vboID;
-	GLuint vboID2;
-	GLuint vboID3;
-	GLenum mrt[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-	float* _data[2];
 
 	GLuint t_query;
 	GLuint64 elapsed_time;
@@ -171,33 +170,6 @@ public:
 private:
 	//每次物理步进的时候约束的迭代次数
 	const int NUM_ITER = 2;
-	int vertice_data_length = 8;
-	std::vector<float>vertices;
-	std::vector<unsigned int>indices;
-	//绘制相关
-	unsigned int VBO, VAO, EBO;
-	int width;
-	int height;
-	int num_particles_width; // number of particles in "width" direction
-	int num_particles_height; // number of particles in "height" direction
-	//GPGPU相关
-	//位置数据
-	const size_t total_points = (num_particles_width)*(num_particles_height);
-	std::vector<glm::vec4> X;
-	std::vector<glm::vec4> X_last;
-	std::vector<glm::vec4> Normal;
-	std::vector<glm::vec2> TexCoord;
-	//std::vector<int> Null_X;
-
-	GLuint fboID[2];
-	GLuint attachID[4];
-	int readID = 0, writeID = 1;
-	GLuint vboID;
-	GLuint vboID2;
-	GLuint vboID3;
-	GLenum mrt[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-	float* _data[2];
-	unsigned int vaoID;
 
 	Shader *computeShader;
 	Shader *renderShader;//渲染用的Shader
@@ -233,12 +205,6 @@ private:
 	GLuint DeltaTexXID;
 	GLuint DeltaTexYID;
 	GLuint DeltaTexZID;
-	//求解纹理
-	//GLuint NormalTexID[3];
-	//GLuint NormalVboID[3];
-	//std::vector<int>NormalX;
-	//std::vector<int>NormalY;
-	//std::vector<int>NormalZ;
 	//SOR求解
 	GLuint NiTexID;//SOR求解时除去的因子
 	std::vector<int>Ni;

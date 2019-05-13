@@ -44,6 +44,8 @@ void main(void)
 			finalPos  = finalPos + vec4(moveOffset,0);
 		}
 	}
+	if(finalPos.y<-3.4)
+	   finalPos.y=-3.4;
 	//输出到粒子数目宽高的纹理中
 	imageStore(output_PosData, pos, finalPos);
 }

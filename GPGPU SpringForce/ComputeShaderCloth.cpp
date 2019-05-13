@@ -3,19 +3,6 @@
 #include <ClothSimulation\util.h>
 #define glCheckError() glCheckError_(__FILE__, __LINE__) 
 
-void ComputeShaderCloth::readNormal() {
-	glBindBuffer(GL_PIXEL_PACK_BUFFER, NormalVboID[0]);
-	glBindTexture(GL_TEXTURE_2D, NormalTexID[0]);
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_INT, 0);
-
-	glBindBuffer(GL_PIXEL_PACK_BUFFER, NormalVboID[1]);
-	glBindTexture(GL_TEXTURE_2D, NormalTexID[1]);
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_INT, 0);
-
-	glBindBuffer(GL_PIXEL_PACK_BUFFER, NormalVboID[2]);
-	glBindTexture(GL_TEXTURE_2D, NormalTexID[2]);
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_INT, 0);
-}
 void ComputeShaderCloth::timeStep(float dt)
 {
 	CHECK_GL_ERRORS
@@ -83,22 +70,11 @@ void ComputeShaderCloth::timeStep(float dt)
 		readID = writeID;
 		writeID = tmp;
 	}
-	NormalCalcShader->use();
-	for (int i = 0; i < 3; i++)
-		glClearTexImage(NormalTexID[i], 0, GL_RED_INTEGER, GL_INT, &Null_X[0]);
-	glFinish();
-	glBindImageTexture(0, attachID[2 * readID], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-	glBindImageTexture(1, NormalTexID[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-	glBindImageTexture(2, NormalTexID[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-	glBindImageTexture(3, NormalTexID[2], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-	glDispatchCompute(num_particles_width-1, num_particles_height-1, 1);
-	glFinish();
+	CalcNormal(attachID[2 * readID], num_particles_width, num_particles_height);
 
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, vboID);
 	glBindTexture(GL_TEXTURE_2D, attachID[2 * readID]);
 	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, 0);
-
-	readNormal();
 	
 	//重置状态
 	//glReadBuffer(GL_NONE);
@@ -160,8 +136,11 @@ void setupInt2Texture(const GLuint texID, int *data, int width, int height) {
 
 }
 
-ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_particles_width, int num_particles_height) : num_particles_width(num_particles_width), num_particles_height(num_particles_height)
+ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int _num_particles_width, int _num_particles_height)
 {
+	num_particles_width = _num_particles_width;
+	num_particles_height = _num_particles_height;
+	total_points = (num_particles_width)*(num_particles_height);
 	width = _width;
 	height = _height;
 	glfwSwapInterval(0);
@@ -323,44 +302,7 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	BendingConstraintCompute->setFloat("global_dampening", global_dampening);
 
 
-	const int size = num_particles_width * num_particles_height * 4 * sizeof(float);
-	glGenVertexArrays(1, &vaoID);
-	glGenBuffers(1, &EBO);
-	glBindVertexArray(vaoID);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*indices.size(), &indices[0], GL_DYNAMIC_DRAW);
-	//顶点位置属性
-	glGenBuffers(1, &vboID);
-	glBindBuffer(GL_ARRAY_BUFFER, vboID);
-	glBufferData(GL_ARRAY_BUFFER, size, 0, GL_DYNAMIC_COPY);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(0);
-	//顶点法线属性
-	glGenBuffers(1, &NormalVboID[0]);
-	glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[0]);
-	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 1 * sizeof(int), 0, GL_DYNAMIC_COPY);
-	glVertexAttribPointer(1, 1, GL_INT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(1);
-
-	glGenBuffers(1, &NormalVboID[1]);
-	glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[1]);
-	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 1 * sizeof(int), 0, GL_DYNAMIC_COPY);
-	glVertexAttribPointer(2, 1, GL_INT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(2);
-
-	glGenBuffers(1, &NormalVboID[2]);
-	glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[2]);
-	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 1 * sizeof(int), 0, GL_DYNAMIC_COPY);
-	glVertexAttribPointer(3, 1, GL_INT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(3);
-
-	//顶点纹理属性
-	glGenBuffers(1, &vboID3);
-	glBindBuffer(GL_ARRAY_BUFFER, vboID3);
-	glBufferData(GL_ARRAY_BUFFER, num_particles_width * num_particles_height * 2 * sizeof(float), &TexCoord[0], GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(4);
+	InitVAOTex();
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -378,9 +320,6 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 			glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, mrt[i], GL_TEXTURE_2D, attachID[i + 2 * j], 0);
 		}
 	}
-	
-
-	
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	//DistanceConstraint纹理存储在默认帧缓冲中?
@@ -430,14 +369,6 @@ ComputeShaderCloth::ComputeShaderCloth(float _width, float _height, int num_part
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, RestDistanceData.size(), 1, 0,
 		GL_RED, GL_FLOAT, &RestDistanceData[0]);
 
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID[0]);
-	glGenTextures(3, NormalTexID);
-	for (int i = 0; i < 3; i++) {
-		setupIntTexture(NormalTexID[i], &Null_X[0], num_particles_width, num_particles_height);//attachID里面存放顶点数据
-	}
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, NormalTexID[0], 0);
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, NormalTexID[1], 0);
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, NormalTexID[2], 0);
 	GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 	if (status == GL_FRAMEBUFFER_COMPLETE) {
 		printf("FBO setup succeeded.");
@@ -529,13 +460,5 @@ void ComputeShaderCloth::render()
 	//calcNormal();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindVertexArray(vaoID);
-
-	//glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[0]);
-	//glBufferSubData(GL_ARRAY_BUFFER, 0, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalX[0]);
-	//glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[1]);
-	//glBufferSubData(GL_ARRAY_BUFFER, 0, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalY[0]);
-	//glBindBuffer(GL_ARRAY_BUFFER, NormalVboID[2]);
-	//glBufferSubData(GL_ARRAY_BUFFER, 0, num_particles_width * num_particles_height * 1 * sizeof(int), &NormalZ[0]);
-
 	glDrawElements(GL_TRIANGLES, 6 * (num_particles_height - 1)*(num_particles_width - 1), GL_UNSIGNED_INT, 0);
 }

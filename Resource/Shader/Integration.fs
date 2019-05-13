@@ -36,9 +36,6 @@ void main(void)
 	else
 	   acc = force/mymass;
 
-	if(CurPos.y<-10)
-	   CurPos.y=-10;
-
 	vel = vel * global_dampening;
 	vel = vel + acc*dt;
 	// verlet integration
